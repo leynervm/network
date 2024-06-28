@@ -12,6 +12,7 @@ use App\Http\Livewire\Admin\Mufas\ShowMufas;
 use App\Http\Livewire\Admin\Networks\ShowNetworks;
 use App\Http\Livewire\Admin\Payments\ShowPayments;
 use App\Http\Livewire\Admin\Portolts\ShowPortolts;
+use App\Http\Livewire\Admin\Products\ShowProducts;
 use App\Http\Livewire\Admin\Recibos\ShowRecibos;
 use App\Http\Livewire\Admin\Spliters\ShowSpliters;
 use App\Models\Network;
@@ -56,4 +57,6 @@ Route::middleware([
 
     Route::put('/admin/spliters/{spliter}/delete', [AdminController::class, 'deletespliter'])->name('admin.spliters.delete');
 
+    Route::get('/admin/marcas', [AdminController::class, 'marcas'])->name('admin.marcas');
+    Route::get('/admin/products', [AdminController::class, 'products'])->name('admin.products');
 });

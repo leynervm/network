@@ -52,6 +52,16 @@ class AdminController extends Controller
         return view('admin.reports.index');
     }
 
+    public function products()
+    {
+        return view('admin.products.index');
+    }
+
+    public function marcas()
+    {
+        return view('admin.marcas.index');
+    }
+
     public function print(Recibo $recibo)
     {
 

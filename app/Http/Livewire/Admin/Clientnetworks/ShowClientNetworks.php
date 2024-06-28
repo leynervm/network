@@ -4,10 +4,8 @@ namespace App\Http\Livewire\Admin\Clientnetworks;
 
 use App\Models\Antena;
 use App\Models\Boxnav;
-use App\Models\Mufa;
 use App\Models\Network;
 use App\Models\Olt;
-use App\Models\Oltport;
 use App\Models\Portboxnav;
 use App\Models\Spliter;
 use App\Models\Ubigeo;
@@ -55,7 +53,7 @@ class ShowClientNetworks extends Component
     protected function rules()
     {
         return [
-            'network.descripcion' => ['required', 'string', 'min:10'],
+            'network.telefono' => ['required', 'numeric', 'regex:/^\d{9}$/'],
             'network.type' => ['required', 'string'],
             'network.price' => ['required', 'numeric', 'decimal:0,2'],
             'network.direccion' =>  ['required', 'string', 'min:6'],
@@ -138,6 +136,7 @@ class ShowClientNetworks extends Component
     public function update()
     {
 
+        $this->network->telefono = trim($this->network->telefono);
         $this->validate();
         DB::beginTransaction();
         try {
@@ -217,5 +216,18 @@ class ShowClientNetworks extends Component
         $network->status = Network::ACTIVO;
         $network->save();
         $this->dispatchBrowserEvent('toast', toastJson('Servicio internet reconectado correctamente'));
+    }
+
+    public function delete(Network $network)
+    {
+
+        if (get_class($network->networkable) == Portboxnav::class) {
+            // dd($network->networkable->status);
+        }
+
+        // $network->networkable_id = null;
+        // $network->networkable_type = null;
+        $network->delete();
+        $this->dispatchBrowserEvent('toast', toastJson('Eliminado correctamente'));
     }
 }

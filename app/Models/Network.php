@@ -13,7 +13,7 @@ class Network extends Model
     use HasFactory;
 
     protected $fillable = [
-        'date', 'code', 'portnumber', 'descripcion', 'type',
+        'date', 'code', 'portnumber', 'descripcion', 'type', 'telefono',
         'price', 'direccion', 'typelocal', 'status', 'client_id',
         'ubigeo_id', 'networkable_id', 'networkable_type',
     ];

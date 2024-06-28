@@ -20,24 +20,49 @@
                                                 <div
                                                     class="shadow border p-2 font-bold text-[8px] w-12 h-12 {{ $portboxnav->network ? 'bg-red-200 text-red-600' : 'bg-green-200 text-green-600' }}">
                                                     {{ $portboxnav->code }}
-                                                </div>
 
-                                                {{-- <button class="shadow border p-2 font-bold text-[8px] w-12 h-12"
-                                                wire:click="createnetwork({{ $portboxnav->id }})"
-                                                wire:key="createnetwork_{{ $portboxnav->id }}">
-                                                {{ $portboxnav->code }}
-                                            </button> --}}
+                                                    <div class="w-full">
+                                                        <button class="rounded text-red-600 disabled:opacity-25"
+                                                            wire:key="deleteportbox_{{ $item->id }}_{{ $itemboxnav->id }}_{{ $portboxnav->id }}"
+                                                            wire:click="deleteportbox({{ $portboxnav->id }})"
+                                                            wire:loading.attr="disabled">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                                fill="none" stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                class="w-4 h-4">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                <line x1="10" x2="10" y1="11"
+                                                                    y2="17" />
+                                                                <line x1="14" x2="14" y1="11"
+                                                                    y2="17" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             @endforeach
                                         @endif
                                     </div>
-                                    <div class="mt-2 w-full flex gap-2 justify-end">
-                                        <x-button wire:click="editbox({{ $itemboxnav->id }})"
-                                            wire:key="editbox_{{ $item->id }}_{{ $itemboxnav->id }}">EDITAR</x-button>
+                                    <div class="mt-2 w-full flex gap-2 items-end justify-end">
 
-                                        <x-danger-button
-                                            wire:key="deletebox_{{ $item->id }}_{{ $itemboxnav->id }}"
-                                            onclick="confirmDeleteBox({{ $itemboxnav->id }})">
-                                            ELIMINAR</x-danger-button>
+                                        @if (count($itemboxnav->portboxnavs) < $itemboxnav->outs)
+                                            <x-button wire:click="openmodalport({{ $itemboxnav->id }})"
+                                                wire:key="createportbox_{{ $item->id }}_{{ $itemboxnav->id }}"
+                                                wire:loading.attr="disabled" class="mr-auto">AGREGAR</x-button>
+                                        @endif
+
+                                        <div class="inline-flex items-end gap-1 justify-end flex-1 w-full">
+                                            <x-button wire:click="editbox({{ $itemboxnav->id }})"
+                                                wire:key="editbox_{{ $item->id }}_{{ $itemboxnav->id }}"
+                                                wire:loading.attr="disabled">EDITAR</x-button>
+
+                                            <x-danger-button
+                                                wire:key="deletebox_{{ $item->id }}_{{ $itemboxnav->id }}"
+                                                onclick="confirmDeleteBox({{ $itemboxnav->id }})"
+                                                wire:loading.attr="disabled">
+                                                ELIMINAR</x-danger-button>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -48,17 +73,19 @@
                         <div class="inline-flex gap-2">
                             @if (count($item->boxnavs) < $item->outs)
                                 <x-button wire:click="addbooxnav({{ $item->id }})"
-                                    wire:key="addbooxnav{{ $item->id }}">REGISTRAR CAJA NAP</x-button>
+                                    wire:key="addbooxnav{{ $item->id }}" wire:loading.attr="disabled">REGISTRAR
+                                    CAJA NAP</x-button>
                             @endif
                             <x-button wire:click="editspliter({{ $item->id }})"
-                                wire:key="editspliter{{ $item->id }}">EDITAR</x-button>
+                                wire:key="editspliter{{ $item->id }}"
+                                wire:loading.attr="disabled">EDITAR</x-button>
                         </div>
 
                         <div>
                             <form action="{{ route('admin.spliters.delete', $item->id) }}" method="post">
                                 @method('put')
                                 @csrf
-                                <x-danger-button type="submit">
+                                <x-danger-button type="submit" wire:loading.attr="disabled">
                                     ELIMINAR</x-danger-button>
                                 {{-- <x-danger-button type="submit"
                                     wire:key="deletebox_{{ $item->id }}_{{ $itemboxnav->id }}"
@@ -198,9 +225,37 @@
                     <x-input-error for="editouts" />
                 </div>
                 <div class="text-end">
-                    {{ print_r($errors->all()) }}
+                    {{-- {{ print_r($errors->all()) }} --}}
                     <x-button type="submit" wire:loading.attr="disabled">
                         ACTUALIZAR</x-button>
+                </div>
+            </form>
+        </x-slot>
+    </x-dialog-modal>
+
+
+    <x-dialog-modal wire:model="openport" maxWidth="xl">
+        <x-slot name="title">
+            <h1 class="font-semibold text-[10px]">REGISTRAR PUERTO NAP</h1>
+            <button wire:click="$set('openport', false)"
+                class="rounded-md text-gray-700 p-2 hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-600 focus:text-gray-600 transition-colors ease-in-out duration-150">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                    stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </x-slot>
+
+        <x-slot name="content">
+            <form wire:submit.prevent="saveport" class="w-full grid grid-cols-1 gap-2">
+                <div class="w-full">
+                    <x-label value="Código Puerto" />
+                    <x-input class="w-full block" wire:model.defer="codeport" maxlength="12" />
+                    <x-input-error for="codeport" />
+                </div>
+                <div class="text-end">
+                    <x-button type="submit" wire:loading.attr="disabled">
+                        REGISTRAR</x-button>
                 </div>
             </form>
         </x-slot>

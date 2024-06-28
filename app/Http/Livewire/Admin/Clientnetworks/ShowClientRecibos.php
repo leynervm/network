@@ -21,7 +21,7 @@ class ShowClientRecibos extends Component
     public $openpay = false;
 
     public $network, $recibo, $client_id, $date, $seriepago_id, $amount = 0, $total = 0, $descuento = 0, $month;
-    public $seriecompleta = 'SELECCIONAR...';
+    public $seriecompleta = 'SELECCIONAR TIPO RECIBO...';
 
     public $formapay_id, $codetransferencia, $detalle;
 
@@ -88,7 +88,7 @@ class ShowClientRecibos extends Component
                     $amount =  amountDays($this->network->date, now('America/Lima'), $amount);
                 }
             }
-            $this->amount = $amount;
+            $this->amount = number_format($amount, 2, '.', '');
         }
     }
 
@@ -112,7 +112,7 @@ class ShowClientRecibos extends Component
                     $amount =  amountDays($this->network->date, now('America/Lima'), $amount);
                 }
             }
-            $this->amount = $amount;
+            $this->amount = number_format($amount, 2, '.', '');
         }
     }
 

@@ -19,7 +19,7 @@ class CreateClientNetwork extends Component
     public $open = false;
 
     public $date, $code, $portnumber, $descripcion, $type, $price, $direccion,
-        $client_id, $ubigeo_id;
+        $client_id, $ubigeo_id, $telefono;
 
     public $antena_id;
     public $document, $name;
@@ -39,9 +39,12 @@ class CreateClientNetwork extends Component
     {
         return [
             'date' => ['required', 'date'],
-            'document' => ['required', 'numeric',],
+            'document' => [
+                'required', 'numeric', 'regex:/^(?:\d{8}|\d{11})$/',
+            ],
             'name' => ['required', 'string', 'min:6'],
-            'descripcion' => ['required', 'string', 'min:10'],
+            'telefono' => ['nullable', 'numeric', 'regex:/^\d{9}$/'],
+            'descripcion' => ['nullable', 'string', 'min:10'],
             'portnumber' => ['nullable', 'string'],
             'type' => ['required', 'string'],
             'price' => ['required', 'numeric', 'decimal:0,2'],
@@ -142,6 +145,18 @@ class CreateClientNetwork extends Component
 
         $this->document = trim($this->document);
         $this->name = trim($this->name);
+        $this->telefono = trim($this->telefono);
+
+        $client = Client::withWhereHas('networks', function ($query) {
+            $query->activos();
+        })->where('document', $this->document)->first();
+
+        if ($client) {
+            if (count($client->networks) > 0) {
+                $this->dispatchBrowserEvent('alert', alertJson('CLIENTE YA CUENTA CON SERVICIO REGISTRADO', 'Cliente registrado y con servicio activo.', 'info'));
+                return false;
+            }
+        }
 
         if (is_null($this->client_id)) {
             $exists = Client::where('document', $this->document)->exists();

@@ -45,7 +45,7 @@
         @endif
 
         <!-- Page Content -->
-        <main class="w-full max-w-7xl mx-auto p-8">
+        <main class="w-full max-w-[90rem] mx-auto p-1 xl:p-8">
             {{ $slot }}
         </main>
     </div>

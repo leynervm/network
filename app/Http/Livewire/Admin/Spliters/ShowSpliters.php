@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Admin\Spliters;
 use App\Models\Boxnav;
 use App\Models\Olt;
 use App\Models\Oltport;
+use App\Models\Portboxnav;
 use App\Models\Spliter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -17,11 +18,15 @@ class ShowSpliters extends Component
     public $open = false;
     public $openspliter = false;
     public $openedit = false;
+    public $openport = false;
 
     public $name, $code, $outs;
     public $editname, $editcode, $editouts;
     public $allports = false;
     public $oldspliterouts;
+    public $codeport;
+
+
 
     protected $listeners = ['render'];
 
@@ -151,6 +156,12 @@ class ShowSpliters extends Component
                 return false;
             }
 
+            if ($this->editouts < count($this->boxnav->portboxnavs)) {
+                $take = $this->boxnav->outs - $this->editouts;
+                $this->boxnav->portboxnavs()->doesntHave('network')
+                    ->orderBy('id', 'desc')->take($take)->delete();
+            }
+
             $this->boxnav->name = $this->editname;
             $this->boxnav->code = $this->editcode;
             $this->boxnav->outs = $this->editouts;
@@ -170,16 +181,6 @@ class ShowSpliters extends Component
     {
         DB::beginTransaction();
         try {
-            // foreach ($spliter->boxnavs as $item) {
-            //     if (count($item->portboxnavs) > 0) {
-            //         foreach ($item->portboxnavs as $portbox) {
-            //             if ($portbox->network) {
-            //                 $portbox->network->networkable_id = null;
-            //                 $portbox->network->networkable_type = null;
-            //             }
-            //         }
-            //     }
-            // }
             $spliter->delete();
             DB::commit();
             $this->dispatchBrowserEvent('toast', toastJson('Spliter eliminado correctamente'));
@@ -228,5 +229,53 @@ class ShowSpliters extends Component
         $this->dispatchBrowserEvent('toast', toastJson('Spliter actualizado correctamente'));
         $this->resetValidation();
         $this->reset(['openspliter']);
+    }
+
+    public function openmodalport(Boxnav $boxnav)
+    {
+        $this->boxnav = $boxnav;
+        $this->resetValidation(['codeport']);
+        $this->reset(['codeport']);
+        $this->openport = true;
+    }
+
+    public function saveport()
+    {
+
+        $this->codeport = trim($this->codeport);
+        $this->validate([
+            'codeport' => [
+                'required', 'string', 'min:4', 'max:12',
+                Rule::unique('portboxnavs', 'code')->where('boxnav_id', $this->boxnav->id)
+            ]
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $this->boxnav->portboxnavs()->create([
+                'code' => $this->codeport
+            ]);
+            DB::commit();
+            $this->olt->refresh();
+            $this->dispatchBrowserEvent('toast', toastJson('Puerto CAJA NAP registrado correctamente'));
+            $this->resetValidation();
+            $this->reset(['codeport', 'openport']);
+        } catch (\Exception $e) {
+            $this->dispatchBrowserEvent('alert', alertJson('Error al eliminar caja NAP', $e->getMessage(), 'error'));
+            DB::rollBack();
+        }
+    }
+
+    public function deleteportbox(Portboxnav $portboxnav)
+    {
+
+        if ($portboxnav->network) {
+            $this->dispatchBrowserEvent('alert', alertJson('PUERTO ESTA OCUPADO !', 'El puerto de la caja NAP está vinculado a un cliente', 'info'));
+            return false;
+        } else {
+            $portboxnav->delete();
+            $this->olt->refresh();
+            $this->dispatchBrowserEvent('toast', toastJson('Eliminado correctamente'));
+        }
     }
 }

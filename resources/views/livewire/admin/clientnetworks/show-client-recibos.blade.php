@@ -115,7 +115,7 @@
                 </div>
 
                 <div class="text-end">
-                    {{ print_r($errors->all()) }}
+                    {{-- {{ print_r($errors->all()) }} --}}
                     <x-button type="submit" wire:loading.attr="disabled">
                         REGISTRAR</x-button>
                 </div>

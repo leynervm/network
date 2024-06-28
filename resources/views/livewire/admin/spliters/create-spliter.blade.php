@@ -40,7 +40,6 @@
                         <x-input type="checkbox" x-model="allspliters" wire:loading.attr="disabled" id="allspliters" />
                         USAR DATOS PARA TODAS LAS SALIDAS
                     </label>
-                    <span x-text="allspliters"></span>
                 </div>
 
                 <div class="text-end">

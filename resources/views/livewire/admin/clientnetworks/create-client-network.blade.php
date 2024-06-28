@@ -19,8 +19,9 @@
                 <div class="w-full">
                     <x-label value="Documento cliente" />
                     <div class="w-full flex gap-1">
-                        <x-input class="w-full block" wire:model.defer="document" maxlength="11" />
-                        <x-button class="text-white px-2" wire:click="buscar" wire:loading.attr="disabled"
+                        <x-input class="w-full flex-1 block" wire:model.defer="document" maxlength="11"
+                            wire:keydown.enter="buscar" />
+                        <x-button class="text-white px-2 flex-shrink-0" wire:click="buscar" wire:loading.attr="disabled"
                             type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor" class="w-6 h-6 block mx-auto">
@@ -122,7 +123,9 @@
                             <option value="">SELECCIONAR...</option>
                             @if (count($portboxnavs) > 0)
                                 @foreach ($portboxnavs as $item)
-                                    <option value="{{ $item->id }}">{{ $item->code }}</option>
+                                    <option value="{{ $item->id }}"
+                                        class="{{ $item->network ? 'bg-red-200 text-red-600' : 'bg-green-200 text-green-600' }}">
+                                        {{ $item->code }}</option>
                                 @endforeach
                             @endif
                         </select>
@@ -143,13 +146,19 @@
                     <x-input-error for="antena_id" />
                 </div>
 
-                <span x-text="type"></span>
 
-                <div class="w-full">
+                {{-- <div class="w-full">
                     <x-label value="Descripción" />
                     <x-input class="w-full block" wire:model.defer="descripcion" />
                     <x-input-error for="descripcion" />
+                </div> --}}
+
+                <div class="w-full">
+                    <x-label value="Teléfono" />
+                    <x-input class="w-full block" wire:model.defer="telefono" type="number" step="1" />
+                    <x-input-error for="telefono" />
                 </div>
+
                 <div class="w-full grid lg:grid-cols-2 gap-2">
                     <div class="w-full">
                         <x-label value="Precio" />

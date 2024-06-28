@@ -36,6 +36,9 @@
                     <x-nav-link href="{{ route('admin.payments') }}" :active="request()->routeIs('admin.payments')">
                         {{ __('Payments') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('admin.products') }}" :active="request()->routeIs('admin.products')">
+                        {{ __('Products') }}
+                    </x-nav-link>
                     {{-- <x-nav-link href="{{ route('admin.reports') }}" :active="request()->routeIs('admin.reports')">
                         {{ __('Reports') }}
                     </x-nav-link> --}}
@@ -174,7 +177,22 @@
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('Inicio') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('admin.olts') }}" :active="request()->routeIs('admin.olts')">
+                {{ __('OLT networks') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('admin.antenas') }}" :active="request()->routeIs('admin.antenas')">
+                {{ __('Antenas') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('admin.recibos') }}" :active="request()->routeIs('admin.recibos')">
+                {{ __('Recibos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('admin.payments') }}" :active="request()->routeIs('admin.payments')">
+                {{ __('Payments') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('admin.products') }}" :active="request()->routeIs('admin.products')">
+                {{ __('Products') }}
             </x-responsive-nav-link>
         </div>
 
