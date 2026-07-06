@@ -64,7 +64,7 @@ function getCliente($document)
             $response = Http::withHeaders([
                 'Referer' => $urlreferer,
                 'Authorization' => 'Bearer ' . $token,
-            ])->get($urlconsulta . $document);
+            ])->timeout(3)->get($urlconsulta . $document);
 
             if ($response->ok()) {
                 $data = json_decode($response->body());
@@ -85,7 +85,7 @@ function getCliente($document)
                 $data = json_decode($response->body());
                 $json = [
                     'success' => false,
-                    'mensaje' => $data->message
+                    'mensaje' => $data->message ?? 'No se encontró información para el documento ingresado.'
                 ];
             }
 
@@ -101,9 +101,14 @@ function getCliente($document)
 
         }
     } catch (Exception $e) {
+        $mensaje = $e->getMessage();
+        if ($e instanceof \Illuminate\Http\Client\ConnectionException || str_contains($mensaje, 'timed out') || str_contains($mensaje, 'cURL error 28')) {
+            $mensaje = 'Tiempo de espera agotado al consultar servicio externo (3s). Intente nuevamente o verifique su conexión.';
+        }
+
         $json = [
             'success' => false,
-            'mensaje' => $e->getMessage()
+            'mensaje' => $mensaje
         ];
     }
 

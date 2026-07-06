@@ -8,7 +8,7 @@
 
     <title>{{ config('app.name', 'Clientes Internet') }}</title>
 
-    <!-- Fonts -->
+    <!-- Fonts & Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/sweetAlert2/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/animate/animate.min.css') }}" />
@@ -20,34 +20,76 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kdam+Thmor+Pro&family=Tilt+Neon&display=swap');
-
-        * {
-            font-family: "Kdam Thmor Pro", sans-serif;
-            font-weight: 300;
-            font-style: normal;
-        }
+        * { font-family: "Kdam Thmor Pro", sans-serif; font-weight: 300; font-style: normal; }
+        [x-cloak] { display: none !important; }
+        .sidebar-transition { transition: width 0.3s ease, transform 0.3s ease; }
+        .content-transition { transition: padding-left 0.3s ease; }
     </style>
-    <!-- Styles -->
+
     @livewireStyles
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-white">
+<body class="font-sans antialiased bg-gray-50 dark:bg-neutral-800 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('nav', {
+                open: localStorage.getItem('sidebarOpen') !== 'false',
+                mobileOpen: false,
+                theme: localStorage.getItem('theme') || (document.documentElement.classList.contains('dark') ? 'dark' : 'light'),
+                toggle() {
+                    this.open = !this.open;
+                    localStorage.setItem('sidebarOpen', this.open);
+                },
+                toggleTheme() {
+                    this.theme = this.theme === 'dark' ? 'light' : 'dark';
+                    localStorage.setItem('theme', this.theme);
+                    if (this.theme === 'dark') {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            });
+        });
+    </script>
+
+    <div x-data class="flex min-h-screen">
+
+        {{-- Sidebar (Livewire) --}}
         @livewire('navigation-menu')
 
-        <!-- Page Heading -->
-        @if (isset($header))
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endif
+        {{-- Main wrapper --}}
+        <div class="flex flex-col flex-1 min-w-0 content-transition"
+             :class="$store.nav.open ? 'lg:pl-52' : 'lg:pl-14'">
 
-        <!-- Page Content -->
-        <main class="w-full max-w-[90rem] mx-auto p-1 xl:p-8">
-            {{ $slot }}
-        </main>
+            {{-- Mobile top bar --}}
+            <div class="lg:hidden flex items-center h-11 px-3 bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-700/50 sticky top-0 z-10 transition-colors duration-200">
+                <button @click="$store.nav.mobileOpen = true"
+                        class="text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <span class="ml-3 text-gray-800 dark:text-white text-sm font-semibold truncate">{{ config('app.name') }}</span>
+            </div>
+
+            @if (isset($header))
+                <header class="bg-white dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700/50 transition-colors duration-200">
+                    <div class="px-4 py-3">{{ $header }}</div>
+                </header>
+            @endif
+
+            <main class="flex-1 p-3">
+                {{ $slot }}
+            </main>
+        </div>
     </div>
 
     @stack('modals')
@@ -58,42 +100,19 @@
 
     <script>
         const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
+            toast: true, position: 'top-end', showConfirmButton: false,
+            timer: 2000, timerProgressBar: true,
             didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
             }
         });
-
-        window.addEventListener('toast', toast => {
-            Toast.fire({
-                icon: toast.detail.icon,
-                title: toast.detail.title
-            });
-        });
-
-        window.addEventListener('alert', alert => {
-            Swal.fire({
-                title: alert.detail.title,
-                text: alert.detail.text,
-                icon: alert.detail.icon,
-                // showClass: {
-                //     popup: 'animate__animated animate__fadeIn'
-                // },
-                // hideClass: {
-                //     popup: 'animate__animated animate__backOutRight'
-                // },
-                showCancelButton: false,
-                allowOutsideClick: false,
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'CERRAR',
-                allowEscapeKey: true,
-            });
-        });
+        window.addEventListener('toast', e => Toast.fire({ icon: e.detail.icon, title: e.detail.title }));
+        window.addEventListener('alert', e => Swal.fire({
+            title: e.detail.title, text: e.detail.text, icon: e.detail.icon,
+            showCancelButton: false, allowOutsideClick: false,
+            confirmButtonColor: '#3085d6', confirmButtonText: 'CERRAR', allowEscapeKey: true,
+        }));
     </script>
 
     @yield('scripts')

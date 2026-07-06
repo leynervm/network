@@ -2,21 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .table-default,
 .table-default thead {
     @apply rounded-md overflow-hidden;
 }
 
-.table-default thead tr th, .table-default tbody tr td {
+.table-default thead tr th,
+.table-default tbody tr td {
     @apply p-2;
 }
 
- .table-default tbody tr {
+.table-default tbody tr {
     @apply border-b;
 }
 
+@layer base {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    input[type="month"],
+    input[type="week"],
+    input:not([type]),
+    select,
+    textarea {
+        @apply rounded-lg py-1 px-2.5 text-[10px] border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 shadow-sm;
+    }
 
-select {
-    @apply rounded-md border border-gray-300 focus:border-indigo-400;
+    label {
+        @apply text-[11px] uppercase font-medium text-gray-700 dark:text-gray-300;
+    }
 }

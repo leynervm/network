@@ -6,9 +6,9 @@
     @endif
 
     @if (count($antenas) > 0)
-        <div class="w-full flex gap-3 mt-5">
+        <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 mt-5">
             @foreach ($antenas as $item)
-                <div class="w-40 p-3 shadow rounded flex flex-col gap-1">
+                <div class="w-full bg-white dark:bg-neutral-700/80 hover:bg-gray-50/80 dark:hover:bg-neutral-700 border border-gray-200 dark:border-neutral-600/80 rounded-xl shadow-md hover:shadow-lg p-3 flex flex-col justify-between gap-2 transition-all duration-200">
                     <span class="w-12 h-12 mx-auto">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="block w-full h-full">

@@ -21,11 +21,20 @@ class ShowClientNetworks extends Component
 
     public $open = false;
     public $network;
+    public $client_id = null;
+    public $client_name = '';
+    public $client_document = '';
     public $typetoggle;
 
     public $antena_id;
     public $olt_id = '', $spliter_id = '',
         $boxnav_id = '', $portboxnav_id, $portnumber;
+
+    public $actual_olt_id = null;
+    public $actual_spliter_id = null;
+    public $actual_boxnav_id = null;
+    public $actual_port_id = null;
+    public $actual_antena_id = null;
 
     public $spliters = [];
     public $boxnavs = [];
@@ -53,6 +62,7 @@ class ShowClientNetworks extends Component
     protected function rules()
     {
         return [
+            'client_name' => ['required', 'string', 'min:3'],
             'network.telefono' => ['required', 'numeric', 'regex:/^\d{9}$/'],
             'network.type' => ['required', 'string'],
             'network.price' => ['required', 'numeric', 'decimal:0,2'],
@@ -95,7 +105,7 @@ class ShowClientNetworks extends Component
     public function render()
     {
         $ubigeos = Ubigeo::orderBy('ubigeo', 'asc')->get();
-        $olts = Olt::with('spliters')->get();
+        $olts = Olt::with(['spliters.boxnavs.portboxnavs.network'])->get();
         $antenas = Antena::orderBy('id', 'asc')->get();
         $clientnetworks = Network::withWhereHas('client', function ($query) {
             if (trim($this->search) !== '') {
@@ -115,19 +125,33 @@ class ShowClientNetworks extends Component
         $this->resetExcept(['network']);
         $this->resetValidation();
         $this->network = $network;
+        $this->client_id = $network->client_id;
+        $this->client_name = $network->client ? $network->client->name : '';
+        $this->client_document = $network->client ? $network->client->document : '';
         $this->typetoggle = $this->network->isFibra() ? '0' : '1';
+
+        $this->actual_olt_id = null;
+        $this->actual_spliter_id = null;
+        $this->actual_boxnav_id = null;
+        $this->actual_port_id = null;
+        $this->actual_antena_id = null;
 
         if ($network->networkable) {
             if ($network->isSatelital()) {
                 $this->antena_id = $network->networkable_id;
+                $this->actual_antena_id = $network->networkable_id;
             } else {
-                $this->olt_id = $network->networkable->boxnav->spliter->olt_id;
-                $this->spliters = Olt::find($this->olt_id)->spliters;
-                $this->spliter_id = $network->networkable->boxnav->spliter_id;
-                $this->boxnavs = Spliter::find($this->spliter_id)->boxnavs;
-                $this->boxnav_id = $network->networkable->boxnav_id;
-                $this->portboxnavs = Boxnav::find($this->boxnav_id)->portboxnavs;
+                $this->olt_id = $network->networkable->boxnav->spliter->olt_id ?? null;
+                $this->actual_olt_id = $this->olt_id;
+                $this->spliters = Olt::find($this->olt_id)->spliters ?? [];
+                $this->spliter_id = $network->networkable->boxnav->spliter_id ?? null;
+                $this->actual_spliter_id = $this->spliter_id;
+                $this->boxnavs = Spliter::find($this->spliter_id)->boxnavs ?? [];
+                $this->boxnav_id = $network->networkable->boxnav_id ?? null;
+                $this->actual_boxnav_id = $this->boxnav_id;
+                $this->portboxnavs = Boxnav::find($this->boxnav_id)->portboxnavs()->with('network')->get() ?? [];
                 $this->portboxnav_id = $this->network->networkable_id;
+                $this->actual_port_id = $this->network->networkable_id;
             }
         }
         $this->open = true;
@@ -141,10 +165,18 @@ class ShowClientNetworks extends Component
         DB::beginTransaction();
         try {
 
+            if ($this->client_id) {
+                $client = \App\Models\Client::find($this->client_id);
+                if ($client) {
+                    $client->name = trim($this->client_name);
+                    $client->save();
+                }
+            }
+
             if ($this->network->isFibra()) {
                 if ($this->network->networkable_id !== $this->portboxnav_id) {
                     $portboxnav = Portboxnav::find($this->portboxnav_id);
-                    if ($portboxnav->network()->exists()) {
+                    if ($portboxnav->network()->exists() && $this->portboxnav_id != $this->actual_port_id) {
                         $this->dispatchBrowserEvent('alert', alertJson('Puerto no se encuentra DISPONIBLE', 'El puerto de la caja NAV ya se encuentra ocupado.', 'error'));
                         return false;
                     }
@@ -165,42 +197,84 @@ class ShowClientNetworks extends Component
         }
     }
 
-    public function updatedOltId($value)
+    public function updatedNetwork($name, $value)
     {
-        $this->reset([
-            'spliters', 'boxnavs', 'portboxnavs',
-            'spliter_id', 'boxnav_id', 'portboxnav_id'
-        ]);
-        if ($value) {
-            $this->spliters = Olt::find($value)->spliters;
+        if ($name === 'type') {
+            $this->reset([
+                'antena_id', 'olt_id', 'spliter_id',
+                'boxnav_id', 'portboxnav_id', 'portnumber',
+                'spliters', 'boxnavs', 'portboxnavs'
+            ]);
         }
     }
 
-    public function updatedSpliterId($value)
+    public function updatedNetworkType($value)
     {
         $this->reset([
-            'boxnavs', 'portboxnavs',
-            'boxnav_id', 'portboxnav_id'
+            'antena_id', 'olt_id', 'spliter_id',
+            'boxnav_id', 'portboxnav_id', 'portnumber',
+            'spliters', 'boxnavs', 'portboxnavs'
         ]);
-        if ($value) {
-            $this->boxnavs = Spliter::find($value)->boxnavs;
-        }
     }
 
-    public function updatedBoxnavId($value)
+    public function selectOlt($id)
     {
+        if ($this->olt_id == $id) {
+            $this->reset([
+                'olt_id', 'spliter_id', 'boxnav_id', 'portboxnav_id',
+                'spliters', 'boxnavs', 'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->olt_id = $id;
         $this->reset([
-            'portboxnavs', 'portboxnav_id'
+            'spliter_id', 'boxnav_id', 'portboxnav_id',
+            'boxnavs', 'portboxnavs', 'portnumber'
         ]);
-        if ($value) {
-            $this->portboxnavs = Boxnav::find($value)->portboxnavs;
-        }
+        $this->spliters = Olt::find($id)->spliters;
     }
 
-    public function updatedPortboxnavId($value)
+    public function selectSpliter($id)
     {
-        if ($value) {
-            $this->portnumber = Portboxnav::find($value)->code;
+        if ($this->spliter_id == $id) {
+            $this->reset([
+                'spliter_id', 'boxnav_id', 'portboxnav_id',
+                'boxnavs', 'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->spliter_id = $id;
+        $this->reset([
+            'boxnav_id', 'portboxnav_id',
+            'portboxnavs', 'portnumber'
+        ]);
+        $this->boxnavs = Spliter::find($id)->boxnavs;
+    }
+
+    public function selectBoxnav($id)
+    {
+        if ($this->boxnav_id == $id) {
+            $this->reset([
+                'boxnav_id', 'portboxnav_id',
+                'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->boxnav_id = $id;
+        $this->reset(['portboxnav_id', 'portnumber']);
+        $this->portboxnavs = Boxnav::find($id)->portboxnavs()->with('network')->get();
+    }
+
+    public function selectPort($id)
+    {
+        $port = Portboxnav::find($id);
+        if ($port && $port->network()->exists() && $id != $this->actual_port_id) {
+            $this->dispatchBrowserEvent('alert', alertJson('Puerto no disponible', 'El puerto seleccionado ya se encuentra ocupado.', 'error'));
+            return;
+        }
+        $this->portboxnav_id = $id;
+        if ($port) {
+            $this->portnumber = $port->code;
         }
     }
 

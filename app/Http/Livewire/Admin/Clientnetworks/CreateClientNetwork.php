@@ -90,7 +90,7 @@ class CreateClientNetwork extends Component
     public function render()
     {
         $ubigeos = Ubigeo::orderBy('ubigeo', 'asc')->get();
-        $olts = Olt::with('spliters')->get();
+        $olts = Olt::with(['spliters.boxnavs.portboxnavs.network'])->get();
         $antenas = Antena::orderBy('id', 'asc')->get();
         return view('livewire.admin.clientnetworks.create-client-network', compact('ubigeos', 'olts', 'antenas'));
     }
@@ -101,6 +101,79 @@ class CreateClientNetwork extends Component
             $this->resetValidation();
             $this->reset();
             $this->date = now('America/Lima')->format('Y-m-d');
+        }
+    }
+
+    public function updatedType($value)
+    {
+        if (validarFibra($value)) {
+            $this->reset(['antena_id']);
+        } else {
+            $this->reset([
+                'olt_id', 'spliter_id', 'boxnav_id', 'portboxnav_id',
+                'spliters', 'boxnavs', 'portboxnavs', 'portnumber'
+            ]);
+        }
+    }
+
+    public function selectOlt($id)
+    {
+        if ($this->olt_id == $id) {
+            $this->reset([
+                'olt_id', 'spliter_id', 'boxnav_id', 'portboxnav_id',
+                'spliters', 'boxnavs', 'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->olt_id = $id;
+        $this->reset([
+            'spliter_id', 'boxnav_id', 'portboxnav_id',
+            'boxnavs', 'portboxnavs', 'portnumber'
+        ]);
+        $this->spliters = Olt::find($id)->spliters;
+    }
+
+    public function selectSpliter($id)
+    {
+        if ($this->spliter_id == $id) {
+            $this->reset([
+                'spliter_id', 'boxnav_id', 'portboxnav_id',
+                'boxnavs', 'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->spliter_id = $id;
+        $this->reset([
+            'boxnav_id', 'portboxnav_id',
+            'portboxnavs', 'portnumber'
+        ]);
+        $this->boxnavs = Spliter::find($id)->boxnavs;
+    }
+
+    public function selectBoxnav($id)
+    {
+        if ($this->boxnav_id == $id) {
+            $this->reset([
+                'boxnav_id', 'portboxnav_id',
+                'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->boxnav_id = $id;
+        $this->reset(['portboxnav_id', 'portnumber']);
+        $this->portboxnavs = Boxnav::find($id)->portboxnavs()->with('network')->get();
+    }
+
+    public function selectPort($id)
+    {
+        $port = Portboxnav::find($id);
+        if ($port && $port->network()->exists()) {
+            $this->dispatchBrowserEvent('alert', alertJson('Puerto no disponible', 'El puerto seleccionado ya se encuentra ocupado.', 'error'));
+            return;
+        }
+        $this->portboxnav_id = $id;
+        if ($port) {
+            $this->portnumber = $port->code;
         }
     }
 
@@ -127,9 +200,9 @@ class CreateClientNetwork extends Component
 
     public function updatedBoxnavId($value)
     {
-        $this->reset(['portboxnavs', 'portboxnav_id']);
+        $this->reset(['portboxnavs', 'portboxnav_id', 'portnumber']);
         if ($value) {
-            $this->portboxnavs = Boxnav::find($value)->portboxnavs;
+            $this->portboxnavs = Boxnav::find($value)->portboxnavs()->with('network')->get();
         }
     }
 

@@ -24,12 +24,12 @@
                 @else
                     <a href="{{ route('login') }}"
                         class="bg-neutral-700 uppercase w-full px-3 text-sm tracking-wide focus:ring-2 focus:ring-neutral-300 py-2 rounded-md text-white shadow-md hover:shadow-inner transform hover:-translate-x hover:scale-105 focus:outline-none transition ease-in-out duration-500">
-                        Log in</a>
+                        {{ __('Log in') }}</a>
 
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}"
                             class="ml-4 bg-neutral-700 uppercase w-full px-3 text-sm tracking-wide focus:ring-2 focus:ring-neutral-300 py-2 rounded-md text-white shadow-md hover:shadow-inner transform hover:-translate-x hover:scale-105 focus:outline-none transition ease-in-out duration-500">
-                            Register</a>
+                            {{ __('Register') }}</a>
                     @endif
                 @endauth
             </div>

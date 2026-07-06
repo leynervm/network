@@ -58,9 +58,4 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
-
-    public function setNameAttribute($value)
-    {
-        $this->attributes['name'] =  trim(mb_strtoupper($value, "UTF-8"));
-    }
 }
