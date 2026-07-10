@@ -160,7 +160,14 @@ return [
         'codeport'              =>  'codigo puerto',
         'code'                  =>  'codigo',
         'seriepago_id'          =>  'tipo recibo',
-        'month'                 =>  'mes'
+        'month'                 =>  'mes',
+        'olt_id'                =>  'olt',
+        'spliter_id'            =>  'splitter',
+        'splitter_id'           =>  'splitter',
+        'splitter_port'         =>  'puerto splitter',
+        'city_id'               =>  'ciudad',
+        'boxnav_id'             =>  'caja nap',
+        'client_id'             =>  'cliente',
     ],
 
 ];

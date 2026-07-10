@@ -25,6 +25,7 @@ class ShowSpliters extends Component
     public $allports = false;
     public $oldspliterouts;
     public $codeport;
+    public $selectedPort;
 
 
 
@@ -57,9 +58,10 @@ class ShowSpliters extends Component
     }
 
 
-    public function addbooxnav(Spliter $spliter)
+    public function addbooxnav(Spliter $spliter, $port = null)
     {
         $this->spliter = $spliter;
+        $this->selectedPort = $port;
         $this->open = true;
     }
 
@@ -88,42 +90,72 @@ class ShowSpliters extends Component
             }
 
             if ($this->allports) {
-                $disponibles = $this->spliter->outs - count($this->spliter->boxnavs);
-                for ($i = 0; $i < $disponibles; $i++) {
+                for ($p = 1; $p <= $this->spliter->outs; $p++) {
+                    $exists = $this->spliter->boxnavs()->where('splitter_port', $p)->exists();
+                    if ($exists) {
+                        continue;
+                    }
+
                     $j = 1;
                     do {
-                        $code = trim($this->spliter->code) . '-' . $j;
-                        $exists = $this->spliter->boxnavs()->where('code', trim($code))->exists();
+                        $code = trim($this->spliter->code) . '-' . $p;
+                        $existsCode = $this->spliter->boxnavs()->where('code', trim($code))->exists();
+                        if ($existsCode) {
+                            $code = trim($this->spliter->code) . '-' . $p . '-' . $j;
+                            $existsCode = $this->spliter->boxnavs()->where('code', trim($code))->exists();
+                        }
                         $j++;
-                    } while ($exists);
+                    } while ($existsCode);
 
                     $boxnav = $this->spliter->boxnavs()->create([
                         'name' => 'NAP ' . $code,
                         'code' => $code,
-                        'outs' => $this->outs
+                        'outs' => $this->outs,
+                        'splitter_port' => $p,
                     ]);
 
                     for ($k = 0; $k < $boxnav->outs; $k++) {
                         $boxnav->portboxnavs()->create([
-                            'code' => 'PORT-' . $k + 1,
+                            'code' => 'PORT-' . ($k + 1),
                         ]);
                     }
                 }
             } else {
+                $portToUse = null;
+                if ($this->selectedPort !== null && $this->selectedPort !== '') {
+                    $portToUse = (int)$this->selectedPort + 1;
+                } else {
+                    for ($p = 1; $p <= $this->spliter->outs; $p++) {
+                        if (!$this->spliter->boxnavs()->where('splitter_port', $p)->exists()) {
+                            $portToUse = $p;
+                            break;
+                        }
+                    }
+                }
 
+                if ($portToUse === null) {
+                    $this->dispatchBrowserEvent('alert', alertJson('LÍMITE DE SALIDAS  ALCANZADO !', 'Límite de puertos de CAJA NAP alcanzado.', 'info'));
+                    return false;
+                }
+
+                if ($this->spliter->boxnavs()->where('splitter_port', $portToUse)->exists()) {
+                    $this->dispatchBrowserEvent('alert', alertJson('PUERTO OCUPADO !', 'El puerto seleccionado ya tiene una CAJA NAP vinculada.', 'info'));
+                    return false;
+                }
+
+                $validateData['splitter_port'] = $portToUse;
                 $boxnav = $this->spliter->boxnavs()->create($validateData);
                 for ($i = 0; $i < $boxnav->outs; $i++) {
                     $boxnav->portboxnavs()->create([
-                        'code' => 'PORT-' . $i + 1,
+                        'code' => 'PORT-' . ($i + 1),
                     ]);
                 }
             }
             DB::commit();
             $this->resetValidation();
-            $this->reset(['name', 'code', 'outs', 'open']);
+            $this->reset(['name', 'code', 'outs', 'open', 'selectedPort']);
             $this->olt->refresh();
             $this->dispatchBrowserEvent('toast', toastJson('CAJA NAP registrado correctamente'));
-            // $this->emitTo('admin.boxnavs.show-boxnavs', 'render');
         } catch (\Exception $e) {
             $this->dispatchBrowserEvent('alert', alertJson('Error al registrar CAJA NAP', $e->getMessage(), 'error'));
             DB::rollBack();

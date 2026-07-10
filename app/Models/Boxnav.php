@@ -12,7 +12,7 @@ class Boxnav extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'outs', 'direccion', 'boxnavable_id', 'boxnavable_type'];
+    protected $fillable = ['name', 'code', 'outs', 'direccion', 'boxnavable_id', 'boxnavable_type', 'splitter_port'];
     public $timestamps = false;
 
     const DISPONIBLE = '0';
