@@ -1,4 +1,7 @@
 <x-app-layout>
+
+    <x-slot name="header">{{ __('Gestionar Recibos de Pago') }}</x-slot>
+
     <div>
         <livewire:admin.recibos.create-recibo />
     </div>

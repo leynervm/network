@@ -1,4 +1,7 @@
 <x-app-layout>
+
+    <x-slot name="header">{{ __('Gestionar Productos') }}</x-slot>
+
     <div class="flex gap-2 justify-start">
         <livewire:admin.products.create-product />
 

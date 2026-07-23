@@ -62,6 +62,11 @@ class AdminController extends Controller
         return view('admin.marcas.index');
     }
 
+    public function payments()
+    {
+        return view('admin.payments.index');
+    }
+
     public function print(Recibo $recibo)
     {
 

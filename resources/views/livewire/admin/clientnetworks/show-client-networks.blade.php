@@ -30,7 +30,7 @@
                 <tr>
                     <th>COD. SERVICIO</th>
                     <th>FECHA ALTA</th>
-                    <th>CLIENTE</th>
+                    <th class="text-left">CLIENTE</th>
                     <th>PUERTO</th>
                     <th>TIPO SERVICIO</th>
                     <th>CONEXIÓN</th>

@@ -1,4 +1,7 @@
 <x-app-layout>
+
+    <x-slot name="header">{{ __('Gestionar Antenas') }}</x-slot>
+
     <div>
         <livewire:admin.antenas.create-antena />
     </div>

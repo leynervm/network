@@ -48,7 +48,7 @@ Route::middleware([
 
     Route::get('/admin/antenas', [AdminController::class, 'antenas'])->name('admin.antenas');
     Route::get('/admin/Recibos', [AdminController::class, 'recibos'])->name('admin.recibos');
-    Route::get('/admin/payments', ShowPayments::class)->name('admin.payments');
+    Route::get('/admin/payments', [AdminController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
 
 
