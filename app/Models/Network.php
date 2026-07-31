@@ -16,6 +16,7 @@ class Network extends Model
         'date', 'code', 'portnumber', 'descripcion', 'type', 'telefono',
         'price', 'direccion', 'typelocal', 'status', 'client_id',
         'ubigeo_id', 'networkable_id', 'networkable_type',
+        'latitude', 'longitude', 'zoom',
     ];
     public $timestamps = false;
 

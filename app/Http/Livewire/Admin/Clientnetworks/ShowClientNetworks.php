@@ -67,6 +67,9 @@ class ShowClientNetworks extends Component
             'network.type' => ['required', 'string'],
             'network.price' => ['required', 'numeric', 'decimal:0,2'],
             'network.direccion' =>  ['required', 'string', 'min:6'],
+            'network.latitude' => ['required', 'string'],
+            'network.longitude' => ['required', 'string'],
+            'network.zoom' => ['nullable', 'numeric'],
             'network.ubigeo_id' => ['nullable', 'integer', 'min:1', 'exists:ubigeos,id'],
             'antena_id' => [
                 'nullable',

@@ -12,7 +12,7 @@
             <x-label value="Filtrar mes" />
             <x-input class="w-full block" wire:model.lazy="searchmonth" type="month" />
         </div> --}}
-        <div class="w-full max-w-xs">
+        <div class="w-full max-w-48">
             <x-label value="Tipo servicio" />
             <x-select-input class="w-full" wire:model.lazy="searchtype">
                 <option value="">SELECCIONAR...</option>
@@ -29,13 +29,13 @@
             <x-slot name="thead">
                 <tr>
                     <th>COD. SERVICIO</th>
-                    <th>FECHA ALTA</th>
-                    <th class="text-left">CLIENTE</th>
-                    <th>PUERTO</th>
-                    <th>TIPO SERVICIO</th>
-                    <th>CONEXIÓN</th>
+                    <th style="min-width: 100px;">FECHA ALTA</th>
+                    <th style="min-width: 260px;" class="text-left">CLIENTE</th>
+                    {{-- <th>PUERTO</th> --}}
+                    <th style="min-width: 150px;">TIPO SERVICIO</th>
+                    <th style="min-width: 150px;">CONEXIÓN</th>
                     <th>DESCRIPCIÓN</th>
-                    <th>PRECIO</th>
+                    <th style="min-width: 100px;">PRECIO</th>
                     <th>ESTADO</th>
                     <th>PAGOS</th>
                 </tr>
@@ -49,7 +49,15 @@
                             <td class="text-left w-[400px]">
                                 <p>{{ $item->client->name }}</p>
                                 <p>{{ $item->client->document }}</p>
-                                <p class="text-green-600">TELEFONO : {{ $item->telefono }}</p>
+                                <p class="text-green-600 dark:text-green-500 flex items-center gap-1 font-medium mt-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-3 h-3">
+                                        <path fill-rule="evenodd"
+                                            d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    {{ $item->telefono ? implode(' ', str_split($item->telefono, 3)) : '' }}
+                                </p>
                                 <p>
                                     @if ($item->ubigeo)
                                         {{ $item->ubigeo->departamento }}
@@ -59,7 +67,7 @@
                                 </p>
                                 <p>LOCAL: {{ $item->typelocal }}</p>
                             </td>
-                            <td class="text-center">{{ $item->portnumber }}</td>
+                            {{-- <td class="text-center">{{ $item->portnumber }}</td> --}}
                             {{-- <td class="text-center uppercase">{{ formatDate($item->datepayment) }}</td> --}}
                             <td class="text-center">
                                 {{ $item->type }}
@@ -94,8 +102,7 @@
                                         class="bg-rose-500 dark:bg-rose-600 inline-block mb-1 text-white text-[9px] font-bold p-1 px-1.5 rounded tracking-wider">
                                         SUSPENDIDO</span>
 
-                                    <x-button wire:click="reconectar({{ $item->id }})"
-                                        wire:loading.attr="disabled"
+                                    <x-button wire:click="reconectar({{ $item->id }})" wire:loading.attr="disabled"
                                         class="!bg-emerald-600 hover:!bg-emerald-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 !text-white !px-2 !text-[10px] shadow-sm transition-all">
                                         RECONECTAR
                                     </x-button>
@@ -104,8 +111,7 @@
                                         class="bg-emerald-500 dark:bg-emerald-600 inline-block mb-1 text-white text-[9px] font-bold p-1 px-1.5 rounded tracking-wider">
                                         ACTIVO</span>
 
-                                    <x-button wire:click="suspender({{ $item->id }})"
-                                        wire:loading.attr="disabled"
+                                    <x-button wire:click="suspender({{ $item->id }})" wire:loading.attr="disabled"
                                         class="!bg-orange-500 hover:!bg-orange-600 dark:!bg-orange-600 dark:hover:!bg-orange-500 !text-white !px-2 !text-[10px] shadow-sm transition-all">
                                         SUSPENDER
                                     </x-button>
@@ -124,7 +130,8 @@
                                     </button>
 
                                     <button type="button" onclick="confirmDeleteNetwork({{ $item }})"
-                                        wire:loading.attr="disabled" wire:key="delete_{{ $item->id }}" title="Eliminar"
+                                        wire:loading.attr="disabled" wire:key="delete_{{ $item->id }}"
+                                        title="Eliminar"
                                         class="inline-block p-1 rounded-md text-red-600 hover:bg-red-600 hover:text-white duration-150 transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -154,7 +161,7 @@
         </x-table>
     </div>
 
-    <x-dialog-modal wire:model="open" maxWidth="2xl">
+    <x-dialog-modal wire:model="open" maxWidth="4xl">
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">ACTUALIZAR CLIENTE INTERNET</h1>
             <button wire:click="$set('open', false)"
@@ -179,7 +186,7 @@
                         </div>
                         <div class="w-full">
                             <x-label value="Nombre del cliente / Razón Social" />
-                            <x-input class="w-full block text-xs uppercase rounded-lg"
+                            <x-input class="w-full block text-xs uppercase rounded-lg !p-1.5"
                                 wire:model.defer="client_name" />
                             <x-input-error for="client_name" />
                         </div>
@@ -193,7 +200,7 @@
                             <x-input class="hidden peer" type="radio" name="edittype" wire:model="network.type"
                                 id="edit_tv" value="{{ \App\Models\Network::TV }}" />
                             <label for="edit_tv"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::TV }}
                             </label>
                         </div>
@@ -201,7 +208,7 @@
                             <x-input class="hidden peer" type="radio" name="edittype" wire:model="network.type"
                                 id="edit_fibra" value="{{ \App\Models\Network::FIBRA }}" />
                             <label for="edit_fibra"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::FIBRA }}
                             </label>
                         </div>
@@ -209,7 +216,7 @@
                             <x-input class="hidden peer" type="radio" name="edittype" wire:model="network.type"
                                 id="edit_fibra_tv" value="{{ \App\Models\Network::FIBRA_TV }}" />
                             <label for="edit_fibra_tv"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::FIBRA_TV }}
                             </label>
                         </div>
@@ -217,7 +224,7 @@
                             <x-input class="hidden peer" type="radio" name="edittype" wire:model="network.type"
                                 id="edit_satelital" value="{{ \App\Models\Network::SATELITAL }}" />
                             <label for="edit_satelital"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::SATELITAL }}
                             </label>
                         </div>
@@ -265,7 +272,7 @@
                                             <span>{{ $item->name }}</span>
                                             @if ($actual_olt_id == $item->id)
                                                 <span
-                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $olt_id == $item->id ? 'bg-white/20 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
+                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $olt_id == $item->id ? 'bg-green-500/70 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
                                             @endif
                                         </button>
                                     @endforeach
@@ -295,7 +302,7 @@
                                             <span>{{ $item->name }}</span>
                                             @if ($actual_spliter_id == $item->id)
                                                 <span
-                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $spliter_id == $item->id ? 'bg-white/20 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
+                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $spliter_id == $item->id ? 'bg-green-500/70 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
                                             @endif
                                         </button>
                                     @endforeach
@@ -328,7 +335,7 @@
                                             <span>{{ $item->name }}</span>
                                             @if ($actual_boxnav_id == $item->id)
                                                 <span
-                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $boxnav_id == $item->id ? 'bg-white/20 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
+                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $boxnav_id == $item->id ? 'bg-green-500/70 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
                                             @endif
                                         </button>
                                     @endforeach
@@ -439,10 +446,85 @@
                     <x-input-error for="network.direccion" />
                 </div>
 
-                <div class="text-end">
+                <div class="w-full">
+                    <x-label value="Ubicación en el Mapa" />
+                    <div wire:ignore x-data="leafletMapEdit()"
+                        class="w-full relative rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 z-0">
+                        <style>
+                            .leaflet-control-layers {
+                                border-radius: 0.5rem !important;
+                                border: 1px solid #e5e7eb !important;
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+                                background-color: rgba(255, 255, 255, 0.95) !important;
+                                backdrop-filter: blur(4px) !important;
+                            }
+
+                            .leaflet-control-layers-expanded {
+                                padding: 8px 12px !important;
+                            }
+
+                            .leaflet-control-layers label {
+                                display: flex !important;
+                                align-items: center !important;
+                                gap: 6px !important;
+                                font-size: 0.75rem !important;
+                                font-family: inherit !important;
+                                font-weight: 600 !important;
+                                color: #374151 !important;
+                                cursor: pointer !important;
+                                margin-bottom: 6px !important;
+                                transition: color 0.15s ease-in-out;
+                            }
+
+                            .leaflet-control-layers label:hover {
+                                color: #111827 !important;
+                            }
+
+                            .leaflet-control-layers-selector {
+                                margin: 0 !important;
+                                cursor: pointer !important;
+                                accent-color: #3b82f6 !important;
+                                width: 14px;
+                                height: 14px;
+                            }
+
+                            .dark .leaflet-control-layers {
+                                border-color: #404040 !important;
+                                background-color: rgba(38, 38, 38, 0.95) !important;
+                            }
+
+                            .dark .leaflet-control-layers label {
+                                color: #d4d4d8 !important;
+                            }
+
+                            .dark .leaflet-control-layers label:hover {
+                                color: #ffffff !important;
+                            }
+                        </style>
+                        <div id="map-edit" class="w-full h-[250px] z-0"></div>
+                        <div class="absolute bottom-2 right-2 z-[400] flex flex-col gap-1">
+                            <button type="button" @click="locateMe"
+                                class="bg-white/85 dark:bg-neutral-800 text-gray-800 dark:text-gray-200 p-2 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-neutral-700 text-[10px] font-bold flex items-center gap-1 border border-gray-200 dark:border-neutral-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 dark:text-red-400"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                {{-- UBICARME --}}
+                            </button>
+                        </div>
+                    </div>
+                    <x-input-error for="network.latitude" />
+                    <x-input-error for="network.longitude" />
+                </div>
+
+                <div
+                    class="text-end sticky bottom-0 bg-white dark:bg-neutral-800 px-4 pb-4 pt-4 border-t border-gray-200 dark:border-neutral-700/60 z-10">
                     {{-- {{ print_r($errors->all()) }} --}}
                     <x-button type="submit" wire:loading.attr="disabled">
-                        ACTUALIZAR</x-button>
+                        ACTUALIZAR
+                    </x-button>
                 </div>
             </form>
         </x-slot>
@@ -454,6 +536,199 @@
                 type: @entangle('typetoggle').defer,
 
             }))
+
+            Alpine.data('leafletMapEdit', () => ({
+                map: null,
+                marker: null,
+                redIcon: null,
+                lat: @entangle('network.latitude').defer,
+                lng: @entangle('network.longitude').defer,
+                zoom: @entangle('network.zoom').defer,
+                init() {
+                    this.loadLeaflet();
+                },
+                loadLeaflet() {
+                    if (typeof L === 'undefined') {
+                        const link = document.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                        document.head.appendChild(link);
+
+                        const script = document.createElement('script');
+                        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                        script.onload = () => this.initMap();
+                        document.head.appendChild(script);
+                    } else {
+                        setTimeout(() => this.initMap(), 100);
+                    }
+                },
+                initMap() {
+                    this.redIcon = new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    });
+
+                    let defaultLat = this.lat ? parseFloat(this.lat) : -12.046374;
+                    let defaultLng = this.lng ? parseFloat(this.lng) : -77.042793;
+                    let initialZoom = this.zoom ? parseInt(this.zoom) : 14;
+
+                    let osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    });
+                    let satellite = L.tileLayer(
+                        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                            maxZoom: 19,
+                            attribution: '© Esri'
+                        });
+                    let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 17,
+                        attribution: '© OpenTopoMap'
+                    });
+
+                    this.map = L.map('map-edit', {
+                        center: [defaultLat, defaultLng],
+                        zoom: initialZoom,
+                        layers: [osm],
+                        attributionControl: false
+                    });
+
+                    L.control.layers({
+                        "Calles": osm,
+                        "Satélite": satellite,
+                        "Relieve": topo
+                    }).addTo(this.map);
+
+                    this.map.on('click', (e) => {
+                        this.updateMarker(e.latlng.lat, e.latlng.lng);
+                    });
+
+                    this.map.on('zoomend', () => {
+                        this.zoom = this.map.getZoom();
+                        if (this.$wire) {
+                            this.$wire.set('network.zoom', this.zoom, true);
+                        }
+                    });
+
+                    const resizeObserver = new ResizeObserver((entries) => {
+                        for (let entry of entries) {
+                            if (entry.contentRect.width > 0) {
+                                // Visible
+                                if (this.map) {
+                                    this.map.invalidateSize();
+                                    setTimeout(() => this.updateMapView(), 100);
+                                }
+                            } else {
+                                // Hidden
+                                if (this.marker && this.map) {
+                                    this.map.removeLayer(this.marker);
+                                    this.marker = null;
+                                }
+                            }
+                        }
+                    });
+                    resizeObserver.observe(document.getElementById('map-edit'));
+                },
+                updateMapView() {
+                    let viewLat = this.lat ? parseFloat(this.lat) : -12.046374;
+                    let viewLng = this.lng ? parseFloat(this.lng) : -77.042793;
+                    let viewZoom = this.zoom ? parseInt(this.zoom) : 14;
+
+                    if (this.lat && this.lng) {
+                        if (this.marker) {
+                            this.marker.setLatLng([parseFloat(this.lat), parseFloat(this.lng)]);
+                        } else {
+                            this.marker = L.marker([parseFloat(this.lat), parseFloat(this.lng)], {
+                                icon: this.redIcon,
+                                draggable: true
+                            }).addTo(this.map);
+                            this.marker.on('dragend', (e) => {
+                                let position = this.marker.getLatLng();
+                                this.updateMarker(position.lat, position.lng);
+                            });
+                        }
+                    } else {
+                        if (this.marker) {
+                            this.map.removeLayer(this.marker);
+                            this.marker = null;
+                        }
+                        this.locateMe();
+                    }
+
+                    this.map.setView([viewLat, viewLng], viewZoom);
+                    this.map.invalidateSize();
+                },
+                updateMarker(lat, lng) {
+                    if (!this.marker) {
+                        this.marker = L.marker([lat, lng], {
+                            icon: this.redIcon,
+                            draggable: true
+                        }).addTo(this.map);
+                        this.marker.on('dragend', (e) => {
+                            let position = this.marker.getLatLng();
+                            this.updateMarker(position.lat, position.lng);
+                        });
+                    } else {
+                        this.marker.setLatLng([lat, lng]);
+                    }
+                    let strLat = lat.toString();
+                    let strLng = lng.toString();
+                    this.lat = strLat;
+                    this.lng = strLng;
+                    if (this.$wire) {
+                        this.$wire.set('network.latitude', strLat, true);
+                        this.$wire.set('network.longitude', strLng, true);
+                    }
+                },
+                locateMe() {
+                    if ("geolocation" in navigator) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                this.updateMarker(position.coords.latitude, position.coords
+                                    .longitude);
+                                let zoomLevel = this.zoom ? parseInt(this.zoom) : 17;
+                                this.map.setView([position.coords.latitude, position.coords
+                                    .longitude
+                                ], zoomLevel);
+                            },
+                            (error) => {
+                                let msg = "Error al obtener ubicación.";
+                                if (error.code === error.PERMISSION_DENIED) {
+                                    msg =
+                                        "Permiso de ubicación denegado. En entornos de desarrollo locales (como Laragon sin SSL), los navegadores bloquean la ubicación. Usa 'localhost' en lugar de tu dominio virtual, o configura SSL.";
+                                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                                    msg = "La información de la ubicación no está disponible.";
+                                } else if (error.code === error.TIMEOUT) {
+                                    msg = "El tiempo para obtener la ubicación se ha agotado.";
+                                }
+                                window.dispatchEvent(new CustomEvent('alert', {
+                                    detail: {
+                                        title: 'Ubicación fallida',
+                                        text: msg,
+                                        icon: 'warning'
+                                    }
+                                }));
+                            }, {
+                                enableHighAccuracy: true,
+                                timeout: 5000,
+                                maximumAge: 0
+                            }
+                        );
+                    } else {
+                        window.dispatchEvent(new CustomEvent('alert', {
+                            detail: {
+                                title: 'Geolocalización restringida',
+                                text: 'Tu navegador no soporta la geolocalización o está bloqueada por falta de HTTPS (SSL).',
+                                icon: 'error'
+                            }
+                        }));
+                    }
+                }
+            }));
         })
 
 

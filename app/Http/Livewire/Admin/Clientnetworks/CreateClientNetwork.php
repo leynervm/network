@@ -20,6 +20,8 @@ class CreateClientNetwork extends Component
 
     public $date, $code, $portnumber, $descripcion, $type, $price, $direccion,
         $client_id, $ubigeo_id, $telefono;
+    
+    public $latitude, $longitude, $zoom = 14;
 
     public $antena_id;
     public $document, $name;
@@ -49,6 +51,9 @@ class CreateClientNetwork extends Component
             'type' => ['required', 'string'],
             'price' => ['required', 'numeric', 'decimal:0,2'],
             'direccion' =>  ['required', 'string', 'min:6'],
+            'latitude' => ['required', 'string'],
+            'longitude' => ['required', 'string'],
+            'zoom' => ['nullable', 'numeric'],
             'client_id' => ['required', 'integer', 'min:1', 'exists:clients,id'],
             'ubigeo_id' => ['nullable', 'integer', 'min:1', 'exists:ubigeos,id'],
             'antena_id' => [

@@ -1,8 +1,9 @@
 <div>
     <x-button wire:click="$set('open', true)">
-        REGISTRAR CLIENTE INTERNET</x-button>
+        REGISTRAR CLIENTE INTERNET
+    </x-button>
 
-    <x-dialog-modal wire:model="open" maxWidth="2xl">
+    <x-dialog-modal wire:model="open" maxWidth="3xl">
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">REGISTRAR CLIENTE INTERNET</h1>
             <button wire:click="$set('open', false)"
@@ -49,7 +50,7 @@
                             <x-input class="hidden peer" type="radio" name="type" wire:model="type" id="tv"
                                 value="{{ \App\Models\Network::TV }}" />
                             <label for="tv"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::TV }}
                             </label>
                         </div>
@@ -57,7 +58,7 @@
                             <x-input class="hidden peer" type="radio" name="type" wire:model="type" id="fibra"
                                 value="{{ \App\Models\Network::FIBRA }}" />
                             <label for="fibra"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::FIBRA }}
                             </label>
                         </div>
@@ -65,7 +66,7 @@
                             <x-input class="hidden peer" type="radio" name="type" wire:model="type" id="fibra_tv"
                                 value="{{ \App\Models\Network::FIBRA_TV }}" />
                             <label for="fibra_tv"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::FIBRA_TV }}
                             </label>
                         </div>
@@ -73,7 +74,7 @@
                             <x-input class="hidden peer" type="radio" name="type" wire:model="type" id="satelital"
                                 value="{{ \App\Models\Network::SATELITAL }}" />
                             <label for="satelital"
-                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-md font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
+                                class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ \App\Models\Network::SATELITAL }}
                             </label>
                         </div>
@@ -284,6 +285,80 @@
                     <x-input-error for="direccion" />
                 </div>
 
+                <div class="w-full">
+                    <x-label value="Ubicación en el Mapa" />
+                    <div wire:ignore x-data="leafletMap()"
+                        class="w-full relative rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 z-0">
+                        <style>
+                            .leaflet-control-layers {
+                                border-radius: 0.5rem !important;
+                                border: 1px solid #e5e7eb !important;
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+                                background-color: rgba(255, 255, 255, 0.95) !important;
+                                backdrop-filter: blur(4px) !important;
+                            }
+
+                            .leaflet-control-layers-expanded {
+                                padding: 8px 12px !important;
+                            }
+
+                            .leaflet-control-layers label {
+                                display: flex !important;
+                                align-items: center !important;
+                                gap: 6px !important;
+                                font-size: 0.75rem !important;
+                                font-family: inherit !important;
+                                font-weight: 600 !important;
+                                color: #374151 !important;
+                                cursor: pointer !important;
+                                margin-bottom: 6px !important;
+                                transition: color 0.15s ease-in-out;
+                            }
+
+                            .leaflet-control-layers label:hover {
+                                color: #111827 !important;
+                            }
+
+                            .leaflet-control-layers-selector {
+                                margin: 0 !important;
+                                cursor: pointer !important;
+                                accent-color: #3b82f6 !important;
+                                width: 14px;
+                                height: 14px;
+                            }
+
+                            .dark .leaflet-control-layers {
+                                border-color: #404040 !important;
+                                background-color: rgba(38, 38, 38, 0.95) !important;
+                            }
+
+                            .dark .leaflet-control-layers label {
+                                color: #d4d4d8 !important;
+                            }
+
+                            .dark .leaflet-control-layers label:hover {
+                                color: #ffffff !important;
+                            }
+                        </style>
+                        <div id="map-create" class="w-full h-[250px] z-0"></div>
+                        <div class="absolute bottom-2 right-2 z-[400] flex flex-col gap-1">
+                            <button type="button" @click="locateMe"
+                                class="bg-white/85 dark:bg-neutral-800 text-gray-800 dark:text-gray-200 p-2 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-neutral-700 text-[10px] font-bold flex items-center gap-1 border border-gray-200 dark:border-neutral-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                {{-- UBICARME --}}
+                            </button>
+                        </div>
+                    </div>
+                    <x-input-error for="latitude" />
+                    <x-input-error for="longitude" />
+                </div>
+
                 <label for="addequipo">
                     <x-input type="checkbox" id="addequipo" @click="addequipo = !addequipo" />
                     AGREGAR EQUIPO
@@ -359,7 +434,8 @@
                     </x-table>
                 </div>
 
-                <div class="text-end">
+                <div
+                    class="text-end sticky bottom-0 bg-white dark:bg-neutral-800 px-4 pb-4 pt-4 border-t border-gray-200 dark:border-neutral-700/60 z-10">
                     <x-input-error for="equipos" />
                     {{-- {{ print_r($errors->all()) }} --}}
                     <x-button type="submit" wire:loading.attr="disabled">
@@ -375,6 +451,181 @@
                 type: null,
                 addequipo: @entangle('addequipament').defer,
             }))
+
+            Alpine.data('leafletMap', () => ({
+                map: null,
+                marker: null,
+                redIcon: null,
+                lat: @entangle('latitude').defer,
+                lng: @entangle('longitude').defer,
+                zoom: @entangle('zoom').defer,
+                init() {
+                    this.loadLeaflet();
+                },
+                loadLeaflet() {
+                    if (typeof L === 'undefined') {
+                        const link = document.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                        document.head.appendChild(link);
+
+                        const script = document.createElement('script');
+                        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                        script.onload = () => this.initMap();
+                        document.head.appendChild(script);
+                    } else {
+                        setTimeout(() => this.initMap(), 100);
+                    }
+                },
+                initMap() {
+                    this.redIcon = new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    });
+
+                    let defaultLat = this.lat ? parseFloat(this.lat) : -12.046374;
+                    let defaultLng = this.lng ? parseFloat(this.lng) : -77.042793;
+                    let initialZoom = this.zoom ? parseInt(this.zoom) : 14;
+
+                    let osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    });
+                    let satellite = L.tileLayer(
+                        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                            maxZoom: 19,
+                            attribution: '© Esri'
+                        });
+                    let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 17,
+                        attribution: '© OpenTopoMap'
+                    });
+
+                    this.map = L.map('map-create', {
+                        center: [defaultLat, defaultLng],
+                        zoom: initialZoom,
+                        layers: [osm],
+                        attributionControl: false
+                    });
+
+                    L.control.layers({
+                        "Calles": osm,
+                        "Satélite": satellite,
+                        "Relieve": topo
+                    }).addTo(this.map);
+
+                    if (this.lat && this.lng) {
+                        this.marker = L.marker([parseFloat(this.lat), parseFloat(this.lng)], {
+                            icon: this.redIcon,
+                            draggable: true
+                        }).addTo(this.map);
+                    }
+
+                    this.map.on('click', (e) => {
+                        this.updateMarker(e.latlng.lat, e.latlng.lng);
+                    });
+
+                    this.map.on('zoomend', () => {
+                        this.zoom = this.map.getZoom();
+                        if (this.$wire) {
+                            this.$wire.set('zoom', this.zoom, true);
+                        }
+                    });
+
+                    const resizeObserver = new ResizeObserver((entries) => {
+                        for (let entry of entries) {
+                            if (entry.contentRect.width > 0) {
+                                // Visible
+                                if (this.map) {
+                                    this.map.invalidateSize();
+                                    if (!this.marker && !this.lat && !this.lng) {
+                                        this.locateMe();
+                                    }
+                                }
+                            } else {
+                                // Hidden (Modal closed)
+                                if (this.marker && this.map) {
+                                    this.map.removeLayer(this.marker);
+                                    this.marker = null;
+                                }
+                                this.lat = null;
+                                this.lng = null;
+                            }
+                        }
+                    });
+                    resizeObserver.observe(document.getElementById('map-create'));
+                },
+                updateMarker(lat, lng) {
+                    if (!this.marker) {
+                        this.marker = L.marker([lat, lng], {
+                            icon: this.redIcon,
+                            draggable: true
+                        }).addTo(this.map);
+                        this.marker.on('dragend', (e) => {
+                            let position = this.marker.getLatLng();
+                            this.updateMarker(position.lat, position.lng);
+                        });
+                    } else {
+                        this.marker.setLatLng([lat, lng]);
+                    }
+                    let strLat = lat.toString();
+                    let strLng = lng.toString();
+                    this.lat = strLat;
+                    this.lng = strLng;
+                    if (this.$wire) {
+                        this.$wire.set('latitude', strLat, true);
+                        this.$wire.set('longitude', strLng, true);
+                    }
+                },
+                locateMe() {
+                    if ("geolocation" in navigator) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                this.updateMarker(position.coords.latitude, position.coords
+                                    .longitude);
+                                let zoomLevel = this.zoom ? parseInt(this.zoom) : 17;
+                                this.map.setView([position.coords.latitude, position.coords
+                                    .longitude
+                                ], zoomLevel);
+                            },
+                            (error) => {
+                                let msg = "Error al obtener ubicación.";
+                                if (error.code === error.PERMISSION_DENIED) {
+                                    msg =
+                                        "Permiso de ubicación denegado. En entornos de desarrollo locales (como Laragon sin SSL), los navegadores bloquean la ubicación. Usa 'localhost' en lugar de tu dominio virtual, o configura SSL.";
+                                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                                    msg = "La información de la ubicación no está disponible.";
+                                } else if (error.code === error.TIMEOUT) {
+                                    msg = "El tiempo para obtener la ubicación se ha agotado.";
+                                }
+                                window.dispatchEvent(new CustomEvent('alert', {
+                                    detail: {
+                                        title: 'Ubicación fallida',
+                                        text: msg,
+                                        icon: 'warning'
+                                    }
+                                }));
+                            }, {
+                                enableHighAccuracy: true,
+                                timeout: 5000,
+                                maximumAge: 0
+                            }
+                        );
+                    } else {
+                        window.dispatchEvent(new CustomEvent('alert', {
+                            detail: {
+                                title: 'Geolocalización restringida',
+                                text: 'Tu navegador no soporta la geolocalización o está bloqueada por falta de HTTPS (SSL).',
+                                icon: 'error'
+                            }
+                        }));
+                    }
+                }
+            }));
         })
     </script>
 </div>

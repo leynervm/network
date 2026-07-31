@@ -14,17 +14,17 @@ class CreateRecibo extends Component
 
     public $open = false;
     public $seriepago_id, $month, $type;
+    public $olt_id = '', $antena_id = '';
+    public $olts = [], $antenas = [];
 
     protected function rules()
     {
         return [
             'month' => [
                 'required', 'date',
-                // Rule::unique('recibos', 'month')->where('network_id', $this->network->id)
             ],
             'seriepago_id' => ['required', 'integer', 'min:1'],
             'type' => ['required', 'string'],
-            // 'vencimiento' => ['required', 'date'],
         ];
     }
 
@@ -44,7 +44,15 @@ class CreateRecibo extends Component
             $this->reset();
             $this->resetValidation();
             $this->month = now('America/Lima')->format('Y-m');
+            $this->olts = \App\Models\Olt::orderBy('name', 'asc')->get();
+            $this->antenas = \App\Models\Antena::orderBy('name', 'asc')->get();
         }
+    }
+
+    public function updatedType($value)
+    {
+        $this->olt_id = '';
+        $this->antena_id = '';
     }
 
     // public function updatedMonth($value)
@@ -60,16 +68,31 @@ class CreateRecibo extends Component
         $validateData = $this->validate();
         DB::beginTransaction();
         try {
-            $networks = [];
-            if (trim($this->type) == 'TODOS' || trim($this->type) == 'todos') {
-                $networks = Network::activos()->whereDoesntHave('recibos', function ($query) {
-                    $query->where('month', $this->month);
-                })->where('status',  Network::ACTIVO)->get();
-            } else {
-                $networks = Network::activos()->whereDoesntHave('recibos', function ($query) {
-                    $query->where('month', $this->month);
-                })->where('type', $this->type)->where('status', Network::ACTIVO)->get();
+            $query = Network::activos()->whereDoesntHave('recibos', function ($q) {
+                $q->where('month', $this->month);
+            })->where('status', Network::ACTIVO);
+
+            if (trim($this->type) != 'TODOS' && trim($this->type) != 'todos') {
+                $query->where('type', $this->type);
+                
+                if (validarFibra($this->type)) {
+                    if (!empty($this->olt_id)) {
+                        $portIds = \App\Models\Portboxnav::whereHas('boxnav.spliter.olt', function($q) {
+                            $q->where('olts.id', $this->olt_id);
+                        })->pluck('id');
+                        
+                        $query->where('networkable_type', \App\Models\Portboxnav::class)
+                              ->whereIn('networkable_id', $portIds);
+                    }
+                } else {
+                    if (!empty($this->antena_id)) {
+                        $query->where('networkable_type', \App\Models\Antena::class)
+                              ->where('networkable_id', $this->antena_id);
+                    }
+                }
             }
+
+            $networks = $query->get();
 
             if (count($networks) > 0) {
                 foreach ($networks as $item) {

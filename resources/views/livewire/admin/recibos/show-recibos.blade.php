@@ -6,15 +6,15 @@
     @endif
 
     <div class="w-full flex flex-wrap gap-2 mb-2">
-        <div class="w-full max-w-xs">
+        <div class="w-full max-w-48">
             <x-label value="Buscar serie recibo" />
             <x-input class="w-full block" wire:model.lazy="search" />
         </div>
-        <div class="w-full max-w-xs">
+        <div class="w-full max-w-40">
             <x-label value="Filtrar mes" />
             <x-input class="w-full block" wire:model.lazy="searchmonth" type="month" />
         </div>
-        <div class="w-full max-w-xs">
+        <div class="w-full max-w-40">
             <x-label value="Tipo recibo" />
             <select class="w-full" wire:model.lazy="searchtype">
                 <option value="">SELECCIONAR...</option>

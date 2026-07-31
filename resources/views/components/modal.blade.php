@@ -9,6 +9,11 @@ $maxWidth = [
     'lg' => 'sm:max-w-lg',
     'xl' => 'sm:max-w-xl',
     '2xl' => 'sm:max-w-2xl',
+    '3xl' => 'sm:max-w-3xl',
+    '4xl' => 'sm:max-w-4xl',
+    '5xl' => 'sm:max-w-5xl',
+    '6xl' => 'sm:max-w-6xl',
+    '7xl' => 'sm:max-w-7xl',
 ][$maxWidth ?? '2xl'];
 @endphp
 
@@ -30,7 +35,7 @@ $maxWidth = [
         <div class="absolute inset-0 bg-neutral-900/70 dark:bg-black/80 backdrop-blur-[2px] transition-opacity"></div>
     </div>
 
-    <div x-show="show" class="mb-6 bg-white dark:bg-neutral-800 rounded-xl border border-gray-200/80 dark:border-neutral-700/60 overflow-hidden shadow-2xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto transition-colors duration-200"
+    <div x-show="show" class="mb-6 flex flex-col max-h-[90dvh] sm:max-h-[95dvh] bg-white dark:bg-neutral-800 rounded-xl border border-gray-200/80 dark:border-neutral-700/60 overflow-hidden shadow-2xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto transition-colors duration-200"
                     x-trap.inert.noscroll="show"
                     x-transition:enter="ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
