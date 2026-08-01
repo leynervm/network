@@ -17,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Endpoint para recibir notificaciones PUSH de Yape (Vía MacroDroid)
+Route::post('/yape-webhook', [\App\Http\Controllers\Api\YapeWebhookController::class, 'store']);

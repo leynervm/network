@@ -16,28 +16,30 @@
         </x-slot>
 
         <x-slot name="content">
-            <form wire:submit.prevent="save" class="w-full grid grid-cols-1 gap-2" x-data="network">
-                <div class="w-full">
-                    <x-label value="Documento cliente" />
-                    <div class="w-full flex gap-1">
-                        <x-input class="w-full flex-1 block" wire:model.defer="document" maxlength="11"
-                            wire:keydown.enter="buscar" />
-                        <x-button class="text-white !px-2 flex-shrink-0 !p-1.5" wire:click="buscar"
-                            wire:loading.attr="disabled" type="button">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="size-4 block mx-auto">
-                                <path
-                                    d="M16.6725 16.6412L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" />
-                            </svg>
-                        </x-button>
+            <form wire:submit.prevent="save" class="relative w-full grid grid-cols-1 gap-2" x-data="network">
+                <div class="w-full grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <div class="w-full">
+                        <x-label value="Documento cliente" />
+                        <div class="w-full flex gap-1">
+                            <x-input class="w-full flex-1 block" wire:model.defer="document" maxlength="11"
+                                wire:keydown.enter="buscar" />
+                            <x-button class="text-white !px-2 flex-shrink-0 !p-1.5" wire:click="buscar"
+                                wire:loading.attr="disabled" type="button">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" class="size-4 block mx-auto">
+                                    <path
+                                        d="M16.6725 16.6412L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" />
+                                </svg>
+                            </x-button>
+                        </div>
+                        <x-input-error for="document" />
                     </div>
-                    <x-input-error for="document" />
-                </div>
 
-                <div class="w-full">
-                    <x-label value="Nombres cliente" />
-                    <x-input class="w-full block" wire:model.defer="name" />
-                    <x-input-error for="name" />
+                    <div class="w-full md:col-span-2">
+                        <x-label value="Nombres cliente" />
+                        <x-input class="w-full block" wire:model.defer="name" />
+                        <x-input-error for="name" />
+                    </div>
                 </div>
 
                 <div>
@@ -247,21 +249,18 @@
                     </div>
                 @endif
 
-
-
                 {{-- <div class="w-full">
                     <x-label value="Descripción" />
                     <x-input class="w-full block" wire:model.defer="descripcion" />
                     <x-input-error for="descripcion" />
                 </div> --}}
 
-                <div class="w-full">
-                    <x-label value="Teléfono" />
-                    <x-input class="w-full block" wire:model.defer="telefono" type="number" step="1" />
-                    <x-input-error for="telefono" />
-                </div>
-
-                <div class="w-full grid lg:grid-cols-2 gap-2">
+                <div class="w-full grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                    <div class="w-full">
+                        <x-label value="Teléfono" />
+                        <x-input class="w-full block" wire:model.defer="telefono" type="number" step="1" />
+                        <x-input-error for="telefono" />
+                    </div>
                     <div class="w-full">
                         <x-label value="Precio" />
                         <x-input class="w-full block" wire:model.defer="price" type="number" min="0"
@@ -269,14 +268,12 @@
                         <x-input-error for="price" />
                     </div>
 
-                    {{-- {{ $date }} --}}
                     <div class="w-full">
                         <x-label value="Fecha alta" />
                         <x-input class="w-full block" wire:model.defer="date" type="date"
                             value="{{ $date }}" />
                         <x-input-error for="date" />
                     </div>
-
                 </div>
 
                 <div class="w-full">
@@ -344,9 +341,8 @@
                         <div class="absolute bottom-2 right-2 z-[400] flex flex-col gap-1">
                             <button type="button" @click="locateMe"
                                 class="bg-white/85 dark:bg-neutral-800 text-gray-800 dark:text-gray-200 p-2 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-neutral-700 text-[10px] font-bold flex items-center gap-1 border border-gray-200 dark:border-neutral-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 20 20"
-                                    fill="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 dark:text-red-400"
+                                    viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd"
                                         d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
                                         clip-rule="evenodd" />
@@ -359,10 +355,22 @@
                     <x-input-error for="longitude" />
                 </div>
 
-                <label for="addequipo">
-                    <x-input type="checkbox" id="addequipo" @click="addequipo = !addequipo" />
-                    AGREGAR EQUIPO
-                </label>
+                <div
+                    class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-neutral-900/60 rounded-xl border border-gray-200 dark:border-neutral-700/60 transition-colors">
+                    <div class="flex flex-col">
+                        <span
+                            class="text-xs font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wide">AGREGAR
+                            EQUIPO</span>
+                        <span class="text-[10px] text-gray-500 dark:text-neutral-400">Registrar equipos adicionales al
+                            cliente</span>
+                    </div>
+                    <label for="addequipo" class="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" id="addequipo" class="sr-only peer" x-model="addequipo">
+                        <div
+                            class="w-10 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500/50 dark:peer-focus:ring-neutral-500/30 rounded-full peer dark:bg-neutral-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-500 shadow-inner">
+                        </div>
+                    </label>
+                </div>
 
                 <div class="w-full grid lg:grid-cols-2 gap-2" style="display: none;" x-show="addequipo">
                     <div class="lg:col-span-2">
@@ -423,9 +431,23 @@
                                         <td class="text-center">{{ $item['tipoentrega'] }}</td>
                                         <td class="text-center">S/. {{ $item['priceequipo'] }}</td>
                                         <td class="text-center">
-                                            <x-danger-button wire:click="delete('{{ $item['id_equipo'] }}')"
+                                            <button type="button" wire:click="delete('{{ $item['id_equipo'] }}')"
                                                 wire:loading.attr="disabled"
-                                                wire:key="{{ $item['id_equipo'] }}">ELIMINAR</x-danger-button>
+                                                wire:key="delete_{{ $item['id_equipo'] }}" title="Eliminar"
+                                                class="inline-block p-1 rounded-md text-red-600 hover:bg-red-600 hover:text-white duration-150 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                    class="size-4 block mx-auto">
+                                                    <path d="M3 6h18" />
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                    <line x1="10" x2="10" y1="11"
+                                                        y2="17" />
+                                                    <line x1="14" x2="14" y1="11"
+                                                        y2="17" />
+                                                </svg>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -435,7 +457,7 @@
                 </div>
 
                 <div
-                    class="text-end sticky bottom-0 bg-white dark:bg-neutral-800 px-4 pb-4 pt-4 border-t border-gray-200 dark:border-neutral-700/60 z-10">
+                    class="text-end sticky bottom-0 bg-white dark:bg-neutral-800 pb-4 pt-4 border-t border-gray-200 dark:border-neutral-700/60 z-10">
                     <x-input-error for="equipos" />
                     {{-- {{ print_r($errors->all()) }} --}}
                     <x-button type="submit" wire:loading.attr="disabled">

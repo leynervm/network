@@ -50,6 +50,8 @@ Route::middleware([
     Route::get('/admin/Recibos', [AdminController::class, 'recibos'])->name('admin.recibos');
     Route::get('/admin/payments', [AdminController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
+    
+    Route::get('/admin/yape-notifications', \App\Http\Livewire\Admin\Yape\ShowNotifications::class)->name('admin.yape.notifications');
 
 
     Route::get('/admin/client-network/{network}/show', [AdminController::class, 'shownetwork'])->name('admin.network.show');

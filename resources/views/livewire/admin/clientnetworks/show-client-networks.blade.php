@@ -30,25 +30,40 @@
                 <tr>
                     <th>COD. SERVICIO</th>
                     <th style="min-width: 100px;">FECHA ALTA</th>
-                    <th style="min-width: 260px;" class="text-left">CLIENTE</th>
-                    {{-- <th>PUERTO</th> --}}
+                    <th style="min-width: 240px;" class="text-left">CLIENTE</th>
                     <th style="min-width: 150px;">TIPO SERVICIO</th>
                     <th style="min-width: 150px;">CONEXIÓN</th>
                     <th>DESCRIPCIÓN</th>
                     <th style="min-width: 100px;">PRECIO</th>
                     <th>ESTADO</th>
-                    <th>PAGOS</th>
+                    <th>OPCIONES</th>
                 </tr>
             </x-slot>
             <x-slot name="tbody">
                 @if (count($clientnetworks) > 0)
                     @foreach ($clientnetworks as $item)
                         <tr>
-                            <td class="text-center">{{ $item->code }}</td>
-                            <td class="text-center uppercase w-[100px]">{{ formatDate($item->date) }}</td>
-                            <td class="text-left w-[400px]">
-                                <p>{{ $item->client->name }}</p>
-                                <p>{{ $item->client->document }}</p>
+                            <td class="text-center">
+                                <a class="text-xs inline-flex gap-1 items-center justify-center text-blue-500 hover:text-blue-800 duration-150 transition-colors"
+                                    title="Ver detalle" href="{{ route('admin.network.show', $item->id) }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="size-4">
+                                        <path
+                                            d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                                    </svg>
+                                    {{ $item->code }}
+                                </a>
+                            </td>
+                            <td class="text-center uppercase w-[100px]">
+                                {{ formatDate($item->date, 'DD MMM YYYY') }}
+                            </td>
+                            <td class="text-left">
+                                <p>
+                                    <span class="font-bold text-neutral-600 dark:text-neutral-300">
+                                        [{{ $item->client->document }}]
+                                    </span>
+                                    {{ $item->client->name }}
+                                </p>
                                 <p class="text-green-600 dark:text-green-500 flex items-center gap-1 font-medium mt-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                         class="w-3 h-3">
@@ -65,7 +80,7 @@
                                     @endif
                                     {{ $item->direccion }}
                                 </p>
-                                <p>LOCAL: {{ $item->typelocal }}</p>
+                                {{-- <p>LOCAL: {{ $item->typelocal }}</p> --}}
                             </td>
                             {{-- <td class="text-center">{{ $item->portnumber }}</td> --}}
                             {{-- <td class="text-center uppercase">{{ formatDate($item->datepayment) }}</td> --}}
@@ -92,7 +107,6 @@
                             <td class="text-left">
                                 {{ $item->descripcion }}
                             </td>
-
                             <td class="text-center">S/.
                                 {{ number_format($item->price, 2, '.', ', ') }}
                             </td>
@@ -101,24 +115,28 @@
                                     <span
                                         class="bg-rose-500 dark:bg-rose-600 inline-block mb-1 text-white text-[9px] font-bold p-1 px-1.5 rounded tracking-wider">
                                         SUSPENDIDO</span>
-
-                                    <x-button wire:click="reconectar({{ $item->id }})" wire:loading.attr="disabled"
-                                        class="!bg-emerald-600 hover:!bg-emerald-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 !text-white !px-2 !text-[10px] shadow-sm transition-all">
-                                        RECONECTAR
-                                    </x-button>
                                 @else
                                     <span
                                         class="bg-emerald-500 dark:bg-emerald-600 inline-block mb-1 text-white text-[9px] font-bold p-1 px-1.5 rounded tracking-wider">
                                         ACTIVO</span>
-
-                                    <x-button wire:click="suspender({{ $item->id }})" wire:loading.attr="disabled"
-                                        class="!bg-orange-500 hover:!bg-orange-600 dark:!bg-orange-600 dark:hover:!bg-orange-500 !text-white !px-2 !text-[10px] shadow-sm transition-all">
-                                        SUSPENDER
-                                    </x-button>
                                 @endif
                             </td>
                             <td class="text-center">
                                 <div class="flex items-center justify-center gap-1">
+                                    @if ($item->isSuspendido())
+                                        <x-button wire:click="reconectar({{ $item->id }})"
+                                            wire:loading.attr="disabled"
+                                            class="!bg-emerald-600 hover:!bg-emerald-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 !text-white !py-1.5 !text-[10px] shadow-sm transition-all">
+                                            RECONECTAR
+                                        </x-button>
+                                    @else
+                                        <x-button wire:click="suspender({{ $item->id }})"
+                                            wire:loading.attr="disabled"
+                                            class="!bg-orange-500 hover:!bg-orange-600 dark:!bg-orange-600 dark:hover:!bg-orange-500 !text-white !py-1.5 !text-[10px] shadow-sm transition-all">
+                                            SUSPENDER
+                                        </x-button>
+                                    @endif
+
                                     <button wire:click="edit({{ $item->id }})" wire:loading.attr="disabled"
                                         wire:key="edit_{{ $item->id }}" title="Editar"
                                         class="inline-block p-1 rounded-md text-orange-500 hover:bg-orange-500 hover:text-white duration-150 transition-colors">
@@ -143,15 +161,6 @@
                                             <line x1="14" x2="14" y1="11" y2="17" />
                                         </svg>
                                     </button>
-
-                                    <a class="inline-block p-1 rounded-md text-neutral-500 hover:bg-neutral-500 hover:text-white duration-150 transition-colors"
-                                        title="Ver detalle" href="{{ route('admin.network.show', $item->id) }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="2" stroke="currentColor" class="size-4 block mx-auto">
-                                            <path
-                                                d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                                        </svg>
-                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -176,7 +185,8 @@
         <x-slot name="content">
             <form wire:submit.prevent="update" class="w-full grid grid-cols-1 gap-2" x-data="editnetwork">
                 @if ($client_id)
-                    <div class="w-full grid lg:grid-cols-2 gap-2" wire:key="client_edit_{{ $client_id }}">
+                    <div class="w-full grid grid-cols-1 gap-2 md:grid-cols-3"
+                        wire:key="client_edit_{{ $client_id }}">
                         <div class="w-full">
                             <x-label value="Documento (DNI/RUC)" />
                             <span
@@ -184,7 +194,7 @@
                                 {{ $client_document }}
                             </span>
                         </div>
-                        <div class="w-full">
+                        <div class="w-full md:col-span-2">
                             <x-label value="Nombre del cliente / Razón Social" />
                             <x-input class="w-full block text-xs uppercase rounded-lg !p-1.5"
                                 wire:model.defer="client_name" />
@@ -352,9 +362,9 @@
                         {{-- PASO 4: PUERTOS (Grid Visual de Hardware) --}}
                         @if ($boxnav_id && count($portboxnavs) > 0)
                             <div class="border-t border-gray-200 dark:border-neutral-700/60 pt-3">
-                                <div class="flex items-center justify-between mb-2">
+                                <div class="flex flex-col sm:flex-row items-center justify-between mb-2">
                                     <x-label value="4. Seleccionar Puerto"
-                                        class="text-xs font-semibold text-gray-700 dark:text-gray-300" />
+                                        class="block w-full flex-1 text-xs font-semibold text-gray-700 dark:text-gray-300 text-left" />
                                     <div class="flex items-center gap-3 text-[10px]">
                                         <span class="flex items-center gap-1"><span
                                                 class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
@@ -419,13 +429,13 @@
                     </div>
                 @endif
 
-                <div class="w-full">
-                    <x-label value="Teléfono" />
-                    <x-input class="w-full block" wire:model.defer="network.telefono" type="number"
-                        step="1" />
-                    <x-input-error for="network.telefono" />
-                </div>
-                <div class="w-full grid lg:grid-cols-2 gap-2">
+                <div class="w-full grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                    <div class="w-full">
+                        <x-label value="Teléfono" />
+                        <x-input class="w-full block" wire:model.defer="network.telefono" type="number"
+                            step="1" />
+                        <x-input-error for="network.telefono" />
+                    </div>
                     <div class="w-full">
                         <x-label value="Precio" />
                         <x-input class="w-full block" wire:model.defer="network.price" type="number" min="0"
@@ -520,7 +530,7 @@
                 </div>
 
                 <div
-                    class="text-end sticky bottom-0 bg-white dark:bg-neutral-800 px-4 pb-4 pt-4 border-t border-gray-200 dark:border-neutral-700/60 z-10">
+                    class="text-end sticky -bottom-4 bg-white dark:bg-neutral-800 pb-4 pt-4 border-t border-gray-200 dark:border-neutral-700/60 z-10">
                     {{-- {{ print_r($errors->all()) }} --}}
                     <x-button type="submit" wire:loading.attr="disabled">
                         ACTUALIZAR

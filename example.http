@@ -1,0 +1,7 @@
+POST https://network.test/api/yape-webhook HTTP/1.1
+content-type: application/json
+
+{
+    "title": "YAPE RECIBIDO",
+    "content": "HAS RECIBIDO UN YAPE DE S/. 20.00 DE JOSE SANCHEZ ROMERO"
+}

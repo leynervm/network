@@ -23,7 +23,7 @@
                         </span>
                     @endif
                 </div>
-                <div class="text-sm text-neutral-600 dark:text-neutral-400 font-medium flex items-center gap-2">
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 font-medium flex flex-wrap items-center gap-2">
                     <svg class="w-4 h-4 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -32,6 +32,15 @@
                     <span>{{ $network->client->name }}</span>
                     <span
                         class="opacity-75 text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-md border border-neutral-200 dark:border-neutral-700">{{ $network->client->document }}</span>
+                    
+                    @if ($network->telefono)
+                        <span class="flex items-center gap-1 text-green-600 dark:text-green-500 ml-1 md:ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                                <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+                            </svg>
+                            {{ implode(' ', str_split($network->telefono, 3)) }}
+                        </span>
+                    @endif
                 </div>
             </div>
 
@@ -39,8 +48,8 @@
             <div
                 class="flex flex-col md:items-end bg-neutral-50 dark:bg-neutral-800/50 p-2 rounded-lg border border-neutral-100 dark:border-neutral-800">
                 <span
-                    class="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-0.5">Costo
-                    de Servicio</span>
+                    class="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-0.5">
+                    Costo de Servicio</span>
                 <div class="flex items-baseline gap-1 text-emerald-600 dark:text-emerald-400">
                     <span class="text-sm font-semibold">S/.</span>
                     <span class="text-xl font-black tracking-tight">{{ $network->price }}</span>
@@ -64,7 +73,7 @@
                         {{ formatDate($network->date) }}</dd>
                 </div>
 
-                <!-- Puerto -->
+                <!-- Conexión -->
                 <div class="flex flex-col gap-1">
                     <dt
                         class="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -72,9 +81,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        Número de Puerto
+                        Conexión
                     </dt>
-                    <dd class="text-sm font-medium text-neutral-800 dark:text-neutral-200">{{ $network->portnumber }}
+                    <dd class="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+                        @if ($network->isSatelital())
+                            @if ($network->antena)
+                                {{ $network->antena->name }}
+                            @else
+                                -
+                            @endif
+                        @else
+                            @if ($network->networkable)
+                                <span>{{ $network->networkable->code }}</span>
+                                <span class="block text-[10px] text-neutral-500 dark:text-neutral-400 leading-tight mt-0.5">
+                                    {{ $network->networkable->boxnav->name }},
+                                    {{ $network->networkable->boxnav->spliter->name }},
+                                    {{ $network->networkable->boxnav->spliter->olt->name }}
+                                </span>
+                            @else
+                                -
+                            @endif
+                        @endif
                     </dd>
                 </div>
 

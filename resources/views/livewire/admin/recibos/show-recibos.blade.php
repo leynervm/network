@@ -46,8 +46,10 @@
                     @foreach ($recibos as $item)
                         <tr>
                             <td class="text-center uppercase">
-                                {{ formatDate($item->date) }}
-                                <p class="text-[10px] text-red-600">VENCE : {{ formatDate($item->vencimiento) }}</p>
+                                {{ formatDate($item->date, 'DD MMM YYYY') }}
+                                <p class="text-[10px] text-red-600">
+                                    VENCE : {{ formatDate($item->vencimiento, 'DD MMM YYYY') }}
+                                </p>
                             </td>
                             <td class="text-center">{{ $item->seriecompleta }}</td>
                             <td>
@@ -64,6 +66,15 @@
                                     @if ($item->payment)
                                         <span class="bg-green-500 text-white text-[10px] p-1 rounded leading-3">
                                             PAGADO</span>
+                                    @else
+                                        <span class="bg-orange-500 text-white text-[10px] p-1 rounded leading-3">
+                                            PENDIENTE</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="text-center align-middle">
+                                <div class="flex items-center justify-center gap-2">
+                                    @if ($item->payment)
                                         <x-danger-button wire:key="deletepay_{{ $item->id }}"
                                             onclick="confirmDeletePayment({{ $item }})"
                                             wire:loading.attr="disabled">ANULAR</x-danger-button>
@@ -71,10 +82,27 @@
                                         <x-button wire:click="pay({{ $item->id }})"
                                             wire:key="pay{{ $item->id }}">PAGAR</x-button>
                                     @endif
-                                </div>
-                            </td>
-                            <td class="text-center align-middle">
-                                <div class="flex items-center justify-center gap-1.5">
+
+                                    @php
+                                        $pdfFileName =
+                                            $item->client->document .
+                                            '-' .
+                                            \Carbon\Carbon::parse($item->month)->format('mY') .
+                                            '-' .
+                                            $item->seriecompleta .
+                                            '.pdf';
+                                    @endphp
+                                    <button type="button"
+                                        onclick="sharePdf('{{ route('admin.recibo.print', $item->id) }}', '{{ $pdfFileName }}', '{{ $item->network->telefono ?? '' }}')"
+                                        title="Compartir por WhatsApp"
+                                        class="inline-flex items-center justify-center p-1.5 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-500/10 dark:hover:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/30 transition-colors shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="size-4"
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232" />
+                                        </svg>
+                                    </button>
+
                                     <a href="{{ route('admin.recibo.print', $item->id) }}" target="_blank"
                                         title="Imprimir Recibo"
                                         class="inline-flex items-center justify-center p-1.5 rounded-lg bg-white hover:bg-gray-100 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-black dark:text-white border border-black dark:border-white transition-colors shadow-sm">
@@ -84,9 +112,10 @@
                                                 d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081-.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
                                         </svg>
                                     </a>
+
                                     <button type="button" wire:key="deleterecibo_{{ $item->id }}"
-                                        onclick="confirmDeleteRecibo({{ $item }})"
-                                        wire:loading.attr="disabled" title="Eliminar Recibo"
+                                        onclick="confirmDeleteRecibo({{ $item }})" wire:loading.attr="disabled"
+                                        title="Eliminar Recibo"
                                         class="inline-flex items-center justify-center p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 transition-colors shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="size-4">
@@ -216,6 +245,66 @@
                     @this.deleterecibo(recibo.id);
                 }
             })
+        }
+
+        async function sharePdf(url, filename, phone) {
+            Swal.fire({
+                title: 'Preparando recibo...',
+                text: 'Descargando el PDF para compartir...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const blob = await response.blob();
+                const file = new File([blob], filename, {
+                    type: 'application/pdf'
+                });
+
+                Swal.close();
+
+                // Intentamos compartir usando la Web Share API nativa si lo soporta y permite compartir archivos
+                if (navigator.canShare && navigator.canShare({
+                        files: [file]
+                    })) {
+                    await navigator.share({
+                        title: 'Recibo de Pago',
+                        text: 'Estimado cliente, adjunto su recibo de pago.',
+                        files: [file]
+                    });
+                } else {
+                    // Fallback para PC: Descargar y abrir WhatsApp
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(downloadUrl);
+
+                    if (phone) {
+                        let waPhone = phone.replace(/\D/g, '');
+                        if (waPhone.length === 9) {
+                            waPhone = '51' + waPhone;
+                        }
+                        const waMessage = encodeURIComponent(
+                            'Hola! Estimado cliente, le escribimos para adjuntarle su recibo de pago PDF.');
+                        window.open(`https://wa.me/${waPhone}?text=${waMessage}`, '_blank');
+                    } else {
+                        Swal.fire('Atención',
+                            'El archivo ha sido descargado. El cliente no tiene teléfono registrado para abrir WhatsApp.',
+                            'info');
+                    }
+                }
+            } catch (error) {
+                console.error('Error sharing PDF:', error);
+                Swal.fire('Error', 'Hubo un problema al generar o compartir el archivo PDF.', 'error');
+            }
         }
     </script>
 </div>
