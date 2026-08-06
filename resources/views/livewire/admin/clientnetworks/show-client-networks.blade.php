@@ -51,7 +51,14 @@
                                         <path
                                             d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                                     </svg>
-                                    {{ $item->code }}
+                                    <span class="flex-1 flex flex-col gap-1 items-center justify-center">
+                                        @if ($item->codigo_slp)
+                                            <span class="text-[9px] border bg-blue-50 border-blue-300 rounded-lg p-0.5 whitespace-nowrap">
+                                                {{ $item->codigo_slp }}
+                                            </span>
+                                        @endif
+                                        {{ $item->code }}
+                                    </span>
                                 </a>
                             </td>
                             <td class="text-center uppercase w-[100px]">
@@ -429,7 +436,12 @@
                     </div>
                 @endif
 
-                <div class="w-full grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                <div class="w-full grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
+                    <div class="w-full">
+                        <x-label value="CÓDIGO SLP" />
+                        <x-input class="w-full block" wire:model.defer="network.codigo_slp" />
+                        <x-input-error for="network.codigo_slp" />
+                    </div>
                     <div class="w-full">
                         <x-label value="Teléfono" />
                         <x-input class="w-full block" wire:model.defer="network.telefono" type="number"

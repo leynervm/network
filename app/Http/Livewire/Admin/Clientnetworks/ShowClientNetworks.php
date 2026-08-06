@@ -65,6 +65,7 @@ class ShowClientNetworks extends Component
     {
         return [
             'client_name' => ['required', 'string', 'min:3'],
+            'network.codigo_slp' => ['nullable', 'string', 'max:255'],
             'network.telefono' => ['required', 'numeric', 'regex:/^\d{9}$/'],
             'network.type' => ['required', 'string'],
             'network.price' => ['required', 'numeric', 'decimal:0,2'],
@@ -153,6 +154,7 @@ class ShowClientNetworks extends Component
     public function update()
     {
         $this->network->telefono = trim($this->network->telefono);
+        $this->network->codigo_slp = trim($this->network->codigo_slp);
         $this->validate();
         DB::beginTransaction();
         try {

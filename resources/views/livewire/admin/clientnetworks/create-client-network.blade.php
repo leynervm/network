@@ -255,7 +255,12 @@
                     <x-input-error for="descripcion" />
                 </div> --}}
 
-                <div class="w-full grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                <div class="w-full grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
+                    <div class="w-full">
+                        <x-label value="CÓDIGO SLP" />
+                        <x-input class="w-full block" wire:model.defer="codigo_slp" />
+                        <x-input-error for="codigo_slp" />
+                    </div>
                     <div class="w-full">
                         <x-label value="Teléfono" />
                         <x-input class="w-full block" wire:model.defer="telefono" type="number" step="1" />

@@ -19,7 +19,7 @@ class CreateClientNetwork extends Component
     public $open = false;
 
     public $date, $code, $portnumber, $descripcion, $type, $price, $direccion,
-        $client_id, $ubigeo_id, $telefono;
+        $client_id, $ubigeo_id, $telefono, $codigo_slp;
     
     public $latitude, $longitude, $zoom = 14;
 
@@ -45,6 +45,7 @@ class CreateClientNetwork extends Component
                 'required', 'numeric', 'regex:/^(?:\d{8}|\d{11})$/',
             ],
             'name' => ['required', 'string', 'min:6'],
+            'codigo_slp' => ['nullable', 'string', 'max:255'],
             'telefono' => ['nullable', 'numeric', 'regex:/^\d{9}$/'],
             'descripcion' => ['nullable', 'string', 'min:10'],
             'portnumber' => ['nullable', 'string'],
@@ -224,6 +225,7 @@ class CreateClientNetwork extends Component
         $this->document = trim($this->document);
         $this->name = trim($this->name);
         $this->telefono = trim($this->telefono);
+        $this->codigo_slp = trim($this->codigo_slp);
 
         $client = Client::withWhereHas('networks', function ($query) {
             $query->activos();
