@@ -1,4 +1,7 @@
 <div>
+    <!-- Full viewport elegant loading overlay -->
+    <x-loading-overlay />
+
     @if ($clientnetworks->hasPages())
         {{ $clientnetworks->links() }}
     @endif
@@ -15,11 +18,19 @@
         <div class="w-full max-w-48">
             <x-label value="Tipo servicio" />
             <x-select-input class="w-full" wire:model.lazy="searchtype">
-                <option value="">SELECCIONAR...</option>
+                <option value="">TODOS</option>
                 <option value="{{ \App\Models\Network::TV }}">{{ \App\Models\Network::TV }}</option>
                 <option value="{{ \App\Models\Network::FIBRA }}">{{ \App\Models\Network::FIBRA }}</option>
                 <option value="{{ \App\Models\Network::FIBRA_TV }}">{{ \App\Models\Network::FIBRA_TV }}</option>
                 <option value="{{ \App\Models\Network::SATELITAL }}">{{ \App\Models\Network::SATELITAL }}</option>
+            </x-select-input>
+        </div>
+        <div class="w-full max-w-48">
+            <x-label value="Estado" />
+            <x-select-input class="w-full" wire:model.lazy="searchstatus">
+                <option value="">TODOS</option>
+                <option value="{{ \App\Models\Network::ACTIVO }}">ACTIVO</option>
+                <option value="{{ \App\Models\Network::SUSPENDIDO }}">SUSPENDIDO</option>
             </x-select-input>
         </div>
     </div>
@@ -53,7 +64,8 @@
                                     </svg>
                                     <span class="flex-1 flex flex-col gap-1 items-center justify-center">
                                         @if ($item->codigo_slp)
-                                            <span class="text-[9px] border bg-blue-50 border-blue-300 rounded-lg p-0.5 whitespace-nowrap">
+                                            <span
+                                                class="text-[9px] border bg-blue-50 border-blue-300 dark:bg-blue-900/50 dark:border-blue-500 dark:text-blue-100 rounded-lg p-0.5 whitespace-nowrap">
                                                 {{ $item->codigo_slp }}
                                             </span>
                                         @endif
@@ -81,6 +93,11 @@
                                     {{ $item->telefono ? implode(' ', str_split($item->telefono, 3)) : '' }}
                                 </p>
                                 <p>
+                                    @if ($item->location)
+                                        {{ $item->location }}
+                                        -
+                                    @endif
+
                                     @if ($item->ubigeo)
                                         {{ $item->ubigeo->departamento }}
                                         -
@@ -95,14 +112,16 @@
                                 {{ $item->type }}
                             </td>
                             <td class="text-center">
-                                @if ($item->isSatelital())
-                                    @if ($item->antena)
-                                        {{ $item->antena->name }}
-                                    @endif
-                                @else
-                                    @if ($item->networkable)
+                                @if ($item->networkable)
+                                    @if ($item->isSatelital())
                                         <p class="text-[10px] text-neutral-500">
-                                            {{ $item->networkable->code }} </p>
+                                            {{ $item->networkable->name }}
+                                        </p>
+                                        <p>{{ $item->networkable->direccion }}</p>
+                                    @else
+                                        <p class="text-[10px] text-neutral-500">
+                                            {{ $item->networkable->code }}
+                                        </p>
                                         <p class="">
                                             {{ $item->networkable->boxnav->name }},
                                             {{ $item->networkable->boxnav->spliter->name }},
@@ -181,7 +200,7 @@
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">ACTUALIZAR CLIENTE INTERNET</h1>
             <button wire:click="$set('open', false)"
-                class="rounded-md text-gray-700 p-2 hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-600 focus:text-gray-600 transition-colors ease-in-out duration-150">
+                class="rounded-md text-gray-700 p-2 dark:text-gray-400 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-neutral-700/40 dark:focus:bg-neutral-700/40 hover:text-gray-600 focus:text-gray-600 dark:hover:text-gray-300 dark:focus:text-gray-300 transition-colors ease-in-out duration-150">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
                     stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -462,83 +481,129 @@
                     </div>
                 </div>
 
-                <div class="w-full">
-                    <x-label value="Dirección de instalación" />
-                    <x-input class="w-full block" wire:model.defer="network.direccion" />
-                    <x-input-error for="network.direccion" />
+                <div class="w-full grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <div class="w-full">
+                        <x-label value="Lugar" />
+                        <x-input class="w-full block" wire:model.defer="network.location" />
+                        <x-input-error for="network.location" />
+                    </div>
+                    <div class="w-full">
+                        <x-label value="Dirección de instalación" />
+                        <x-input class="w-full block" wire:model.defer="network.direccion" />
+                        <x-input-error for="network.direccion" />
+                    </div>
                 </div>
 
                 <div class="w-full">
                     <x-label value="Ubicación en el Mapa" />
-                    <div wire:ignore x-data="leafletMapEdit()"
-                        class="w-full relative rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 z-0">
-                        <style>
-                            .leaflet-control-layers {
-                                border-radius: 0.5rem !important;
-                                border: 1px solid #e5e7eb !important;
-                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-                                background-color: rgba(255, 255, 255, 0.95) !important;
-                                backdrop-filter: blur(4px) !important;
-                            }
+                    <div x-data="leafletMapEdit()">
+                        <div wire:ignore
+                            class="w-full relative rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 z-0">
+                            <div class="absolute top-2 left-[50px] z-[400] w-[200px] sm:w-[250px]">
+                                <div
+                                    class="relative bg-white/95 dark:bg-neutral-800/95 backdrop-blur-sm rounded-lg shadow-md border border-gray-200 dark:border-neutral-600 flex items-center">
+                                    <input type="text" x-model="searchQuery" @keydown.enter.prevent="searchPlace"
+                                        class="w-full bg-transparent border-none focus:ring-0 text-[11px] px-3 py-1.5 text-gray-700 dark:text-gray-200 placeholder-gray-400 rounded-l-lg"
+                                        placeholder="Buscar lugar..." />
+                                    <button type="button" @click="searchPlace"
+                                        class="p-1.5 mr-0.5 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                        <svg x-show="!isSearching" xmlns="http://www.w3.org/2000/svg"
+                                            class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        <svg x-show="isSearching" style="display: none;"
+                                            class="animate-spin h-3.5 w-3.5 text-blue-500"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <style>
+                                .leaflet-control-layers {
+                                    border-radius: 0.5rem !important;
+                                    border: 1px solid #e5e7eb !important;
+                                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+                                    background-color: rgba(255, 255, 255, 0.95) !important;
+                                    backdrop-filter: blur(4px) !important;
+                                }
 
-                            .leaflet-control-layers-expanded {
-                                padding: 8px 12px !important;
-                            }
+                                .leaflet-control-layers-expanded {
+                                    padding: 8px 12px !important;
+                                }
 
-                            .leaflet-control-layers label {
-                                display: flex !important;
-                                align-items: center !important;
-                                gap: 6px !important;
-                                font-size: 0.75rem !important;
-                                font-family: inherit !important;
-                                font-weight: 600 !important;
-                                color: #374151 !important;
-                                cursor: pointer !important;
-                                margin-bottom: 6px !important;
-                                transition: color 0.15s ease-in-out;
-                            }
+                                .leaflet-control-layers label {
+                                    display: flex !important;
+                                    align-items: center !important;
+                                    gap: 6px !important;
+                                    font-size: 0.75rem !important;
+                                    font-family: inherit !important;
+                                    font-weight: 600 !important;
+                                    color: #374151 !important;
+                                    cursor: pointer !important;
+                                    margin-bottom: 6px !important;
+                                    transition: color 0.15s ease-in-out;
+                                }
 
-                            .leaflet-control-layers label:hover {
-                                color: #111827 !important;
-                            }
+                                .leaflet-control-layers label:hover {
+                                    color: #111827 !important;
+                                }
 
-                            .leaflet-control-layers-selector {
-                                margin: 0 !important;
-                                cursor: pointer !important;
-                                accent-color: #3b82f6 !important;
-                                width: 14px;
-                                height: 14px;
-                            }
+                                .leaflet-control-layers-selector {
+                                    margin: 0 !important;
+                                    cursor: pointer !important;
+                                    accent-color: #3b82f6 !important;
+                                    width: 14px;
+                                    height: 14px;
+                                }
 
-                            .dark .leaflet-control-layers {
-                                border-color: #404040 !important;
-                                background-color: rgba(38, 38, 38, 0.95) !important;
-                            }
+                                .dark .leaflet-control-layers {
+                                    border-color: #404040 !important;
+                                    background-color: rgba(38, 38, 38, 0.95) !important;
+                                }
 
-                            .dark .leaflet-control-layers label {
-                                color: #d4d4d8 !important;
-                            }
+                                .dark .leaflet-control-layers label {
+                                    color: #d4d4d8 !important;
+                                }
 
-                            .dark .leaflet-control-layers label:hover {
-                                color: #ffffff !important;
-                            }
-                        </style>
-                        <div id="map-edit" class="w-full h-[250px] z-0"></div>
-                        <div class="absolute bottom-2 right-2 z-[400] flex flex-col gap-1">
-                            <button type="button" @click="locateMe"
-                                class="bg-white/85 dark:bg-neutral-800 text-gray-800 dark:text-gray-200 p-2 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-neutral-700 text-[10px] font-bold flex items-center gap-1 border border-gray-200 dark:border-neutral-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 dark:text-red-400"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                {{-- UBICARME --}}
-                            </button>
+                                .dark .leaflet-control-layers label:hover {
+                                    color: #ffffff !important;
+                                }
+                            </style>
+                            <div id="map-edit" class="w-full h-[250px] z-0"></div>
+                            <div class="absolute bottom-2 right-2 z-[400] flex flex-col gap-1">
+                                <button type="button" @click="locateMe"
+                                    class="bg-white/85 dark:bg-neutral-800 text-gray-800 dark:text-gray-200 p-2 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-neutral-700 text-[10px] font-bold flex items-center gap-1 border border-gray-200 dark:border-neutral-600 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    {{-- UBICARME --}}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                            <div class="w-full">
+                                <x-label value="Latitud" />
+                                <x-input class="w-full block text-sm" x-model="lat" @input="updateFromInput" />
+                                <x-input-error for="network.latitude" />
+                            </div>
+                            <div class="w-full">
+                                <x-label value="Longitud" />
+                                <x-input class="w-full block text-sm" x-model="lng" @input="updateFromInput" />
+                                <x-input-error for="network.longitude" />
+                            </div>
                         </div>
                     </div>
-                    <x-input-error for="network.latitude" />
-                    <x-input-error for="network.longitude" />
                 </div>
 
                 <div
@@ -560,29 +625,74 @@
             }))
 
             Alpine.data('leafletMapEdit', () => ({
-                map: null,
-                marker: null,
-                redIcon: null,
+                openModal: @entangle('open'),
                 lat: @entangle('network.latitude').defer,
                 lng: @entangle('network.longitude').defer,
                 zoom: @entangle('network.zoom').defer,
+                searchQuery: '',
+                isSearching: false,
+                mapInitialized: false,
                 init() {
-                    this.loadLeaflet();
-                },
-                loadLeaflet() {
-                    if (typeof L === 'undefined') {
-                        const link = document.createElement('link');
-                        link.rel = 'stylesheet';
-                        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-                        document.head.appendChild(link);
-
-                        const script = document.createElement('script');
-                        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-                        script.onload = () => this.initMap();
-                        document.head.appendChild(script);
-                    } else {
-                        setTimeout(() => this.initMap(), 100);
+                    if (this.openModal) {
+                        setTimeout(() => this.initializeMapNow(), 300);
                     }
+                    this.$watch('lat', () => {
+                        if (this.mapInitialized && this.map) {
+                            this.updateMapView();
+                        }
+                    });
+                    this.$watch('lng', () => {
+                        if (this.mapInitialized && this.map) {
+                            this.updateMapView();
+                        }
+                    });
+                    this.$watch('openModal', (isOpen) => {
+                        if (isOpen) {
+                            setTimeout(() => {
+                                this.initializeMapNow();
+                            }, 350);
+                        } else {
+                            this.destroyMap();
+                        }
+                    });
+                },
+                destroyMap() {
+                    if (this.map) {
+                        this.map.off();
+                        this.map.remove();
+                        this.map = null;
+                    }
+                    this.marker = null;
+                    this.mapInitialized = false;
+
+                    let container = document.getElementById('map-edit');
+                    if (container) {
+                        container._leaflet_map = null;
+                        container._leaflet_marker = null;
+                    }
+                },
+                initializeMapNow() {
+                    let container = document.getElementById('map-edit');
+                    if (!container) return;
+
+                    if (this.map) {
+                        this.map.off();
+                        this.map.remove();
+                        this.map = null;
+                    }
+                    if (container) {
+                        container.innerHTML = '';
+                        container._leaflet_id = null;
+                    }
+
+                    this.initMap();
+                    this.mapInitialized = true;
+                    setTimeout(() => {
+                        if (this.map) {
+                            this.map.invalidateSize();
+                            this.updateMapView();
+                        }
+                    }, 50);
                 },
                 initMap() {
                     this.redIcon = new L.Icon({
@@ -619,6 +729,11 @@
                         attributionControl: false
                     });
 
+                    let container = document.getElementById('map-edit');
+                    if (container) {
+                        container._leaflet_map = this.map;
+                    }
+
                     L.control.layers({
                         "Calles": osm,
                         "Satélite": satellite,
@@ -635,61 +750,59 @@
                             this.$wire.set('network.zoom', this.zoom, true);
                         }
                     });
-
-                    const resizeObserver = new ResizeObserver((entries) => {
-                        for (let entry of entries) {
-                            if (entry.contentRect.width > 0) {
-                                // Visible
-                                if (this.map) {
-                                    this.map.invalidateSize();
-                                    setTimeout(() => this.updateMapView(), 100);
-                                }
-                            } else {
-                                // Hidden
-                                if (this.marker && this.map) {
-                                    this.map.removeLayer(this.marker);
-                                    this.marker = null;
-                                }
-                            }
-                        }
-                    });
-                    resizeObserver.observe(document.getElementById('map-edit'));
                 },
                 updateMapView() {
                     let viewLat = this.lat ? parseFloat(this.lat) : -12.046374;
                     let viewLng = this.lng ? parseFloat(this.lng) : -77.042793;
                     let viewZoom = this.zoom ? parseInt(this.zoom) : 14;
 
-                    if (this.lat && this.lng) {
-                        if (this.marker) {
-                            this.marker.setLatLng([parseFloat(this.lat), parseFloat(this.lng)]);
-                        } else {
-                            this.marker = L.marker([parseFloat(this.lat), parseFloat(this.lng)], {
-                                icon: this.redIcon,
-                                draggable: true
-                            }).addTo(this.map);
-                            this.marker.on('dragend', (e) => {
-                                let position = this.marker.getLatLng();
-                                this.updateMarker(position.lat, position.lng);
-                            });
+                    let freshIcon = new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    });
+
+                    if (!this.marker) {
+                        this.marker = L.marker([viewLat, viewLng], {
+                            icon: freshIcon,
+                            draggable: true
+                        }).addTo(this.map);
+
+                        if (document.getElementById('map-edit')) {
+                            document.getElementById('map-edit')._leaflet_marker = this.marker;
+                        }
+
+                        this.marker.on('dragend', (e) => {
+                            let position = this.marker.getLatLng();
+                            this.updateMarker(position.lat, position.lng);
+                        });
+
+                        if (!this.lat || !this.lng) {
+                            this.locateMe();
                         }
                     } else {
-                        if (this.marker) {
-                            this.map.removeLayer(this.marker);
-                            this.marker = null;
-                        }
-                        this.locateMe();
+                        this.marker.setIcon(freshIcon);
+                        this.marker.setLatLng([viewLat, viewLng]);
                     }
 
-                    this.map.setView([viewLat, viewLng], viewZoom);
-                    this.map.invalidateSize();
+                    setTimeout(() => {
+                        if (this.map) {
+                            this.map.invalidateSize();
+                            this.map.setView([viewLat, viewLng], viewZoom);
+                        }
+                    }, 50);
                 },
                 updateMarker(lat, lng) {
+                    let container = document.getElementById('map-edit');
                     if (!this.marker) {
                         this.marker = L.marker([lat, lng], {
                             icon: this.redIcon,
                             draggable: true
                         }).addTo(this.map);
+                        if (container) container._leaflet_marker = this.marker;
                         this.marker.on('dragend', (e) => {
                             let position = this.marker.getLatLng();
                             this.updateMarker(position.lat, position.lng);
@@ -704,6 +817,65 @@
                     if (this.$wire) {
                         this.$wire.set('network.latitude', strLat, true);
                         this.$wire.set('network.longitude', strLng, true);
+                    }
+                },
+                searchPlace() {
+                    if (!this.searchQuery.trim()) return;
+                    this.isSearching = true;
+                    fetch(
+                            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.searchQuery)}&countrycodes=pe&limit=1`
+                        )
+                        .then(response => response.json())
+                        .then(data => {
+                            this.isSearching = false;
+                            if (data && data.length > 0) {
+                                const lat = parseFloat(data[0].lat);
+                                const lon = parseFloat(data[0].lon);
+                                this.updateMarker(lat, lon);
+                                this.map.setView([lat, lon], 17);
+                            } else {
+                                window.dispatchEvent(new CustomEvent('alert', {
+                                    detail: {
+                                        title: 'Ubicación no encontrada',
+                                        text: 'No se encontraron resultados para la búsqueda.',
+                                        icon: 'warning'
+                                    }
+                                }));
+                            }
+                        })
+                        .catch(err => {
+                            this.isSearching = false;
+                            console.error(err);
+                            window.dispatchEvent(new CustomEvent('alert', {
+                                detail: {
+                                    title: 'Error de red',
+                                    text: 'Hubo un problema al buscar la ubicación.',
+                                    icon: 'error'
+                                }
+                            }));
+                        });
+                },
+                updateFromInput() {
+                    let newLat = parseFloat(this.lat);
+                    let newLng = parseFloat(this.lng);
+                    if (!isNaN(newLat) && !isNaN(newLng)) {
+                        if (!this.marker) {
+                            this.marker = L.marker([newLat, newLng], {
+                                icon: this.redIcon,
+                                draggable: true
+                            }).addTo(this.map);
+                            this.marker.on('dragend', (e) => {
+                                let position = this.marker.getLatLng();
+                                this.updateMarker(position.lat, position.lng);
+                            });
+                        } else {
+                            this.marker.setLatLng([newLat, newLng]);
+                        }
+                        this.map.setView([newLat, newLng], this.map.getZoom());
+                        if (this.$wire) {
+                            this.$wire.set('network.latitude', this.lat, true);
+                            this.$wire.set('network.longitude', this.lng, true);
+                        }
                     }
                 },
                 locateMe() {

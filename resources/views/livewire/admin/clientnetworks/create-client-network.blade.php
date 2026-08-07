@@ -1,13 +1,14 @@
-<div>
+<div wire:key="create-client-network">
     <x-button wire:click="$set('open', true)">
         REGISTRAR CLIENTE INTERNET
     </x-button>
 
+    
     <x-dialog-modal wire:model="open" maxWidth="3xl">
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">REGISTRAR CLIENTE INTERNET</h1>
             <button wire:click="$set('open', false)"
-                class="rounded-lg text-gray-700 p-2.5 hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-600 focus:text-gray-600 transition-colors ease-in-out duration-150">
+                class="rounded-lg text-gray-700 p-2.5 dark:text-gray-400 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-neutral-700/40 dark:focus:bg-neutral-700/40 hover:text-gray-600 focus:text-gray-600 dark:hover:text-gray-300 dark:focus:text-gray-300 transition-colors ease-in-out duration-150">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
                     stroke="currentColor" class="size-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -281,17 +282,42 @@
                     </div>
                 </div>
 
-                <div class="w-full">
-                    <x-label value="Dirección de instalación" />
-                    <x-input class="w-full block" wire:model.defer="direccion" />
-                    <x-input-error for="direccion" />
+                <div class="w-full grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <div class="w-full">
+                        <x-label value="Lugar" />
+                        <x-input class="w-full block" wire:model.defer="location" />
+                        <x-input-error for="location" />
+                    </div>
+                    <div class="w-full">
+                        <x-label value="Dirección de instalación" />
+                        <x-input class="w-full block" wire:model.defer="direccion" />
+                        <x-input-error for="direccion" />
+                    </div>
                 </div>
 
                 <div class="w-full">
                     <x-label value="Ubicación en el Mapa" />
-                    <div wire:ignore x-data="leafletMap()"
-                        class="w-full relative rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 z-0">
-                        <style>
+                    <div x-data="leafletMap()">
+                        <div wire:ignore
+                            class="w-full relative rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 z-0">
+                            <div class="absolute top-2 left-[50px] z-[400] w-[200px] sm:w-[250px]">
+                                <div class="relative bg-white/95 dark:bg-neutral-800/95 backdrop-blur-sm rounded-lg shadow-md border border-gray-200 dark:border-neutral-600 flex items-center">
+                                    <input type="text" x-model="searchQuery" @keydown.enter.prevent="searchPlace"
+                                        class="w-full bg-transparent border-none focus:ring-0 text-[11px] px-3 py-1.5 text-gray-700 dark:text-gray-200 placeholder-gray-400 rounded-l-lg"
+                                        placeholder="Buscar lugar..." />
+                                    <button type="button" @click="searchPlace"
+                                        class="p-1.5 mr-0.5 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                        <svg x-show="!isSearching" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        <svg x-show="isSearching" style="display: none;" class="animate-spin h-3.5 w-3.5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <style>
                             .leaflet-control-layers {
                                 border-radius: 0.5rem !important;
                                 border: 1px solid #e5e7eb !important;
@@ -356,8 +382,19 @@
                             </button>
                         </div>
                     </div>
-                    <x-input-error for="latitude" />
-                    <x-input-error for="longitude" />
+                    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                        <div class="w-full">
+                            <x-label value="Latitud" />
+                            <x-input class="w-full block text-sm" x-model="lat" @input="updateFromInput" />
+                            <x-input-error for="latitude" />
+                        </div>
+                        <div class="w-full">
+                            <x-label value="Longitud" />
+                            <x-input class="w-full block text-sm" x-model="lng" @input="updateFromInput" />
+                            <x-input-error for="longitude" />
+                        </div>
+                    </div>
+                    </div>
                 </div>
 
                 <div
@@ -480,40 +517,76 @@
             }))
 
             Alpine.data('leafletMap', () => ({
-                map: null,
-                marker: null,
-                redIcon: null,
+                openModal: @entangle('open'),
                 lat: @entangle('latitude').defer,
                 lng: @entangle('longitude').defer,
                 zoom: @entangle('zoom').defer,
+                searchQuery: '',
+                isSearching: false,
+                mapInitialized: false,
                 init() {
-                    this.loadLeaflet();
+                    if (this.openModal) {
+                        setTimeout(() => this.initializeMapNow(), 300);
+                    }
+                    this.$watch('lat', () => {
+                        if (this.mapInitialized && this.map) {
+                            this.updateMapView();
+                        }
+                    });
+                    this.$watch('lng', () => {
+                        if (this.mapInitialized && this.map) {
+                            this.updateMapView();
+                        }
+                    });
+                    this.$watch('openModal', (isOpen) => {
+                        if (isOpen) {
+                            setTimeout(() => {
+                                this.initializeMapNow();
+                            }, 350);
+                        } else {
+                            this.destroyMap();
+                        }
+                    });
                 },
-                loadLeaflet() {
-                    if (typeof L === 'undefined') {
-                        const link = document.createElement('link');
-                        link.rel = 'stylesheet';
-                        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-                        document.head.appendChild(link);
-
-                        const script = document.createElement('script');
-                        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-                        script.onload = () => this.initMap();
-                        document.head.appendChild(script);
-                    } else {
-                        setTimeout(() => this.initMap(), 100);
+                destroyMap() {
+                    if (this.map) {
+                        this.map.off();
+                        this.map.remove();
+                        this.map = null;
+                    }
+                    this.marker = null;
+                    this.mapInitialized = false;
+                    
+                    let container = document.getElementById('map-create');
+                    if (container) {
+                        container._leaflet_map = null;
+                        container._leaflet_marker = null;
                     }
                 },
-                initMap() {
-                    this.redIcon = new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                    });
+                initializeMapNow() {
+                    let container = document.getElementById('map-create');
+                    if (!container) return;
+                    
+                    if (this.map) {
+                        this.map.off();
+                        this.map.remove();
+                        this.map = null;
+                    }
+                    if (container) {
+                        container.innerHTML = '';
+                        container._leaflet_id = null;
+                    }
 
+                    this.initMap();
+                    this.mapInitialized = true;
+                    setTimeout(() => {
+                        if (this.map) {
+                            this.map.invalidateSize();
+                            this.updateMapView();
+                        }
+                    }, 50);
+                },
+                initMap() {
                     let defaultLat = this.lat ? parseFloat(this.lat) : -12.046374;
                     let defaultLng = this.lng ? parseFloat(this.lng) : -77.042793;
                     let initialZoom = this.zoom ? parseInt(this.zoom) : 14;
@@ -539,18 +612,16 @@
                         attributionControl: false
                     });
 
+                    let container = document.getElementById('map-create');
+                    if (container) {
+                        container._leaflet_map = this.map;
+                    }
+
                     L.control.layers({
                         "Calles": osm,
                         "Satélite": satellite,
                         "Relieve": topo
                     }).addTo(this.map);
-
-                    if (this.lat && this.lng) {
-                        this.marker = L.marker([parseFloat(this.lat), parseFloat(this.lng)], {
-                            icon: this.redIcon,
-                            draggable: true
-                        }).addTo(this.map);
-                    }
 
                     this.map.on('click', (e) => {
                         this.updateMarker(e.latlng.lat, e.latlng.lng);
@@ -562,36 +633,59 @@
                             this.$wire.set('zoom', this.zoom, true);
                         }
                     });
+                },
+                updateMapView() {
+                    let viewLat = this.lat ? parseFloat(this.lat) : -12.046374;
+                    let viewLng = this.lng ? parseFloat(this.lng) : -77.042793;
+                    let viewZoom = this.zoom ? parseInt(this.zoom) : 14;
 
-                    const resizeObserver = new ResizeObserver((entries) => {
-                        for (let entry of entries) {
-                            if (entry.contentRect.width > 0) {
-                                // Visible
-                                if (this.map) {
-                                    this.map.invalidateSize();
-                                    if (!this.marker && !this.lat && !this.lng) {
-                                        this.locateMe();
-                                    }
-                                }
-                            } else {
-                                // Hidden (Modal closed)
-                                if (this.marker && this.map) {
-                                    this.map.removeLayer(this.marker);
-                                    this.marker = null;
-                                }
-                                this.lat = null;
-                                this.lng = null;
-                            }
-                        }
+                    let freshIcon = new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
                     });
-                    resizeObserver.observe(document.getElementById('map-create'));
+
+                    if (!this.marker) {
+                        this.marker = L.marker([viewLat, viewLng], {
+                            icon: freshIcon,
+                            draggable: true
+                        }).addTo(this.map);
+                        
+                        if (document.getElementById('map-create')) {
+                            document.getElementById('map-create')._leaflet_marker = this.marker;
+                        }
+
+                        this.marker.on('dragend', (e) => {
+                            let position = this.marker.getLatLng();
+                            this.updateMarker(position.lat, position.lng);
+                        });
+
+                        if (!this.lat || !this.lng) {
+                            this.locateMe();
+                        }
+                    } else {
+                        this.marker.setIcon(freshIcon);
+                        this.marker.setLatLng([viewLat, viewLng]);
+                    }
+
+                    setTimeout(() => {
+                        if (this.map) {
+                            this.map.invalidateSize();
+                            this.map.setView([viewLat, viewLng], viewZoom);
+                        }
+                    }, 50);
                 },
                 updateMarker(lat, lng) {
+                    let container = document.getElementById('map-create');
                     if (!this.marker) {
                         this.marker = L.marker([lat, lng], {
                             icon: this.redIcon,
                             draggable: true
                         }).addTo(this.map);
+                        if (container) container._leaflet_marker = this.marker;
                         this.marker.on('dragend', (e) => {
                             let position = this.marker.getLatLng();
                             this.updateMarker(position.lat, position.lng);
@@ -606,6 +700,55 @@
                     if (this.$wire) {
                         this.$wire.set('latitude', strLat, true);
                         this.$wire.set('longitude', strLng, true);
+                    }
+                },
+                searchPlace() {
+                    if (!this.searchQuery.trim()) return;
+                    this.isSearching = true;
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.searchQuery)}&countrycodes=pe&limit=1`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.isSearching = false;
+                            if (data && data.length > 0) {
+                                const lat = parseFloat(data[0].lat);
+                                const lon = parseFloat(data[0].lon);
+                                this.updateMarker(lat, lon);
+                                this.map.setView([lat, lon], 17);
+                            } else {
+                                window.dispatchEvent(new CustomEvent('alert', {
+                                    detail: { title: 'Ubicación no encontrada', text: 'No se encontraron resultados para la búsqueda.', icon: 'warning' }
+                                }));
+                            }
+                        })
+                        .catch(err => {
+                            this.isSearching = false;
+                            console.error(err);
+                            window.dispatchEvent(new CustomEvent('alert', {
+                                detail: { title: 'Error de red', text: 'Hubo un problema al buscar la ubicación.', icon: 'error' }
+                            }));
+                        });
+                },
+                updateFromInput() {
+                    let newLat = parseFloat(this.lat);
+                    let newLng = parseFloat(this.lng);
+                    if (!isNaN(newLat) && !isNaN(newLng)) {
+                        if (!this.marker) {
+                            this.marker = L.marker([newLat, newLng], {
+                                icon: this.redIcon,
+                                draggable: true
+                            }).addTo(this.map);
+                            this.marker.on('dragend', (e) => {
+                                let position = this.marker.getLatLng();
+                                this.updateMarker(position.lat, position.lng);
+                            });
+                        } else {
+                            this.marker.setLatLng([newLat, newLng]);
+                        }
+                        this.map.setView([newLat, newLng], this.map.getZoom());
+                        if (this.$wire) {
+                            this.$wire.set('latitude', this.lat, true);
+                            this.$wire.set('longitude', this.lng, true);
+                        }
                     }
                 },
                 locateMe() {

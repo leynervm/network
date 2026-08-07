@@ -168,6 +168,7 @@ return [
         'city_id'               =>  'ciudad',
         'boxnav_id'             =>  'caja nap',
         'client_id'             =>  'cliente',
+        'location'              =>  'lugar',
     ],
 
 ];

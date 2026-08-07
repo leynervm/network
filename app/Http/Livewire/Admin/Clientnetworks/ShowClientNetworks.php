@@ -45,6 +45,7 @@ class ShowClientNetworks extends Component
     public $search = '';
     // public $searchmonth = '';
     public $searchtype = '';
+    public $searchstatus = '';
 
     protected $listeners = ['render'];
     protected $queryString = [
@@ -59,6 +60,10 @@ class ShowClientNetworks extends Component
             'except' => '',
             'as' => 'tipo-servicio',
         ],
+        'searchstatus' => [
+            'except' => '',
+            'as' => 'estado',
+        ],
     ];
 
     protected function rules()
@@ -67,6 +72,7 @@ class ShowClientNetworks extends Component
             'client_name' => ['required', 'string', 'min:3'],
             'network.codigo_slp' => ['nullable', 'string', 'max:255'],
             'network.telefono' => ['required', 'numeric', 'regex:/^\d{9}$/'],
+            'network.location' => ['required', 'string', 'min:3', 'max:255'],
             'network.type' => ['required', 'string'],
             'network.price' => ['required', 'numeric', 'decimal:0,2'],
             'network.direccion' => ['required', 'string', 'min:6'],
@@ -92,13 +98,22 @@ class ShowClientNetworks extends Component
         $ubigeos = Ubigeo::orderBy('ubigeo', 'asc')->get();
         $olts = Olt::with(['spliters.boxnavs.portboxnavs.network'])->get();
         $antenas = Antena::orderBy('id', 'asc')->get();
-        $clientnetworks = Network::withWhereHas('client', function ($query) {
+        $clientnetworks = Network::with([
+            'networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    \App\Models\Portboxnav::class => ['boxnav.spliter.olt'],
+                ]);
+            }
+        ])->withWhereHas('client', function ($query) {
             if (trim($this->search) !== '') {
                 $query->where('document', 'like', '%' . $this->search . '%')->orWhere('name', 'like', '%' . $this->search . '%');
             }
         });
         if (trim($this->searchtype) !== '') {
             $clientnetworks->where('type', $this->searchtype);
+        }
+        if (trim($this->searchstatus) !== '') {
+            $clientnetworks->where('status', $this->searchstatus);
         }
         $clientnetworks = $clientnetworks->orderBy('date', 'desc')->paginate();
         return view('livewire.admin.clientnetworks.show-client-networks', compact('clientnetworks', 'ubigeos', 'olts', 'antenas'));
@@ -110,6 +125,11 @@ class ShowClientNetworks extends Component
     }
 
     public function updatingSearchtype()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearchstatus()
     {
         $this->resetPage();
     }

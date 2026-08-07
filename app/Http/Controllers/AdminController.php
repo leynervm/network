@@ -44,6 +44,13 @@ class AdminController extends Controller
 
     public function shownetwork(Network $network)
     {
+        $network->load([
+            'networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    \App\Models\Portboxnav::class => ['boxnav.spliter.olt'],
+                ]);
+            },
+        ]);
         return view('admin.recibos.networkrecibos', compact('network'));
     }
 
@@ -69,7 +76,6 @@ class AdminController extends Controller
 
     public function print(Recibo $recibo)
     {
-
         $pdf = PDF::setPaper([0, 0, 226.77, 500])->loadView('admin.print.index', compact('recibo'));
         return $pdf->stream();
 

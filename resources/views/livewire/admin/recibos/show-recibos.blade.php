@@ -24,6 +24,14 @@
                 <option value="{{ \App\Models\Network::SATELITAL }}">{{ \App\Models\Network::SATELITAL }}</option>
             </select>
         </div>
+        <div class="w-full max-w-40">
+            <x-label value="Estado de pago" />
+            <select class="w-full" wire:model.lazy="searchstatus">
+                <option value="">TODOS</option>
+                <option value="PAGADO">PAGADO</option>
+                <option value="PENDIENTE">PENDIENTE</option>
+            </select>
+        </div>
     </div>
 
     <div class="w-full">
@@ -105,7 +113,7 @@
 
                                     <a href="{{ route('admin.recibo.print', $item->id) }}" target="_blank"
                                         title="Imprimir Recibo"
-                                        class="inline-flex items-center justify-center p-1.5 rounded-lg bg-white hover:bg-gray-100 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-black dark:text-white border border-black dark:border-white transition-colors shadow-sm">
+                                        class="inline-flex items-center justify-center p-1.5 rounded-lg bg-white hover:bg-gray-100 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-black dark:text-white border border-neutral-800 dark:border-neutral-800 transition-colors shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="size-4">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -138,7 +146,7 @@
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">REGISTRAR PAGO</h1>
             <button wire:click="$set('open', false)"
-                class="rounded-md text-gray-700 p-2 hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-600 focus:text-gray-600 transition-colors ease-in-out duration-150">
+                class="rounded-md text-gray-700 p-2 dark:text-gray-400 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-neutral-700/40 dark:focus:bg-neutral-700/40 hover:text-gray-600 focus:text-gray-600 dark:hover:text-gray-300 dark:focus:text-gray-300 transition-colors ease-in-out duration-150">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
                     stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

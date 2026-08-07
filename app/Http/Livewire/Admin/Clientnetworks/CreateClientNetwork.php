@@ -19,7 +19,7 @@ class CreateClientNetwork extends Component
     public $open = false;
 
     public $date, $code, $portnumber, $descripcion, $type, $price, $direccion,
-        $client_id, $ubigeo_id, $telefono, $codigo_slp;
+        $client_id, $ubigeo_id, $telefono, $codigo_slp, $location;
     
     public $latitude, $longitude, $zoom = 14;
 
@@ -47,6 +47,7 @@ class CreateClientNetwork extends Component
             'name' => ['required', 'string', 'min:6'],
             'codigo_slp' => ['nullable', 'string', 'max:255'],
             'telefono' => ['nullable', 'numeric', 'regex:/^\d{9}$/'],
+            'location' => ['required', 'string', 'min:3', 'max:255'],
             'descripcion' => ['nullable', 'string', 'min:10'],
             'portnumber' => ['nullable', 'string'],
             'type' => ['required', 'string'],
@@ -93,6 +94,8 @@ class CreateClientNetwork extends Component
         $this->date = now('America/Lima')->format('Y-m-d');
     }
 
+
+
     public function render()
     {
         $ubigeos = Ubigeo::orderBy('ubigeo', 'asc')->get();
@@ -105,7 +108,7 @@ class CreateClientNetwork extends Component
     {
         if ($this->open == false) {
             $this->resetValidation();
-            $this->reset();
+            $this->resetExcept(['open']);
             $this->date = now('America/Lima')->format('Y-m-d');
         }
     }

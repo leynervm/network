@@ -23,6 +23,9 @@ class ShowRecibos extends Component
         ],
         'searchtype' => [
             'except' => '', 'as' => 'tipo-recibo'
+        ],
+        'searchstatus' => [
+            'except' => '', 'as' => 'estado-pago'
         ]
     ];
 
@@ -33,6 +36,7 @@ class ShowRecibos extends Component
     public $search = '';
     public $searchmonth = '';
     public $searchtype = '';
+    public $searchstatus = '';
 
     public function mount()
     {
@@ -51,6 +55,14 @@ class ShowRecibos extends Component
         }
         if (trim($this->searchmonth) !== '') {
             $recibos->where('month', $this->searchmonth);
+        }
+        
+        if (trim($this->searchstatus) !== '') {
+            if ($this->searchstatus == 'PAGADO') {
+                $recibos->has('payment');
+            } elseif ($this->searchstatus == 'PENDIENTE') {
+                $recibos->doesntHave('payment');
+            }
         }
 
         $recibos = $recibos->orderBy('month', 'desc')->paginate();
@@ -73,6 +85,11 @@ class ShowRecibos extends Component
     }
 
     public function updatedSearchmonth()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSearchstatus()
     {
         $this->resetPage();
     }

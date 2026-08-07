@@ -38,10 +38,11 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified'
 ])->group(function () {
+
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-
+    
     Route::get('/admin/olts', [AdminController::class, 'olts'])->name('admin.olts');
     Route::get('/admin/olts/{olt}/show', [AdminController::class, 'show'])->name('admin.olts.show');
     // Route::get('/admin/olts/{olt}/spliter/{spliter}/boxnavs', [AdminController::class, 'boxnavs'])->name('admin.olts.boxnavs');

@@ -14,8 +14,8 @@ class CreateRecibo extends Component
 
     public $open = false;
     public $seriepago_id, $month, $type;
-    public $olt_id = '', $antena_id = '';
-    public $olts = [], $antenas = [];
+    public $location = '';
+    public $locations = [];
 
     protected function rules()
     {
@@ -44,15 +44,13 @@ class CreateRecibo extends Component
             $this->reset();
             $this->resetValidation();
             $this->month = now('America/Lima')->format('Y-m');
-            $this->olts = \App\Models\Olt::orderBy('name', 'asc')->get();
-            $this->antenas = \App\Models\Antena::orderBy('name', 'asc')->get();
+            $this->locations = Network::activos()->whereNotNull('location')->where('location', '!=', '')->distinct()->pluck('location')->toArray();
         }
     }
 
     public function updatedType($value)
     {
-        $this->olt_id = '';
-        $this->antena_id = '';
+        $this->location = '';
     }
 
     // public function updatedMonth($value)
@@ -74,22 +72,10 @@ class CreateRecibo extends Component
 
             if (trim($this->type) != 'TODOS' && trim($this->type) != 'todos') {
                 $query->where('type', $this->type);
-                
-                if (validarFibra($this->type)) {
-                    if (!empty($this->olt_id)) {
-                        $portIds = \App\Models\Portboxnav::whereHas('boxnav.spliter.olt', function($q) {
-                            $q->where('olts.id', $this->olt_id);
-                        })->pluck('id');
-                        
-                        $query->where('networkable_type', \App\Models\Portboxnav::class)
-                              ->whereIn('networkable_id', $portIds);
-                    }
-                } else {
-                    if (!empty($this->antena_id)) {
-                        $query->where('networkable_type', \App\Models\Antena::class)
-                              ->where('networkable_id', $this->antena_id);
-                    }
-                }
+            }
+
+            if (!empty($this->location)) {
+                $query->where('location', $this->location);
             }
 
             $networks = $query->get();
