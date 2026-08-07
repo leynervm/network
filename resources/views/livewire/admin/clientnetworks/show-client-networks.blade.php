@@ -44,7 +44,7 @@
                     <th style="min-width: 240px;" class="text-left">CLIENTE</th>
                     <th style="min-width: 150px;">TIPO SERVICIO</th>
                     <th style="min-width: 150px;">CONEXIÓN</th>
-                    <th>DESCRIPCIÓN</th>
+                    {{-- <th>DESCRIPCIÓN</th> --}}
                     <th style="min-width: 100px;">PRECIO</th>
                     <th>ESTADO</th>
                     <th>OPCIONES</th>
@@ -92,10 +92,12 @@
                                     </svg>
                                     {{ $item->telefono ? implode(' ', str_split($item->telefono, 3)) : '' }}
                                 </p>
-                                <p>
+                                <p class="text-[9px]">
                                     @if ($item->location)
-                                        {{ $item->location }}
-                                        -
+                                        <small class="font-bold text-[10px] text-neutral-600 dark:text-neutral-300">
+                                            {{ $item->location }}
+                                            - 
+                                        </small>
                                     @endif
 
                                     @if ($item->ubigeo)
@@ -130,9 +132,9 @@
                                     @endif
                                 @endif
                             </td>
-                            <td class="text-left">
+                            {{-- <td class="text-left">
                                 {{ $item->descripcion }}
-                            </td>
+                            </td> --}}
                             <td class="text-center">S/.
                                 {{ number_format($item->price, 2, '.', ', ') }}
                             </td>
