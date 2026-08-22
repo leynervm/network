@@ -1,7 +1,4 @@
 <div x-data="loadeditimage()">
-    @if ($products->hasPages())
-        {{ $products->links() }}
-    @endif
 
     <div class="w-full flex flex-wrap gap-2 mb-2">
         <div class="w-full max-w-sm">
@@ -105,6 +102,12 @@
             </x-slot>
         </x-table>
     </div>
+
+    @if ($products->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $products->links() }}
+        </div>
+    @endif
 
     <x-dialog-modal wire:model="open" maxWidth="2xl" footerAlign="justify-end">
         <x-slot name="title">

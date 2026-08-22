@@ -1,9 +1,4 @@
 <div>
-    @if ($antenas->hasPages())
-        <div class="w-full">
-            {{ $antenas->links() }}
-        </div>
-    @endif
 
     @if (count($antenas) > 0)
         <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 mt-5">
@@ -49,6 +44,12 @@
                     </div>
                 </div>
             @endforeach
+        </div>
+    @endif
+
+    @if ($antenas->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $antenas->links() }}
         </div>
     @endif
 

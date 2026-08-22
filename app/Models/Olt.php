@@ -33,4 +33,9 @@ class Olt extends Model
     {
         return $this->hasMany(Spliter::class);
     }
+
+    public function ports(): HasMany
+    {
+        return $this->hasMany(OltPort::class, 'olt_id');
+    }
 }

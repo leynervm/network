@@ -1,9 +1,7 @@
 <div>
-    @if ($recibos->hasPages())
-        <div class="w-full mb-2">
-            {{ $recibos->links() }}
-        </div>
-    @endif
+    <!-- Full viewport elegant loading overlay -->
+    <x-loading-overlay />
+
 
     <div class="w-full flex flex-wrap gap-2 mb-2">
         <div class="w-full max-w-48">
@@ -31,6 +29,31 @@
                 <option value="PAGADO">PAGADO</option>
                 <option value="PENDIENTE">PENDIENTE</option>
             </select>
+        </div>
+        <div class="w-full max-w-40">
+            <x-label value="Seleccionar Lugar" />
+            <select class="w-full" wire:model.lazy="searchlocation">
+                <option value="">TODOS LOS LUGARES</option>
+                @if (count($locations) > 0)
+                    @foreach ($locations as $item)
+                        <option value="{{ $item }}">{{ $item }}</option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+        <div class="flex items-end gap-2 ml-auto">
+            <button type="button" wire:click="exportExcel" wire:loading.attr="disabled" class="inline-flex items-center justify-center p-2 bg-emerald-600 dark:bg-emerald-700 border border-transparent rounded-lg font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors gap-1 shadow-sm h-[38px] min-h-[38px]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12-3-3m0 0-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                </svg>
+                EXCEL
+            </button>
+            <x-danger-button wire:click="exportPdf" wire:loading.attr="disabled" class="inline-flex items-center justify-center h-[38px] min-h-[38px] gap-1 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                </svg>
+                PDF
+            </x-danger-button>
         </div>
     </div>
 
@@ -63,6 +86,9 @@
                             <td>
                                 <p>{{ $item->client->name }}</p>
                                 <p>{{ $item->client->document }}</p>
+                                @if ($item->network->location)
+                                    <p class="text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">LUGAR: {{ $item->network->location }}</p>
+                                @endif
                                 <p class="font-semibold">SERVICIO :{{ $item->network->type }}</p>
                             </td>
                             <td class="text-center uppercase">{{ formatDate($item->month, 'MMMM Y') }}</td>
@@ -101,7 +127,14 @@
                                             '.pdf';
                                     @endphp
                                     <button type="button"
-                                        onclick="sharePdf('{{ route('admin.recibo.print', $item->id) }}', '{{ $pdfFileName }}', '{{ $item->network->telefono ?? '' }}')"
+                                        onclick="sharePdf('{{ route('admin.recibo.print', $item->id) }}', '{{ $pdfFileName }}', '{{ $item->network->telefono ?? '' }}', {
+                                            client: '{{ addslashes($item->client->name) }}',
+                                            serie: '{{ $item->seriecompleta }}',
+                                            month: '{{ formatDate($item->month, 'MMMM Y') }}',
+                                            service: '{{ $item->network->type }}',
+                                            total: '{{ number_format($item->total, 2) }}',
+                                            due_date: '{{ formatDate($item->vencimiento) }}'
+                                        })"
                                         title="Compartir por WhatsApp"
                                         class="inline-flex items-center justify-center p-1.5 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-500/10 dark:hover:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/30 transition-colors shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="size-4"
@@ -139,6 +172,12 @@
             </x-slot>
         </x-table>
     </div>
+
+    @if ($recibos->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $recibos->links() }}
+        </div>
+    @endif
 
 
 
@@ -254,8 +293,7 @@
                 }
             })
         }
-
-        async function sharePdf(url, filename, phone) {
+        async function sharePdf(url, filename, phone, info = null) {
             Swal.fire({
                 title: 'Preparando recibo...',
                 text: 'Descargando el PDF para compartir...',
@@ -275,17 +313,42 @@
 
                 Swal.close();
 
-                // Intentamos compartir usando la Web Share API nativa si lo soporta y permite compartir archivos
-                if (navigator.canShare && navigator.canShare({
-                        files: [file]
-                    })) {
-                    await navigator.share({
-                        title: 'Recibo de Pago',
-                        text: 'Estimado cliente, adjunto su recibo de pago.',
-                        files: [file]
-                    });
-                } else {
-                    // Fallback para PC: Descargar y abrir WhatsApp
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                let sharedNatively = false;
+
+                // Intentamos compartir usando la Web Share API nativa si es un dispositivo móvil y lo soporta
+                if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        let textMessage = 'Estimado cliente, adjunto su recibo de pago.';
+                        if (info) {
+                            textMessage = `📄 RESUMEN DE COMPROBANTE - RED CENTER\n\n` +
+                                `Cliente: ${info.client}\n` +
+                                `Nro. Recibo: ${info.serie}\n` +
+                                `Mes de Servicio: ${info.month.toUpperCase()}\n` +
+                                `Servicio: ${info.service}\n` +
+                                `Total a Pagar: S/. ${info.total}\n` +
+                                `Fecha de Vencimiento: ${info.due_date}\n\n` +
+                                `Estimado cliente, le remitimos su recibo de pago. Agradecemos su puntualidad.`;
+                        }
+
+                        await navigator.share({
+                            title: 'Recibo de Pago',
+                            text: textMessage,
+                            files: [file]
+                        });
+                        sharedNatively = true;
+                    } catch (shareError) {
+                        // Si el usuario canceló la compartición (AbortError), marcamos como manejado para que no salte error
+                        if (shareError.name === 'AbortError') {
+                            sharedNatively = true;
+                        } else {
+                            console.warn('Native share failed, falling back to download:', shareError);
+                        }
+                    }
+                }
+
+                if (!sharedNatively) {
+                    // Fallback para PC / Navegadores de Escritorio: Descargar y abrir WhatsApp
                     const downloadUrl = window.URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = downloadUrl;
@@ -300,9 +363,38 @@
                         if (waPhone.length === 9) {
                             waPhone = '51' + waPhone;
                         }
-                        const waMessage = encodeURIComponent(
-                            'Hola! Estimado cliente, le escribimos para adjuntarle su recibo de pago PDF.');
-                        window.open(`https://wa.me/${waPhone}?text=${waMessage}`, '_blank');
+                        
+                        let waMessageText = `¡Hola! Estimado cliente, le adjunto su recibo de pago en formato PDF.`;
+                        if (info) {
+                            waMessageText = `*📄 RESUMEN DE COMPROBANTE - RED CENTER*\n\n` +
+                                `*Cliente:* ${info.client}\n` +
+                                `*Nro. Recibo:* ${info.serie}\n` +
+                                `*Mes de Servicio:* ${info.month.toUpperCase()}\n` +
+                                `*Servicio:* ${info.service}\n` +
+                                `*Total a Pagar:* S/. ${info.total}\n` +
+                                `*Fecha de Vencimiento:* ${info.due_date}\n\n` +
+                                `Estimado cliente, le remitimos su recibo de pago. Agradecemos su puntualidad.`;
+                        }
+
+                        const waMessage = encodeURIComponent(waMessageText);
+                        
+                        let waUrl = '';
+                        if (isMobile) {
+                            waUrl = `https://api.whatsapp.com/send?phone=${waPhone}&text=${waMessage}`;
+                        } else {
+                            // En escritorio abrimos directamente la sesión de WhatsApp Web
+                            waUrl = `https://web.whatsapp.com/send?phone=${waPhone}&text=${waMessage}`;
+                        }
+                        
+                        // Abrir la ventana de WhatsApp
+                        window.open(waUrl, '_blank');
+
+                        Swal.fire({
+                            title: '¡Recibo Descargado!',
+                            html: `El archivo <strong>${filename}</strong> se descargó correctamente.<br><br>Se ha abierto la pestaña de WhatsApp. Por favor, <strong>adjunta o arrastra el archivo PDF</strong> en el chat.`,
+                            icon: 'success',
+                            confirmButtonText: 'ENTENDIDO'
+                        });
                     } else {
                         Swal.fire('Atención',
                             'El archivo ha sido descargado. El cliente no tiene teléfono registrado para abrir WhatsApp.',

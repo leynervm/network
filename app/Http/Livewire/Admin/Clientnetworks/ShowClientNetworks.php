@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ClientNetworksExport;
 
 class ShowClientNetworks extends Component
 {
@@ -46,6 +49,7 @@ class ShowClientNetworks extends Component
     // public $searchmonth = '';
     public $searchtype = '';
     public $searchstatus = '';
+    public $searchlocation = '';
 
     protected $listeners = ['render'];
     protected $queryString = [
@@ -64,13 +68,22 @@ class ShowClientNetworks extends Component
             'except' => '',
             'as' => 'estado',
         ],
+        'searchlocation' => [
+            'except' => '',
+            'as' => 'lugar',
+        ],
     ];
 
     protected function rules()
     {
         return [
             'client_name' => ['required', 'string', 'min:3'],
-            'network.codigo_slp' => ['nullable', 'string', 'max:255'],
+            'network.codigo_slp' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('networks', 'codigo_slp')->ignore($this->network->id),
+            ],
             'network.telefono' => ['required', 'numeric', 'regex:/^\d{9}$/'],
             'network.location' => ['required', 'string', 'min:3', 'max:255'],
             'network.type' => ['required', 'string'],
@@ -93,17 +106,16 @@ class ShowClientNetworks extends Component
         $this->network = new Network();
     }
 
-    public function render()
+    private function getClientNetworksQueryBuilder()
     {
-        $ubigeos = Ubigeo::orderBy('ubigeo', 'asc')->get();
-        $olts = Olt::with(['spliters.boxnavs.portboxnavs.network'])->get();
-        $antenas = Antena::orderBy('id', 'asc')->get();
         $clientnetworks = Network::with([
             'networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
                 $morphTo->morphWith([
                     \App\Models\Portboxnav::class => ['boxnav.spliter.olt'],
                 ]);
-            }
+            },
+            'client',
+            'ubigeo'
         ])->withWhereHas('client', function ($query) {
             if (trim($this->search) !== '') {
                 $query->where('document', 'like', '%' . $this->search . '%')->orWhere('name', 'like', '%' . $this->search . '%');
@@ -115,8 +127,43 @@ class ShowClientNetworks extends Component
         if (trim($this->searchstatus) !== '') {
             $clientnetworks->where('status', $this->searchstatus);
         }
-        $clientnetworks = $clientnetworks->orderBy('date', 'desc')->paginate();
-        return view('livewire.admin.clientnetworks.show-client-networks', compact('clientnetworks', 'ubigeos', 'olts', 'antenas'));
+        if (trim($this->searchlocation) !== '') {
+            $clientnetworks->where('location', $this->searchlocation);
+        }
+        return $clientnetworks->orderBy('date', 'desc');
+    }
+
+    public function render()
+    {
+        $ubigeos = Ubigeo::orderBy('ubigeo', 'asc')->get();
+        $olts = Olt::with(['spliters.boxnavs.portboxnavs.network'])->get();
+        $antenas = Antena::orderBy('id', 'asc')->get();
+        $locations = Network::activos()->whereNotNull('location')->where('location', '!=', '')->distinct()->orderBy('location', 'asc')->pluck('location')->toArray();
+        $clientnetworks = $this->getClientNetworksQueryBuilder()->paginate();
+        return view('livewire.admin.clientnetworks.show-client-networks', compact('clientnetworks', 'ubigeos', 'olts', 'antenas', 'locations'));
+    }
+
+    public function exportExcel()
+    {
+        $query = $this->getClientNetworksQueryBuilder();
+        return Excel::download(new ClientNetworksExport($query), 'clientes-internet-' . now()->format('YmdHis') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        // Set dynamic limits for heavy data
+        ini_set('memory_limit', '1024M');
+        set_time_limit(300);
+
+        // Get matching networks without pagination
+        $clientnetworks = $this->getClientNetworksQueryBuilder()->get();
+
+        $pdf = PDF::setPaper('a4', 'portrait')
+                  ->loadView('admin.clientnetworks.export-pdf', compact('clientnetworks'));
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'clientes-internet-' . now()->format('YmdHis') . '.pdf');
     }
 
     public function updatingSearch()
@@ -130,6 +177,11 @@ class ShowClientNetworks extends Component
     }
 
     public function updatingSearchstatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearchlocation()
     {
         $this->resetPage();
     }
@@ -174,7 +226,7 @@ class ShowClientNetworks extends Component
     public function update()
     {
         $this->network->telefono = trim($this->network->telefono);
-        $this->network->codigo_slp = trim($this->network->codigo_slp);
+        $this->network->codigo_slp = trim($this->network->codigo_slp) === '' ? null : trim($this->network->codigo_slp);
         $this->validate();
         DB::beginTransaction();
         try {

@@ -1,9 +1,4 @@
 <div>
-    @if ($marcas->hasPages())
-        <div class="w-full">
-            {{ $marcas->links() }}
-        </div>
-    @endif
 
     @if (count($marcas) > 0)
         <div class="w-full flex gap-3 mt-5">
@@ -27,6 +22,12 @@
                     </div>
                 </div>
             @endforeach
+        </div>
+    @endif
+
+    @if ($marcas->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $marcas->links() }}
         </div>
     @endif
 

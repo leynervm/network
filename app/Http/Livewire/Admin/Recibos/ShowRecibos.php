@@ -3,10 +3,14 @@
 namespace App\Http\Livewire\Admin\Recibos;
 
 use App\Models\Formapay;
+use App\Models\Network;
 use App\Models\Recibo;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RecibosExport;
 
 class ShowRecibos extends Component
 {
@@ -26,6 +30,9 @@ class ShowRecibos extends Component
         ],
         'searchstatus' => [
             'except' => '', 'as' => 'estado-pago'
+        ],
+        'searchlocation' => [
+            'except' => '', 'as' => 'lugar'
         ]
     ];
 
@@ -37,19 +44,23 @@ class ShowRecibos extends Component
     public $searchmonth = '';
     public $searchtype = '';
     public $searchstatus = '';
+    public $searchlocation = '';
 
     public function mount()
     {
         $this->recibo = new Recibo();
     }
 
-    public function render()
+    private function getRecibosQueryBuilder()
     {
-        $recibos = Recibo::with('client')->withWhereHas('network', function ($query) {
+        $recibos = Recibo::with(['client', 'payment.formapay', 'network'])->withWhereHas('network', function ($query) {
             if (trim($this->searchtype) !== '') {
                 $query->where('type', $this->searchtype);
             }
-        })->orderBy('date', 'desc');
+            if (trim($this->searchlocation) !== '') {
+                $query->where('location', $this->searchlocation);
+            }
+        });
         if (trim($this->search) !== '') {
             $recibos->where('seriecompleta', 'like', $this->search);
         }
@@ -65,9 +76,38 @@ class ShowRecibos extends Component
             }
         }
 
-        $recibos = $recibos->orderBy('month', 'desc')->paginate();
+        return $recibos->orderBy('date', 'desc')->orderBy('month', 'desc');
+    }
+
+    public function render()
+    {
+        $locations = Network::activos()->whereNotNull('location')->where('location', '!=', '')->distinct()->orderBy('location', 'asc')->pluck('location')->toArray();
+        $recibos = $this->getRecibosQueryBuilder()->paginate();
         $formapays = Formapay::orderBy('id', 'asc')->get();
-        return view('livewire.admin.recibos.show-recibos', compact('recibos', 'formapays'));
+        return view('livewire.admin.recibos.show-recibos', compact('recibos', 'formapays', 'locations'));
+    }
+
+    public function exportExcel()
+    {
+        $query = $this->getRecibosQueryBuilder();
+        return Excel::download(new RecibosExport($query), 'recibos-' . now()->format('YmdHis') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        // Set dynamic limits for heavy data
+        ini_set('memory_limit', '1024M');
+        set_time_limit(300);
+
+        // Get the matching receipts without pagination limits
+        $recibos = $this->getRecibosQueryBuilder()->get();
+
+        $pdf = PDF::setPaper('a4', 'portrait')
+                  ->loadView('admin.recibos.export-pdf', compact('recibos'));
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'recibos-' . now()->format('YmdHis') . '.pdf');
     }
 
     public function pay(Recibo $recibo)
@@ -90,6 +130,11 @@ class ShowRecibos extends Component
     }
 
     public function updatedSearchstatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSearchlocation()
     {
         $this->resetPage();
     }

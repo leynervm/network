@@ -1,7 +1,4 @@
 <div>
-    @if ($olts->hasPages())
-        {{ $olt->links() }}
-    @endif
 
 
     @if (count($olts) > 0)
@@ -45,6 +42,12 @@
                     </div>
                 </a>
             @endforeach
+        </div>
+    @endif
+
+    @if ($olts->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $olts->links() }}
         </div>
     @endif
 

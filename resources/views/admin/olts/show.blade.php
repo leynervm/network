@@ -1,13 +1,28 @@
 <x-app-layout>
+    @php
+        $olt->loadMissing('spliters');
+        $portsInfo = [];
+        for ($p = 1; $p <= $olt->outs; $p++) {
+            $splitter = $olt->spliters->values()->get($p - 1);
+            $portModel = $olt->ports->firstWhere('port_number', $p);
+            $portsInfo[$p] = [
+                'alias' => $splitter ? $splitter->name : ($portModel ? $portModel->alias : null),
+                'direccion' => $splitter ? $splitter->direccion : ($portModel ? $portModel->direccion : null),
+            ];
+        }
+    @endphp
     {{-- ══ OLT RACK CHASSIS (Theme Adaptive) ══ --}}
     <div class="bg-gradient-to-b from-[#f9fafb] via-[#f3f4f6] to-[#e5e7eb] dark:from-[#1e2229] dark:via-[#13151a] dark:to-[#1a1d24] border-2 border-gray-300 dark:border-[#2a2e3a] rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.7)] transition-all duration-200 overflow-hidden mb-6"
         x-data="{
             sel: null,
+            hoveredPort: null,
+            portsInfo: {{ json_encode($portsInfo) }},
             pick(i) {
                 this.sel = (this.sel === i) ? null : i;
                 this.$dispatch('pon-selected', { pon: this.sel });
             }
-        }">
+        }"
+        @olt-ports-updated.window="portsInfo = $event.detail">
 
         {{-- Faceplate --}}
         <div
@@ -43,18 +58,38 @@
 
         {{-- Ports Panel --}}
         <div class="bg-gray-50 dark:bg-[#0d0f12] p-2 transition-colors duration-200">
-            <div class="text-[8px]  text-gray-400 dark:text-neutral-600 tracking-widest mb-1 uppercase">
-                // PON INTERFACES ──
-                <span class="text-gray-500 dark:text-neutral-500"
-                    x-text="sel!==null?`PUERTO PON ${sel+1} SELECCIONADO`:'SELECCIONA UN PUERTO'"></span>
+            <div
+                class="text-[8px] text-gray-400 dark:text-neutral-600 tracking-widest mb-1 uppercase flex items-center justify-between flex-wrap gap-2">
+                <div>
+                    // PON INTERFACES ──
+                    <span class="text-gray-500 dark:text-neutral-500"
+                        x-text="sel!==null?`PUERTO PON ${sel+1} SELECCIONADO`:'SELECCIONA UN PUERTO'"></span>
+                    <template x-if="sel !== null && portsInfo[sel+1]">
+                        <span class="text-blue-600 dark:text-blue-400 font-bold ml-2">
+                            [ <span x-text="portsInfo[sel+1].alias || ''"></span> ]
+                            <span class="text-gray-400 dark:text-neutral-500 font-normal ml-1"
+                                x-text="portsInfo[sel+1].direccion ? ' - ' + portsInfo[sel+1].direccion : ''"></span>
+                        </span>
+                    </template>
+                </div>
             </div>
 
             <div class="grid grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-1">
                 @for ($p = 1; $p <= $olt->outs; $p++)
-                    <div class="pon-card rounded-lg" :class="{ 'selected': sel === {{ $p - 1 }} }"
-                        @click="pick({{ $p - 1 }})">
-                        <span class="port-title-meta">PON-{{ str_pad($p, 2, '0', STR_PAD_LEFT) }}</span>
-                        <div class="jack-hardware-plate">
+                    <div class="pon-card rounded-lg relative group overflow-hidden"
+                        :class="{ 
+                            'selected': sel === {{ $p - 1 }},
+                            'hovered-card-state': hoveredPort === {{ $p }}
+                        }"
+                        @click="pick({{ $p - 1 }})"
+                        @mouseenter="hoveredPort = {{ $p }}"
+                        @mousemove="hoveredPort = {{ $p }}"
+                        @mouseleave="hoveredPort = null">
+                        <span class="port-title-meta truncate w-full block text-center px-1"
+                              :title="portsInfo[{{ $p }}] ? portsInfo[{{ $p }}].alias : 'PON-{{ str_pad($p, 2, '0', STR_PAD_LEFT) }}'"
+                              x-text="portsInfo[{{ $p }}] && portsInfo[{{ $p }}].alias ? portsInfo[{{ $p }}].alias : 'PON-{{ str_pad($p, 2, '0', STR_PAD_LEFT) }}'">
+                        </span>
+                        <div class="jack-hardware-plate mt-0.5">
                             <div class="hardware-jack-cavity">
                                 <div class="jack-gold-pins"></div>
                             </div>

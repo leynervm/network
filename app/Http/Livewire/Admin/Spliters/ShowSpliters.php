@@ -4,7 +4,8 @@ namespace App\Http\Livewire\Admin\Spliters;
 
 use App\Models\Boxnav;
 use App\Models\Olt;
-use App\Models\Oltport;
+use App\Models\OltPort;
+use App\Models\SpliterPort;
 use App\Models\Portboxnav;
 use App\Models\Spliter;
 use Illuminate\Support\Facades\DB;
@@ -27,15 +28,36 @@ class ShowSpliters extends Component
     public $codeport;
     public $selectedPort;
 
-
+    // Unified port details edit properties
+    public $openEditPortModal = false;
+    public $portType; // 'olt', 'spliter', 'boxnav'
+    public $editingId; // OltPort/SpliterPort/Portboxnav record ID, or parent ID
+    public $editingNumber; // Port number (for olt/spliter)
+    public $editingAlias;
+    public $editingDireccion;
 
     protected $listeners = ['render'];
 
     public function mount(Olt $olt)
     {
         $this->olt = $olt;
+        $this->loadOltRelations();
         $this->spliter = new Spliter();
         $this->boxnav = new Boxnav();
+    }
+
+    public function hydrate()
+    {
+        $this->loadOltRelations();
+    }
+
+    public function loadOltRelations()
+    {
+        $this->olt->load([
+            'ports',
+            'spliters.ports',
+            'spliters.boxnavs.portboxnavs.network',
+        ]);
     }
 
     public function rules()
@@ -44,6 +66,9 @@ class ShowSpliters extends Component
             'spliter.name' => [
                 'required', 'string', 'min:3',
                 Rule::unique('spliters', 'name')->where('olt_id', $this->olt->id)->ignore($this->spliter->id)
+            ],
+            'spliter.direccion' => [
+                'nullable', 'string', 'max:255'
             ],
             'spliter.outs' => [
                 'required', 'integer', 'min:1',
@@ -114,6 +139,18 @@ class ShowSpliters extends Component
                         'splitter_port' => $p,
                     ]);
 
+                    // Sync to SpliterPort alias
+                    SpliterPort::updateOrCreate(
+                        [
+                            'spliter_id' => $this->spliter->id,
+                            'port_number' => $p,
+                        ],
+                        [
+                            'alias' => $boxnav->name,
+                            'direccion' => $boxnav->direccion,
+                        ]
+                    );
+
                     for ($k = 0; $k < $boxnav->outs; $k++) {
                         $boxnav->portboxnavs()->create([
                             'code' => 'PORT-' . ($k + 1),
@@ -145,6 +182,19 @@ class ShowSpliters extends Component
 
                 $validateData['splitter_port'] = $portToUse;
                 $boxnav = $this->spliter->boxnavs()->create($validateData);
+
+                // Sync to SpliterPort alias
+                SpliterPort::updateOrCreate(
+                    [
+                        'spliter_id' => $this->spliter->id,
+                        'port_number' => $portToUse,
+                    ],
+                    [
+                        'alias' => $boxnav->name,
+                        'direccion' => $boxnav->direccion,
+                    ]
+                );
+
                 for ($i = 0; $i < $boxnav->outs; $i++) {
                     $boxnav->portboxnavs()->create([
                         'code' => 'PORT-' . ($i + 1),
@@ -198,6 +248,20 @@ class ShowSpliters extends Component
             $this->boxnav->code = $this->editcode;
             $this->boxnav->outs = $this->editouts;
             $this->boxnav->save();
+
+            // Sync to SpliterPort alias
+            if ($this->boxnav->spliter_id && $this->boxnav->splitter_port) {
+                SpliterPort::updateOrCreate(
+                    [
+                        'spliter_id' => $this->boxnav->spliter_id,
+                        'port_number' => $this->boxnav->splitter_port,
+                    ],
+                    [
+                        'alias' => $this->boxnav->name,
+                        'direccion' => $this->boxnav->direccion,
+                    ]
+                );
+            }
             DB::commit();
             $this->reset(['editname', 'editcode', 'editouts', 'openedit']);
             $this->resetValidation();
@@ -213,6 +277,15 @@ class ShowSpliters extends Component
     {
         DB::beginTransaction();
         try {
+            $index = $this->olt->spliters->pluck('id')->search($spliter->id);
+            if ($index !== false) {
+                $portNumber = $index + 1;
+                OltPort::where([
+                    'olt_id' => $this->olt->id,
+                    'port_number' => $portNumber,
+                ])->delete();
+            }
+
             $spliter->delete();
             DB::commit();
             $this->dispatchBrowserEvent('toast', toastJson('Spliter eliminado correctamente'));
@@ -229,6 +302,14 @@ class ShowSpliters extends Component
     {
         DB::beginTransaction();
         try {
+            // Delete corresponding SpliterPort alias if exists
+            if ($boxnav->spliter_id && $boxnav->splitter_port) {
+                SpliterPort::where([
+                    'spliter_id' => $boxnav->spliter_id,
+                    'port_number' => $boxnav->splitter_port,
+                ])->delete();
+            }
+
             $boxnav->delete();
             DB::commit();
             $this->dispatchBrowserEvent('toast', toastJson('Caja NAP eliminado correctamente'));
@@ -242,6 +323,20 @@ class ShowSpliters extends Component
 
     public function editspliter(Spliter $spliter)
     {
+        $index = $this->olt->spliters->pluck('id')->search($spliter->id);
+        if ($index !== false) {
+            $portNumber = $index + 1;
+            $oltPort = $this->olt->ports->firstWhere('port_number', $portNumber);
+            if ($oltPort) {
+                if ($oltPort->alias && (!$spliter->name || str_starts_with(strtoupper($spliter->name), 'SPLITER'))) {
+                    $spliter->name = $oltPort->alias;
+                }
+                if ($oltPort->direccion && !$spliter->direccion) {
+                    $spliter->direccion = $oltPort->direccion;
+                }
+            }
+        }
+
         $this->spliter = $spliter;
         $this->oldspliterouts = $spliter->outs;
         $this->resetValidation();
@@ -250,17 +345,46 @@ class ShowSpliters extends Component
 
     public function updatespliter()
     {
-
         if (count($this->spliter->boxnavs) > $this->spliter->outs) {
             $this->dispatchBrowserEvent('alert', alertJson('LIMITE DE PUERTOS INFERIOR A LAS CAJAS NAV REGISTRADAS !', 'Cantidad de cajas nav registradas supera a la cantidad de salidas', 'info'));
             return false;
         }
         $this->validate();
-        $this->spliter->save();
-        $this->olt->refresh();
-        $this->dispatchBrowserEvent('toast', toastJson('Spliter actualizado correctamente'));
-        $this->resetValidation();
-        $this->reset(['openspliter']);
+
+        DB::beginTransaction();
+        try {
+            $this->spliter->save();
+
+            // Sync to OLT port alias
+            $index = $this->olt->spliters->pluck('id')->search($this->spliter->id);
+            if ($index !== false) {
+                $portNumber = $index + 1;
+                OltPort::updateOrCreate(
+                    [
+                        'olt_id' => $this->olt->id,
+                        'port_number' => $portNumber,
+                    ],
+                    [
+                        'alias' => $this->spliter->name,
+                        'direccion' => $this->spliter->direccion,
+                    ]
+                );
+            }
+            DB::commit();
+
+            $this->olt->refresh();
+            $this->loadOltRelations();
+
+            // Dispatch event to update OLT ports display reactively
+            $this->dispatchBrowserEvent('olt-ports-updated', $this->olt->ports->keyBy('port_number')->map(fn($p) => ['alias' => $p->alias, 'direccion' => $p->direccion])->toArray());
+
+            $this->dispatchBrowserEvent('toast', toastJson('Spliter actualizado correctamente'));
+            $this->resetValidation();
+            $this->reset(['openspliter']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatchBrowserEvent('alert', alertJson('Error al actualizar Spliter', $e->getMessage(), 'error'));
+        }
     }
 
     public function openmodalport(Boxnav $boxnav)
@@ -309,5 +433,69 @@ class ShowSpliters extends Component
             $this->olt->refresh();
             $this->dispatchBrowserEvent('toast', toastJson('Eliminado correctamente'));
         }
+    }
+
+
+
+    public function editPortboxnav($portboxnavId)
+    {
+        $this->portType = 'boxnav';
+        $this->editingId = $portboxnavId;
+        $this->editingNumber = null;
+
+        $portboxnav = Portboxnav::findOrFail($portboxnavId);
+        $this->editingAlias = $portboxnav->alias;
+        $this->editingDireccion = $portboxnav->direccion;
+
+        $this->resetValidation();
+        $this->openEditPortModal = true;
+    }
+
+    public function savePortDetails()
+    {
+        $this->validate([
+            'editingAlias' => 'nullable|string|max:255',
+            'editingDireccion' => 'nullable|string|max:65535',
+        ]);
+
+        if ($this->portType === 'spliter') {
+            SpliterPort::updateOrCreate(
+                [
+                    'spliter_id' => $this->editingId,
+                    'port_number' => $this->editingNumber,
+                ],
+                [
+                    'alias' => $this->editingAlias,
+                    'direccion' => $this->editingDireccion,
+                ]
+            );
+            $this->dispatchBrowserEvent('toast', toastJson('Detalles de hilo de Splitter guardados'));
+        } elseif ($this->portType === 'boxnav') {
+            $portboxnav = Portboxnav::findOrFail($this->editingId);
+            $portboxnav->update([
+                'alias' => $this->editingAlias,
+                'direccion' => $this->editingDireccion,
+            ]);
+            
+            // Sync to SpliterPort if the port is linked to a SpliterPort
+            if ($portboxnav->boxnav->spliter_id && $portboxnav->boxnav->splitter_port) {
+                SpliterPort::updateOrCreate(
+                    [
+                        'spliter_id' => $portboxnav->boxnav->spliter_id,
+                        'port_number' => $portboxnav->boxnav->splitter_port,
+                    ],
+                    [
+                        'alias' => $this->editingAlias,
+                        'direccion' => $this->editingDireccion,
+                    ]
+                );
+            }
+            $this->dispatchBrowserEvent('toast', toastJson('Detalles de puerto de Caja NAP guardados'));
+        }
+
+        $this->openEditPortModal = false;
+        $this->olt->refresh();
+        $this->loadOltRelations();
+
     }
 }

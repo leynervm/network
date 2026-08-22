@@ -86,7 +86,8 @@
                 </div>
 
                 @if (validarFibra($type))
-                    <div wire:loading.class="opacity-60 pointer-events-none filter blur-[1.5px]"
+                    <div wire:key="create-fiber-loading-container"
+                        wire:loading.class="opacity-60 pointer-events-none filter blur-[1.5px]"
                         wire:target="type, selectOlt, selectSpliter, selectBoxnav, selectPort"
                         class="w-full bg-gray-50 dark:bg-neutral-900/60 p-3 rounded-xl border border-gray-200 dark:border-neutral-700/60 space-y-4 transition-all duration-200">
                         {{-- PASO 1: OLT --}}
@@ -197,10 +198,13 @@
                                         @php $ocupado = $item->network ? true : false; @endphp
                                         <button type="button" wire:key="port-{{ $item->id }}"
                                             wire:click="selectPort({{ $item->id }})"
-                                            title="{{ $ocupado ? 'Puerto Ocupado' : 'Puerto Disponible: ' . $item->code }}"
+                                            title="{{ $item->alias ? $item->code . ' - ' . $item->alias : ($ocupado ? 'Puerto Ocupado' : 'Puerto Disponible: ' . $item->code) }}"
                                             class="relative py-2 px-1 rounded-lg text-xs font-bold border flex flex-col items-center justify-center gap-0.5 transition-all {{ $portboxnav_id == $item->id ? 'bg-neutral-600 dark:bg-neutral-700 border-neutral-600 dark:border-neutral-700 text-white shadow-md ring-2 ring-neutral-400 dark:ring-neutral-500 scale-105 z-10' : ($ocupado ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60 text-rose-500 dark:text-rose-400 opacity-60 cursor-not-allowed' : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/80 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:scale-105 cursor-pointer shadow-sm') }}">
                                             <span
                                                 class="text-[10px] uppercase font-semibold leading-none">{{ $item->code }}</span>
+                                            @if ($item->alias)
+                                                <span class="text-[8px] text-gray-500 dark:text-neutral-400 truncate max-w-full block font-normal leading-none mt-0.5" title="{{ $item->alias }}">{{ $item->alias }}</span>
+                                            @endif
                                             @if ($ocupado)
                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                     class="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 mt-0.5"
@@ -233,7 +237,8 @@
                         @endif
                     </div>
                 @elseif ($type && !validarFibra($type))
-                    <div wire:loading.class="opacity-60 pointer-events-none filter blur-[1.5px]"
+                    <div wire:key="create-antena-loading-container"
+                        wire:loading.class="opacity-60 pointer-events-none filter blur-[1.5px]"
                         wire:target="type, antena_id"
                         class="w-full bg-gray-50 dark:bg-neutral-900/60 p-3 rounded-xl border border-gray-200 dark:border-neutral-700/60 space-y-2 transition-all duration-200">
                         <x-label value="Seleccionar Antena (Inalámbrico / Radio)"
@@ -587,6 +592,15 @@
                     }, 50);
                 },
                 initMap() {
+                    this.redIcon = new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    });
+
                     let defaultLat = this.lat ? parseFloat(this.lat) : -12.046374;
                     let defaultLng = this.lng ? parseFloat(this.lng) : -77.042793;
                     let initialZoom = this.zoom ? parseInt(this.zoom) : 14;

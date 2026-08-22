@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ReciboController;
+use App\Http\Controllers\DatabaseSetupController;
 use App\Http\Livewire\Admin\Boxnavs\ShowBoxnavs;
 use App\Http\Livewire\Admin\Clientnetworks\ShowClientPayments;
 use App\Http\Livewire\Admin\Clientnetworks\ShowClientRecibos;
@@ -32,6 +33,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/database-setup', [DatabaseSetupController::class, 'index'])->name('database.setup');
+Route::post('/database-setup/run', [DatabaseSetupController::class, 'run'])->name('database.setup.run');
 
 Route::middleware([
     'auth:sanctum',

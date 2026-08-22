@@ -44,8 +44,10 @@
                 @endif
             </x-slot>
         </x-table>
-        <div class="mt-4">
-            {{ $notifications->links() }}
-        </div>
+        @if ($notifications->hasPages())
+            <div class="sticky bottom-2 z-10 w-full mt-4">
+                {{ $notifications->links() }}
+            </div>
+        @endif
     </div>
 </div>

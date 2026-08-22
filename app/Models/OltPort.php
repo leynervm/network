@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class Portboxnav extends Model
+class OltPort extends Model
 {
     use HasFactory;
 
-    const DISPONIBLE = '0';
-    const OCUPADO = '1';
-
-
+    protected $table = 'olt_ports';
     public $timestamps = false;
+
     protected $fillable = [
-        'code', 'status', 'boxnav_id', 'alias', 'direccion'
+        'olt_id',
+        'port_number',
+        'alias',
+        'direccion',
     ];
 
     public function setAliasAttribute($value)
@@ -31,18 +30,8 @@ class Portboxnav extends Model
         $this->attributes['direccion'] = $value ? trim(mb_strtoupper($value, "UTF-8")) : null;
     }
 
-    public function setCodeAttribute($value)
+    public function olt(): BelongsTo
     {
-        $this->attributes['code'] =  trim(mb_strtoupper($value, "UTF-8"));
-    }
-
-    public function boxnav(): BelongsTo
-    {
-        return $this->belongsTo(Boxnav::class);
-    }
-
-    public function network(): MorphOne
-    {
-        return $this->morphOne(Network::class, 'networkable');
+        return $this->belongsTo(Olt::class);
     }
 }

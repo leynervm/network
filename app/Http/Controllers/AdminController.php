@@ -19,6 +19,7 @@ class AdminController extends Controller
 
     public function show(Olt $olt)
     {
+        $olt->load('ports');
         return view('admin.olts.show', compact('olt'));
     }
 

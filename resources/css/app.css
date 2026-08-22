@@ -25,7 +25,15 @@
 }
 
 .port-title-meta {
-    @apply absolute top-1 left-1/2 -translate-x-1/2 text-gray-500 dark:text-gray-400 text-[10px] font-medium whitespace-nowrap tracking-tighter;
+    position: absolute;
+    top: 7px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    line-height: 12px;
+    height: 12px;
+    z-index: 10;
+    @apply text-gray-500 dark:text-gray-400 text-[10px] font-medium tracking-tighter;
 }
 
 :root {
@@ -83,9 +91,9 @@ html.dark {
     /* @apply shadow-inner shadow-gray-500/50; */
 }
 
-.pon-card:hover,
-.splitter-port:hover,
-.rj45-jack:hover {
+.pon-card.hovered-card-state,
+.splitter-port.hovered-card-state,
+.rj45-jack.hovered-card-state {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
     z-index: 5;

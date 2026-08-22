@@ -45,7 +45,7 @@ class CreateClientNetwork extends Component
                 'required', 'numeric', 'regex:/^(?:\d{8}|\d{11})$/',
             ],
             'name' => ['required', 'string', 'min:6'],
-            'codigo_slp' => ['nullable', 'string', 'max:255'],
+            'codigo_slp' => ['nullable', 'string', 'max:255', 'unique:networks,codigo_slp'],
             'telefono' => ['nullable', 'numeric', 'regex:/^\d{9}$/'],
             'location' => ['required', 'string', 'min:3', 'max:255'],
             'descripcion' => ['nullable', 'string', 'min:10'],
@@ -228,7 +228,7 @@ class CreateClientNetwork extends Component
         $this->document = trim($this->document);
         $this->name = trim($this->name);
         $this->telefono = trim($this->telefono);
-        $this->codigo_slp = trim($this->codigo_slp);
+        $this->codigo_slp = trim($this->codigo_slp) === '' ? null : trim($this->codigo_slp);
 
         $client = Client::withWhereHas('networks', function ($query) {
             $query->activos();
