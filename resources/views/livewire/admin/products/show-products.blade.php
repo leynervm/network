@@ -1,7 +1,4 @@
 <div x-data="loadeditimage()">
-    @if ($products->hasPages())
-        {{ $products->links() }}
-    @endif
 
     <div class="w-full flex flex-wrap gap-2 mb-2">
         <div class="w-full max-w-sm">
@@ -106,11 +103,17 @@
         </x-table>
     </div>
 
+    @if ($products->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $products->links() }}
+        </div>
+    @endif
+
     <x-dialog-modal wire:model="open" maxWidth="2xl" footerAlign="justify-end">
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">REGISTRAR PRODUCTO</h1>
             <button wire:click="$set('open', false)"
-                class="rounded-md text-gray-700 p-2 hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-600 focus:text-gray-600 transition-colors ease-in-out duration-150">
+                class="rounded-md text-gray-700 p-2 dark:text-gray-400 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-neutral-700/40 dark:focus:bg-neutral-700/40 hover:text-gray-600 focus:text-gray-600 dark:hover:text-gray-300 dark:focus:text-gray-300 transition-colors ease-in-out duration-150">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
                     stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

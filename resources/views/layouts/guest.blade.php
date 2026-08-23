@@ -8,16 +8,27 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-        {{-- <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" /> --}}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        <!-- Scripts -->
-        {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Theme Initialization Script (prevents FOUC) -->
+        <script>
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        </script>
+
+        <style>
+            body { font-family: 'Outfit', sans-serif; }
+            [x-cloak] { display: none !important; }
+        </style>
     </head>
-    <body>
-        <div class="font-sans text-gray-900 antialiased">
-            {{ $slot }}
-        </div>
+    <body class="font-sans antialiased text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-950 transition-colors duration-300">
+        {{ $slot }}
     </body>
 </html>

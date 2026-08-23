@@ -1,9 +1,4 @@
 <div>
-    @if ($antenas->hasPages())
-        <div class="w-full">
-            {{ $antenas->links() }}
-        </div>
-    @endif
 
     @if (count($antenas) > 0)
         <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3 mt-5">
@@ -21,29 +16,40 @@
                     <h1 class="text-[10px] font-semibold text-center">{{ $item->name }}</h1>
                     <p class="text-[10px] leading-3">{{ $item->direccion }}</p>
 
-                    <div class="w-full flex justify-end items-start gap-1">
-                        <x-button wire:click="edit({{ $item->id }})">
+                    <div class="w-full flex justify-end items-center gap-1">
+                        <button wire:click="edit({{ $item->id }})" wire:loading.attr="disabled"
+                            wire:key="edit_{{ $item->id }}" title="Editar"
+                            class="inline-block p-1 rounded-md text-orange-500 hover:bg-orange-500 hover:text-white duration-150 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-4 h-4 block mx-auto">
+                                stroke="currentColor" class="size-4 block mx-auto">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                             </svg>
-                        </x-button>
-                        <x-danger-button onclick="confirmDeleteAntena({{ $item->id }})"
-                            wire:key="deleteantena_{{ $item->id }}">
+                        </button>
+                        
+                        <button type="button" onclick="confirmDeleteAntena({{ $item->id }})"
+                            wire:loading.attr="disabled" wire:key="deleteantena_{{ $item->id }}"
+                            title="Eliminar"
+                            class="inline-block p-1 rounded-md text-red-600 hover:bg-red-600 hover:text-white duration-150 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                class="w-4 h-4">
+                                class="size-4 block mx-auto">
                                 <path d="M3 6h18" />
                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                                 <line x1="10" x2="10" y1="11" y2="17" />
                                 <line x1="14" x2="14" y1="11" y2="17" />
                             </svg>
-                        </x-danger-button>
+                        </button>
                     </div>
                 </div>
             @endforeach
+        </div>
+    @endif
+
+    @if ($antenas->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $antenas->links() }}
         </div>
     @endif
 
@@ -51,7 +57,7 @@
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">ACTUALIZAR ANTENA</h1>
             <button wire:click="$set('open', false)"
-                class="rounded-md text-gray-700 p-2 hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-600 focus:text-gray-600 transition-colors ease-in-out duration-150">
+                class="rounded-md text-gray-700 p-2 dark:text-gray-400 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-neutral-700/40 dark:focus:bg-neutral-700/40 hover:text-gray-600 focus:text-gray-600 dark:hover:text-gray-300 dark:focus:text-gray-300 transition-colors ease-in-out duration-150">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
                     stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

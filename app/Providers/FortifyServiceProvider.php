@@ -34,13 +34,37 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
         });
 
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $ultimoAcceso = \App\Models\Acceso::latest('id')->first();
+
+            if (!$ultimoAcceso) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    Fortify::username() => 'Acceso al sistema se encuentra restringido. Comunicarse con el administrador',
+                ]);
+            }
+
+            if ($ultimoAcceso && $ultimoAcceso->status === 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    Fortify::username() => 'El sistema se encuentra suspendido. ' . ($ultimoAcceso->description ?: 'No puedes iniciar sesión en este momento.'),
+                ]);
+            }
+
+            $user = \App\Models\User::where(Fortify::username(), $request->input(Fortify::username()))->first();
+
+            if ($user && \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+                return $user;
+            }
+
+            return null;
         });
     }
 }

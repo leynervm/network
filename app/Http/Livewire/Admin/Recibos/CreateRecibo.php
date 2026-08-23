@@ -11,26 +11,21 @@ use Livewire\Component;
 
 class CreateRecibo extends Component
 {
-
     public $open = false;
     public $seriepago_id, $month, $type;
+    public $ubigeo_id = '';
+    public $locations = [];
 
     protected function rules()
     {
         return [
-            'month' => [
-                'required', 'date',
-                // Rule::unique('recibos', 'month')->where('network_id', $this->network->id)
-            ],
+            'month' => ['required', 'date'],
             'seriepago_id' => ['required', 'integer', 'min:1'],
             'type' => ['required', 'string'],
-            // 'vencimiento' => ['required', 'date'],
         ];
     }
 
-    public function mount()
-    {
-    }
+    public function mount() {}
 
     public function render()
     {
@@ -44,7 +39,15 @@ class CreateRecibo extends Component
             $this->reset();
             $this->resetValidation();
             $this->month = now('America/Lima')->format('Y-m');
+            $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+            $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
+            $this->locations = $ubigeos->pluck('distrito', 'id')->toArray();
         }
+    }
+
+    public function updatedType($value)
+    {
+        $this->ubigeo_id = '';
     }
 
     // public function updatedMonth($value)
@@ -60,23 +63,28 @@ class CreateRecibo extends Component
         $validateData = $this->validate();
         DB::beginTransaction();
         try {
-            $networks = [];
-            if (trim($this->type) == 'TODOS' || trim($this->type) == 'todos') {
-                $networks = Network::activos()->whereDoesntHave('recibos', function ($query) {
-                    $query->where('month', $this->month);
-                })->where('status',  Network::ACTIVO)->get();
-            } else {
-                $networks = Network::activos()->whereDoesntHave('recibos', function ($query) {
-                    $query->where('month', $this->month);
-                })->where('type', $this->type)->where('status', Network::ACTIVO)->get();
+            $query = Network::activos()
+                ->whereDoesntHave('recibos', function ($q) {
+                    $q->where('month', $this->month);
+                })
+                ->where('status', Network::ACTIVO);
+
+            if (trim($this->type) != 'TODOS' && trim($this->type) != 'todos') {
+                $query->where('type', $this->type);
             }
+
+            if (!empty($this->ubigeo_id)) {
+                $query->where('ubigeo_id', $this->ubigeo_id);
+            }
+
+            $networks = $query->get();
 
             if (count($networks) > 0) {
                 foreach ($networks as $item) {
                     $amount = $item->price;
                     if (Carbon::parse($item->date)->format('Y-m') == Carbon::parse($this->month)->format('Y-m')) {
                         if (!Carbon::parse($item->date)->isSameDay(Carbon::parse($item->date)->copy()->firstOfMonth())) {
-                            $amount =  amountDays($item->date, now('America/Lima'), $amount);
+                            $amount = amountDays($item->date, now('America/Lima'), $amount);
                         }
                     }
 

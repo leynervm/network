@@ -38,4 +38,9 @@ class Spliter extends Model
     {
         return $this->hasMany(Boxnav::class);
     }
+
+    public function ports(): HasMany
+    {
+        return $this->hasMany(SpliterPort::class, 'spliter_id');
+    }
 }

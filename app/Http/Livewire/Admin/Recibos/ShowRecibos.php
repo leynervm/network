@@ -3,10 +3,14 @@
 namespace App\Http\Livewire\Admin\Recibos;
 
 use App\Models\Formapay;
+use App\Models\Network;
 use App\Models\Recibo;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RecibosExport;
 
 class ShowRecibos extends Component
 {
@@ -23,6 +27,12 @@ class ShowRecibos extends Component
         ],
         'searchtype' => [
             'except' => '', 'as' => 'tipo-recibo'
+        ],
+        'searchstatus' => [
+            'except' => '', 'as' => 'estado-pago'
+        ],
+        'searchlocation' => [
+            'except' => '', 'as' => 'lugar'
         ]
     ];
 
@@ -33,29 +43,82 @@ class ShowRecibos extends Component
     public $search = '';
     public $searchmonth = '';
     public $searchtype = '';
+    public $searchstatus = '';
+    public $searchlocation = '';
 
     public function mount()
     {
         $this->recibo = new Recibo();
     }
 
-    public function render()
+    private function getRecibosQueryBuilder()
     {
-        $recibos = Recibo::with('client')->withWhereHas('network', function ($query) {
+        $recibos = Recibo::with([
+            'client',
+            'payment.formapay',
+            'network.ubigeo',
+            'network.networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    \App\Models\Portboxnav::class => ['boxnav.spliter.olt'],
+                ]);
+            }
+        ])->withWhereHas('network', function ($query) {
             if (trim($this->searchtype) !== '') {
                 $query->where('type', $this->searchtype);
             }
-        })->orderBy('date', 'desc');
+            if (trim($this->searchlocation) !== '') {
+                $query->where('ubigeo_id', $this->searchlocation);
+            }
+        });
         if (trim($this->search) !== '') {
             $recibos->where('seriecompleta', 'like', $this->search);
         }
         if (trim($this->searchmonth) !== '') {
             $recibos->where('month', $this->searchmonth);
         }
+        
+        if (trim($this->searchstatus) !== '') {
+            if ($this->searchstatus == 'PAGADO') {
+                $recibos->has('payment');
+            } elseif ($this->searchstatus == 'PENDIENTE') {
+                $recibos->doesntHave('payment');
+            }
+        }
 
-        $recibos = $recibos->orderBy('month', 'desc')->paginate();
+        return $recibos->orderBy('date', 'desc')->orderBy('month', 'desc');
+    }
+
+    public function render()
+    {
+        $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+        $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
+        $locations = $ubigeos->pluck('distrito', 'id')->toArray();
+        $recibos = $this->getRecibosQueryBuilder()->paginate();
         $formapays = Formapay::orderBy('id', 'asc')->get();
-        return view('livewire.admin.recibos.show-recibos', compact('recibos', 'formapays'));
+        return view('livewire.admin.recibos.show-recibos', compact('recibos', 'formapays', 'locations'));
+    }
+
+    public function exportExcel()
+    {
+        $query = $this->getRecibosQueryBuilder();
+        return Excel::download(new RecibosExport($query), 'recibos-' . now()->format('YmdHis') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        // Set dynamic limits for heavy data
+        ini_set('memory_limit', '1024M');
+        set_time_limit(300);
+
+        // Get the matching receipts without pagination limits
+        $recibos = $this->getRecibosQueryBuilder()->get();
+
+        $pdf = PDF::setPaper('a4', 'portrait')
+                  ->loadView('admin.recibos.export-pdf', compact('recibos'));
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'recibos-' . now()->format('YmdHis') . '.pdf');
     }
 
     public function pay(Recibo $recibo)
@@ -73,6 +136,16 @@ class ShowRecibos extends Component
     }
 
     public function updatedSearchmonth()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSearchstatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSearchlocation()
     {
         $this->resetPage();
     }

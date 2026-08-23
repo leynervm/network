@@ -18,8 +18,18 @@ class Portboxnav extends Model
 
     public $timestamps = false;
     protected $fillable = [
-        'code', 'status', 'boxnav_id'
+        'code', 'status', 'boxnav_id', 'alias', 'direccion'
     ];
+
+    public function setAliasAttribute($value)
+    {
+        $this->attributes['alias'] = $value ? trim(mb_strtoupper($value, "UTF-8")) : null;
+    }
+
+    public function setDireccionAttribute($value)
+    {
+        $this->attributes['direccion'] = $value ? trim(mb_strtoupper($value, "UTF-8")) : null;
+    }
 
     public function setCodeAttribute($value)
     {

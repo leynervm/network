@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ReciboController;
+use App\Http\Controllers\DatabaseSetupController;
 use App\Http\Livewire\Admin\Boxnavs\ShowBoxnavs;
 use App\Http\Livewire\Admin\Clientnetworks\ShowClientPayments;
 use App\Http\Livewire\Admin\Clientnetworks\ShowClientRecibos;
@@ -33,23 +34,29 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/database-setup', [DatabaseSetupController::class, 'index'])->name('database.setup');
+Route::post('/database-setup/run', [DatabaseSetupController::class, 'run'])->name('database.setup.run');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified'
 ])->group(function () {
+
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-
+    
     Route::get('/admin/olts', [AdminController::class, 'olts'])->name('admin.olts');
     Route::get('/admin/olts/{olt}/show', [AdminController::class, 'show'])->name('admin.olts.show');
     // Route::get('/admin/olts/{olt}/spliter/{spliter}/boxnavs', [AdminController::class, 'boxnavs'])->name('admin.olts.boxnavs');
 
     Route::get('/admin/antenas', [AdminController::class, 'antenas'])->name('admin.antenas');
-    Route::get('/admin/Recibos', [AdminController::class, 'recibos'])->name('admin.recibos');
-    Route::get('/admin/payments', ShowPayments::class)->name('admin.payments');
+    Route::get('/admin/recibos', [AdminController::class, 'recibos'])->name('admin.recibos');
+    Route::get('/admin/payments', [AdminController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
+    
+    Route::get('/admin/yape-notifications', \App\Http\Livewire\Admin\Yape\ShowNotifications::class)->name('admin.yape.notifications');
 
 
     Route::get('/admin/client-network/{network}/show', [AdminController::class, 'shownetwork'])->name('admin.network.show');

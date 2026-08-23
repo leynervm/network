@@ -1,22 +1,19 @@
 <div>
-    @if ($olts->hasPages())
-        {{ $olt->links() }}
-    @endif
 
 
     @if (count($olts) > 0)
         <div class="w-full flex flex-col gap-3 mt-3">
             @foreach ($olts as $item)
                 <a href="{{ route('admin.olts.show', $item->id) }}"
-                    class="w-full p-3 rounded-xl bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700/80 shadow-sm hover:shadow-md hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-200 flex justify-between items-center gap-3 group">
+                    class="w-full p-3 rounded-xl bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700/80 shadow-sm hover:shadow-md hover:border-neutral-500 dark:hover:border-neutral-500 transition-all duration-200 flex justify-between items-center gap-3 group">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
+                        <div class="w-10 h-10 rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-100 dark:border-neutral-700/60 flex items-center justify-center text-neutral-600 dark:text-neutral-400 group-hover:scale-105 transition-transform shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-xs font-bold text-gray-800 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ $item->name }}</h1>
+                            <h1 class="text-xs font-bold text-gray-800 dark:text-gray-100 group-hover:text-neutral-600 dark:group-hover:text-neutral-400 transition-colors">{{ $item->name }}</h1>
                             <span class="inline-block mt-0.5 px-2 py-0.5 bg-gray-100 dark:bg-neutral-700/60 text-gray-600 dark:text-gray-300 text-[10px] font-semibold rounded-md border border-gray-200/60 dark:border-neutral-600/60">{{ $item->outs }} SALIDAS</span>
                         </div>
                     </div>
@@ -48,11 +45,17 @@
         </div>
     @endif
 
+    @if ($olts->hasPages())
+        <div class="sticky bottom-2 z-10 w-full mt-4">
+            {{ $olts->links() }}
+        </div>
+    @endif
+
     <x-dialog-modal wire:model="open" maxWidth="xl">
         <x-slot name="title">
             <h1 class="font-semibold text-[10px]">ACTUALIZAR OLT</h1>
             <button wire:click="$set('open', false)"
-                class="rounded-md text-gray-700 p-2 hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-600 focus:text-gray-600 transition-colors ease-in-out duration-150">
+                class="rounded-md text-gray-700 p-2 dark:text-gray-400 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-neutral-700/40 dark:focus:bg-neutral-700/40 hover:text-gray-600 focus:text-gray-600 dark:hover:text-gray-300 dark:focus:text-gray-300 transition-colors ease-in-out duration-150">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
                     stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

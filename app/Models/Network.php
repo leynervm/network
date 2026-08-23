@@ -16,6 +16,7 @@ class Network extends Model
         'date', 'code', 'portnumber', 'descripcion', 'type', 'telefono',
         'price', 'direccion', 'typelocal', 'status', 'client_id',
         'ubigeo_id', 'networkable_id', 'networkable_type',
+        'latitude', 'longitude', 'zoom', 'codigo_slp', 'location',
     ];
     public $timestamps = false;
 
@@ -49,6 +50,10 @@ class Network extends Model
         $this->attributes['direccion'] =  trim(mb_strtoupper($value, "UTF-8"));
     }
 
+    public function setLocationAttribute($value)
+    {
+        $this->attributes['location'] =  trim(mb_strtoupper($value, "UTF-8"));
+    }
 
     public function networkable(): MorphTo
     {

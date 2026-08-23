@@ -47,6 +47,7 @@ class OltSeeder extends Seeder
                     'outs' => 8,
                     'direccion' => '',
                     'status' => Boxnav::DISPONIBLE,
+                    'splitter_port' => $i + 1,
                 ]);
             }
 

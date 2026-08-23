@@ -19,6 +19,7 @@ class AdminController extends Controller
 
     public function show(Olt $olt)
     {
+        $olt->load('ports');
         return view('admin.olts.show', compact('olt'));
     }
 
@@ -44,6 +45,13 @@ class AdminController extends Controller
 
     public function shownetwork(Network $network)
     {
+        $network->load([
+            'networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    \App\Models\Portboxnav::class => ['boxnav.spliter.olt'],
+                ]);
+            },
+        ]);
         return view('admin.recibos.networkrecibos', compact('network'));
     }
 
@@ -62,9 +70,13 @@ class AdminController extends Controller
         return view('admin.marcas.index');
     }
 
+    public function payments()
+    {
+        return view('admin.payments.index');
+    }
+
     public function print(Recibo $recibo)
     {
-
         $pdf = PDF::setPaper([0, 0, 226.77, 500])->loadView('admin.print.index', compact('recibo'));
         return $pdf->stream();
 

@@ -9,7 +9,20 @@ class Ubigeo extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['departamento', 'provincia', 'distrito', 'ubigeo'];
+    protected $fillable = [
+        'ubigeo_reniec',
+        'ubigeo_inei',
+        'departamento_inei',
+        'departamento',
+        'provincia_inei',
+        'provincia',
+        'distrito',
+        'region',
+        'superficie',
+        'altitud',
+        'latitud',
+        'longitud',
+    ];
+
     public $timestamps = false;
-    
 }
