@@ -134,8 +134,9 @@ class ShowClientNetworks extends Component
     public function render()
     {
         $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
-        $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
-        $locations = $ubigeos->pluck('distrito', 'id')->toArray();
+        $filteredUbigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
+        $locations = $filteredUbigeos->pluck('distrito', 'id')->toArray();
+        $ubigeos = \App\Models\Ubigeo::orderBy('ubigeo_reniec', 'asc')->get();
         $clientnetworks = $this->getClientNetworksQueryBuilder();
         // Filtrar por ubigeo_id en lugar de location
         if (trim($this->searchlocation) !== '') {
