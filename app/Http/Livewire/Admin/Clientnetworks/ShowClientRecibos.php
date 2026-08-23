@@ -213,6 +213,12 @@ class ShowClientRecibos extends Component
                 $recibo->descuento = 0;
                 $recibo->save();
                 $recibo->payment->delete();
+
+                if ($recibo->network) {
+                    $recibo->network->status = Network::SUSPENDIDO;
+                    $recibo->network->save();
+                }
+
                 DB::commit();
                 $this->network->refresh();
                 $this->dispatchBrowserEvent('toast', toastJson('Pago anulado correctamente'));
