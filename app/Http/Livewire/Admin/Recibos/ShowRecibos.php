@@ -182,6 +182,12 @@ class ShowRecibos extends Component
             $this->recibo->descuento = $this->descuento;
             $this->recibo->total = $this->recibo->amount - $this->descuento;
             $this->recibo->save();
+
+            if ($this->recibo->network) {
+                $this->recibo->network->status = Network::ACTIVO;
+                $this->recibo->network->save();
+            }
+
             DB::commit();
             $this->dispatchBrowserEvent('toast', toastJson('Recibo pagado correctamente'));
             $this->resetValidation();

@@ -103,6 +103,9 @@ class CreateRecibo extends Component
                         'client_id' => $item->client_id,
                     ]);
 
+                    $item->status = Network::SUSPENDIDO;
+                    $item->save();
+
                     $seriepago->contador = $seriepago->contador + 1;
                     $seriepago->save();
                 }

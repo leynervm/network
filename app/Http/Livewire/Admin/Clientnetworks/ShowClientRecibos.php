@@ -142,6 +142,10 @@ class ShowClientRecibos extends Component
             ]);
             $recibo->seriepago->contador = $recibo->seriepago->contador + 1;
             $recibo->seriepago->save();
+
+            $this->network->status = Network::SUSPENDIDO;
+            $this->network->save();
+
             DB::commit();
             $this->network->refresh();
             $this->resetExcept(['network', 'recibo']);
@@ -185,6 +189,10 @@ class ShowClientRecibos extends Component
             $this->recibo->descuento = $this->descuento;
             $this->recibo->total = $this->recibo->amount - $this->descuento;
             $this->recibo->save();
+
+            $this->network->status = Network::ACTIVO;
+            $this->network->save();
+
             DB::commit();
             $this->network->refresh();
             $this->dispatchBrowserEvent('toast', toastJson('Recibo pagado correctamente'));
