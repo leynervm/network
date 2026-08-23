@@ -1,4 +1,4 @@
-<div x-data="{ ponIdx: null, fiberIdx: null }" @pon-selected.window="ponIdx = $event.detail.pon; fiberIdx = null">
+<div x-data="{ ponIdx: @entangle('ponIdx'), fiberIdx: @entangle('fiberIdx') }" @pon-selected.window="ponIdx = $event.detail.pon; fiberIdx = null">
     <x-loading-overlay />
 
     {{-- ═══ SPLITTER SECTION ═══ --}}
@@ -9,6 +9,7 @@
 
     @foreach ($olt->spliters as $si => $item)
         <div x-show="ponIdx === {{ $si }}" x-cloak wire:key="spliter_{{ $item->id }}">
+            @if ($ponIdx === $si)
 
             {{-- Splitter Chassis (Theme Adaptive) --}}
             <div
@@ -164,6 +165,7 @@
                 @foreach ($item->boxnavs as $ni => $itemboxnav)
                     <div x-show="fiberIdx === {{ $itemboxnav->splitter_port - 1 }}" x-cloak
                         wire:key="boxnav_{{ $itemboxnav->id }}">
+                        @if ($fiberIdx === $itemboxnav->splitter_port - 1)
 
                         {{-- NAP Box Chassis (Theme Adaptive) --}}
                         <div
@@ -346,6 +348,7 @@
                                 </span>
                             </div>
                         </div>
+                        @endif
                     </div>
                 @endforeach
 
@@ -361,6 +364,7 @@
                 </div>
             </div>
 
+            @endif
         </div>
     @endforeach
 

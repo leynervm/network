@@ -65,15 +65,15 @@
 
                 <div class="w-full">
                     <x-label value="Seleccionar Lugar (Opcional)" />
-                    <select class="w-full block rounded-lg border-gray-300 text-xs !p-2" wire:model.defer="location">
+                    <select class="w-full block rounded-lg border-gray-300 text-xs !p-2" wire:model.defer="ubigeo_id">
                         <option value="">TODOS LOS LUGARES</option>
                         @if (count($locations) > 0)
-                            @foreach ($locations as $item)
-                                <option value="{{ $item }}">{{ $item }}</option>
+                            @foreach ($locations as $id => $district)
+                                <option value="{{ $id }}">{{ $district }}</option>
                             @endforeach
                         @endif
                     </select>
-                    <x-input-error for="location" />
+                    <x-input-error for="ubigeo_id" />
                 </div>
 
                 <div class="w-full ">

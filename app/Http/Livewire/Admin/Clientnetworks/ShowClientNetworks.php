@@ -127,19 +127,27 @@ class ShowClientNetworks extends Component
         if (trim($this->searchstatus) !== '') {
             $clientnetworks->where('status', $this->searchstatus);
         }
-        if (trim($this->searchlocation) !== '') {
-            $clientnetworks->where('location', $this->searchlocation);
-        }
+
         return $clientnetworks->orderBy('date', 'desc');
     }
 
     public function render()
     {
-        $ubigeos = Ubigeo::orderBy('ubigeo', 'asc')->get();
+        $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+        $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
+        $locations = $ubigeos->pluck('distrito', 'id')->toArray();
+        $clientnetworks = $this->getClientNetworksQueryBuilder();
+        // Filtrar por ubigeo_id en lugar de location
+        if (trim($this->searchlocation) !== '') {
+            $clientnetworks->where('ubigeo_id', $this->searchlocation);
+        }
+        // Nuevo filtro por código SLP si se provee
+        if (property_exists($this, 'searchcode') && trim($this->searchcode) !== '') {
+            $clientnetworks->where('codigo_slp', 'like', '%' . $this->searchcode . '%');
+        }
+        $clientnetworks = $clientnetworks->paginate();
         $olts = Olt::with(['spliters.boxnavs.portboxnavs.network'])->get();
         $antenas = Antena::orderBy('id', 'asc')->get();
-        $locations = Network::activos()->whereNotNull('location')->where('location', '!=', '')->distinct()->orderBy('location', 'asc')->pluck('location')->toArray();
-        $clientnetworks = $this->getClientNetworksQueryBuilder()->paginate();
         return view('livewire.admin.clientnetworks.show-client-networks', compact('clientnetworks', 'ubigeos', 'olts', 'antenas', 'locations'));
     }
 
@@ -227,6 +235,12 @@ class ShowClientNetworks extends Component
     {
         $this->network->telefono = trim($this->network->telefono);
         $this->network->codigo_slp = trim($this->network->codigo_slp) === '' ? null : trim($this->network->codigo_slp);
+        if ($this->network->ubigeo_id) {
+            $ubigeo = Ubigeo::find($this->network->ubigeo_id);
+            if ($ubigeo) {
+                $this->network->location = $ubigeo->distrito;
+            }
+        }
         $this->validate();
         DB::beginTransaction();
         try {
@@ -265,13 +279,88 @@ class ShowClientNetworks extends Component
     public function updatedNetwork($name, $value)
     {
         if ($name === 'type') {
-            $this->reset(['antena_id', 'olt_id', 'spliter_id', 'boxnav_id', 'portboxnav_id', 'portnumber', 'spliters', 'boxnavs', 'portboxnavs']);
+            // Reset dependent fields only when selecting SATELITAL service
+            if ($value === \App\Models\Network::SATELITAL) {
+                $this->reset(['antena_id', 'olt_id', 'spliter_id', 'boxnav_id', 'portboxnav_id', 'portnumber', 'spliters', 'boxnavs', 'portboxnavs']);
+            }
+        }
+        if ($name === 'ubigeo_id') {
+            if ($value) {
+                $ubigeo = Ubigeo::find($value);
+                if ($ubigeo) {
+                    $this->network->location = $ubigeo->distrito;
+                }
+            } else {
+                $this->network->location = null;
+            }
         }
     }
 
-    public function updatedNetworkType($value)
+
+
+    public function updatedOltId($id)
     {
-        $this->reset(['antena_id', 'olt_id', 'spliter_id', 'boxnav_id', 'portboxnav_id', 'portnumber', 'spliters', 'boxnavs', 'portboxnavs']);
+        if (!$id) {
+            $this->reset([
+                'spliter_id', 'boxnav_id', 'portboxnav_id',
+                'spliters', 'boxnavs', 'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->reset([
+            'spliter_id', 'boxnav_id', 'portboxnav_id',
+            'boxnavs', 'portboxnavs', 'portnumber'
+        ]);
+        $olt = Olt::find($id);
+        $this->spliters = $olt ? $olt->spliters : [];
+    }
+
+    public function updatedSpliterId($id)
+    {
+        if (!$id) {
+            $this->reset([
+                'spliter_id', 'boxnav_id', 'portboxnav_id',
+                'boxnavs', 'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->reset([
+            'boxnav_id', 'portboxnav_id',
+            'portboxnavs', 'portnumber'
+        ]);
+        $spliter = Spliter::find($id);
+        $this->boxnavs = $spliter ? $spliter->boxnavs : [];
+    }
+
+    public function updatedBoxnavId($id)
+    {
+        if (!$id) {
+            $this->reset([
+                'boxnav_id', 'portboxnav_id',
+                'portboxnavs', 'portnumber'
+            ]);
+            return;
+        }
+        $this->reset(['portboxnav_id', 'portnumber']);
+        $boxnav = Boxnav::find($id);
+        $this->portboxnavs = $boxnav ? $boxnav->portboxnavs()->with('network')->get() : [];
+    }
+
+    public function updatedPortboxnavId($id)
+    {
+        if (!$id) {
+            $this->reset(['portnumber']);
+            return;
+        }
+        $port = Portboxnav::find($id);
+        if ($port && $port->network()->exists() && $id != $this->actual_port_id) {
+            $this->dispatchBrowserEvent('alert', alertJson('Puerto no disponible', 'El puerto seleccionado ya se encuentra ocupado.', 'error'));
+            $this->portboxnav_id = null;
+            return;
+        }
+        if ($port) {
+            $this->portnumber = $port->code;
+        }
     }
 
     public function selectOlt($id)

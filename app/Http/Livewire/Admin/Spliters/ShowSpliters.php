@@ -36,28 +36,16 @@ class ShowSpliters extends Component
     public $editingAlias;
     public $editingDireccion;
 
+    public $ponIdx = null;
+    public $fiberIdx = null;
+
     protected $listeners = ['render'];
 
     public function mount(Olt $olt)
     {
         $this->olt = $olt;
-        $this->loadOltRelations();
         $this->spliter = new Spliter();
         $this->boxnav = new Boxnav();
-    }
-
-    public function hydrate()
-    {
-        $this->loadOltRelations();
-    }
-
-    public function loadOltRelations()
-    {
-        $this->olt->load([
-            'ports',
-            'spliters.ports',
-            'spliters.boxnavs.portboxnavs.network',
-        ]);
     }
 
     public function rules()
@@ -79,7 +67,29 @@ class ShowSpliters extends Component
 
     public function render()
     {
-        return view('livewire.admin.spliters.show-spliters');
+        $olt = Olt::with([
+            'ports',
+            'spliters'
+        ])->findOrFail($this->olt->id);
+
+        if ($this->ponIdx !== null && isset($olt->spliters[(int)$this->ponIdx])) {
+            $selectedSpliter = $olt->spliters[(int)$this->ponIdx];
+            $selectedSpliter->load([
+                'ports',
+                'boxnavs'
+            ]);
+
+            if ($this->fiberIdx !== null) {
+                $selectedBoxnav = $selectedSpliter->boxnavs->firstWhere('splitter_port', (int)$this->fiberIdx + 1);
+                if ($selectedBoxnav) {
+                    $selectedBoxnav->load([
+                        'portboxnavs.network.client'
+                    ]);
+                }
+            }
+        }
+
+        return view('livewire.admin.spliters.show-spliters', compact('olt'));
     }
 
 
@@ -277,7 +287,8 @@ class ShowSpliters extends Component
     {
         DB::beginTransaction();
         try {
-            $index = $this->olt->spliters->pluck('id')->search($spliter->id);
+            $spliters = Spliter::where('olt_id', $this->olt->id)->get();
+            $index = $spliters->pluck('id')->search($spliter->id);
             if ($index !== false) {
                 $portNumber = $index + 1;
                 OltPort::where([
@@ -323,10 +334,11 @@ class ShowSpliters extends Component
 
     public function editspliter(Spliter $spliter)
     {
-        $index = $this->olt->spliters->pluck('id')->search($spliter->id);
+        $spliters = Spliter::where('olt_id', $this->olt->id)->get();
+        $index = $spliters->pluck('id')->search($spliter->id);
         if ($index !== false) {
             $portNumber = $index + 1;
-            $oltPort = $this->olt->ports->firstWhere('port_number', $portNumber);
+            $oltPort = OltPort::where('olt_id', $this->olt->id)->where('port_number', $portNumber)->first();
             if ($oltPort) {
                 if ($oltPort->alias && (!$spliter->name || str_starts_with(strtoupper($spliter->name), 'SPLITER'))) {
                     $spliter->name = $oltPort->alias;
@@ -356,7 +368,8 @@ class ShowSpliters extends Component
             $this->spliter->save();
 
             // Sync to OLT port alias
-            $index = $this->olt->spliters->pluck('id')->search($this->spliter->id);
+            $spliters = Spliter::where('olt_id', $this->olt->id)->get();
+            $index = $spliters->pluck('id')->search($this->spliter->id);
             if ($index !== false) {
                 $portNumber = $index + 1;
                 OltPort::updateOrCreate(
@@ -373,10 +386,10 @@ class ShowSpliters extends Component
             DB::commit();
 
             $this->olt->refresh();
-            $this->loadOltRelations();
 
             // Dispatch event to update OLT ports display reactively
-            $this->dispatchBrowserEvent('olt-ports-updated', $this->olt->ports->keyBy('port_number')->map(fn($p) => ['alias' => $p->alias, 'direccion' => $p->direccion])->toArray());
+            $ports = OltPort::where('olt_id', $this->olt->id)->get();
+            $this->dispatchBrowserEvent('olt-ports-updated', $ports->keyBy('port_number')->map(fn($p) => ['alias' => $p->alias, 'direccion' => $p->direccion])->toArray());
 
             $this->dispatchBrowserEvent('toast', toastJson('Spliter actualizado correctamente'));
             $this->resetValidation();
@@ -495,7 +508,5 @@ class ShowSpliters extends Component
 
         $this->openEditPortModal = false;
         $this->olt->refresh();
-        $this->loadOltRelations();
-
     }
 }

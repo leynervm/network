@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Clientes Internet</title>
@@ -8,21 +9,25 @@
             size: a4 portrait;
             margin: 1.5cm 1cm 1.5cm 1cm;
         }
+
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 8px;
             color: #333333;
             line-height: 1.3;
         }
+
         .header-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
         }
+
         .header-table td {
             border: none;
             padding: 0;
         }
+
         .title {
             font-size: 14px;
             font-weight: bold;
@@ -30,20 +35,24 @@
             margin: 0 0 5px 0;
             text-transform: uppercase;
         }
+
         .meta-text {
             font-size: 8px;
             color: #555555;
         }
+
         .meta-right {
             text-align: right;
             font-size: 8px;
             color: #555555;
         }
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
+
         .data-table th {
             background-color: #1f2937;
             color: #ffffff;
@@ -54,26 +63,33 @@
             text-transform: uppercase;
             font-size: 8px;
         }
+
         .data-table td {
             padding: 5px 4px;
             border: 1px solid #e5e7eb;
             vertical-align: middle;
         }
+
         .data-table tr:nth-child(even) {
             background-color: #f9fafb;
         }
+
         .text-center {
             text-align: center;
         }
+
         .text-left {
             text-align: left;
         }
+
         .text-right {
             text-align: right;
         }
+
         .font-bold {
             font-weight: bold;
         }
+
         .badge {
             display: inline-block;
             padding: 2px 6px;
@@ -82,12 +98,15 @@
             text-align: center;
             color: #ffffff;
         }
+
         .badge-activo {
             background-color: #10b981;
         }
+
         .badge-suspendido {
             background-color: #ef4444;
         }
+
         .footer-page {
             position: fixed;
             bottom: -0.8cm;
@@ -102,6 +121,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <table class="header-table">
@@ -128,10 +148,11 @@
                 <th style="width: 10%;">Cód. Serv / SLP</th>
                 <th style="width: 8%;">Fecha Alta</th>
                 <th style="width: 25%;">Cliente</th>
-                <th style="width: 18%;">Ubicación / Dir</th>
+                <th style="width: 9%;">Teléfono</th>
+                <th style="width: 18%;">Lugar</th>
                 <th style="width: 8%;">Servicio</th>
                 <th style="width: 15%;">Conexión</th>
-                <th style="width: 6%;">Precio</th>
+                {{-- <th style="width: 6%;">Precio</th> --}}
                 <th style="width: 7%;">Estado</th>
             </tr>
         </thead>
@@ -142,48 +163,54 @@
                     <td class="text-center">
                         <span class="font-bold">{{ $item->code }}</span>
                         @if ($item->codigo_slp)
-                            <br/>
+                            <br />
                             <span style="color: #1d4ed8; font-weight: bold;">SLP: {{ $item->codigo_slp }}</span>
                         @endif
                     </td>
                     <td class="text-center">{{ formatDate($item->date, 'DD/MM/YYYY') }}</td>
                     <td>
                         <span class="font-bold">{{ $item->client->name }}</span>
-                        <br/>
+                        <br />
                         <span style="color: #555;">Doc: {{ $item->client->document }}</span>
+                    </td>
+                    <td class="text-center">
                         @if ($item->telefono)
-                            <br/>
-                            <span style="color: #16a34a; font-weight: bold;">Tel: {{ implode(' ', str_split($item->telefono, 3)) }}</span>
+                            {{ implode(' ', str_split($item->telefono, 3)) }}
                         @endif
                     </td>
                     <td>
-                        @if ($item->location)
-                            <strong>Lugar:</strong> {{ $item->location }}
-                            <br/>
+                        @if ($item->direccion)
+                            {{ $item->direccion }}
                         @endif
-                        {{ $item->direccion }}
+
                         @if ($item->ubigeo)
-                            <br/><span style="color: #666;">({{ $item->ubigeo->departamento }})</span>
+                            - {{ $item->ubigeo->distrito }} -
+                            {{ $item->ubigeo->provincia }}
                         @endif
                     </td>
                     <td class="text-center">{{ $item->type }}</td>
                     <td>
                         @if ($item->networkable)
                             @if ($item->isSatelital())
-                                {{ $item->networkable->name }}
-                                <br/><span style="color: #666;">{{ $item->networkable->direccion }}</span>
+                                <span style="color: #555;">{{ $item->networkable->name }}</span>
+                                <br />
+                                <span>{{ $item->networkable->direccion }}</span>
                             @else
-                                <span class="font-bold">Port: {{ $item->networkable->code }}</span>
-                                <br/>
-                                <span style="color: #555;">Caja: {{ $item->networkable->boxnav->name }}</span>
-                                <br/>
-                                <span style="color: #666;">OLT: {{ $item->networkable->boxnav->spliter->olt->name }}</span>
+                                <span style="color: #555;">
+                                    {{ $item->networkable->boxnav?->spliter?->olt?->name }} »
+                                    {{ $item->networkable->boxnav?->spliter?->name }} »
+                                    {{ $item->networkable->boxnav?->name }}
+                                </span>
+                                <br />
+                                <span class="font-bold">
+                                    {{ $item->networkable->alias ?: $item->networkable->code }}
+                                </span>
                             @endif
                         @else
                             -
                         @endif
                     </td>
-                    <td class="text-right font-bold">S/. {{ number_format($item->price, 2, '.', ',') }}</td>
+                    {{-- <td class="text-right font-bold">S/. {{ number_format($item->price, 2, '.', ',') }}</td> --}}
                     <td class="text-center">
                         @if ($item->isSuspendido())
                             <span class="badge badge-suspendido">SUSPENDIDO</span>
@@ -197,7 +224,8 @@
     </table>
 
     <div class="footer-page">
-        Pág. <script type="text/php">
+        Pág.
+        <script type="text/php">
             if (isset($pdf)) {
                 $x = $pdf->get_width() - 50;
                 $y = $pdf->get_height() - 25;
@@ -214,4 +242,5 @@
     </div>
 
 </body>
+
 </html>

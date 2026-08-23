@@ -34,23 +34,27 @@
             <x-label value="Seleccionar Lugar" />
             <select class="w-full" wire:model.lazy="searchlocation">
                 <option value="">TODOS LOS LUGARES</option>
-                @if (count($locations) > 0)
-                    @foreach ($locations as $item)
-                        <option value="{{ $item }}">{{ $item }}</option>
-                    @endforeach
-                @endif
+                @foreach ($locations as $id => $district)
+                    <option value="{{ $id }}">{{ $district }}</option>
+                @endforeach
             </select>
         </div>
         <div class="flex items-end gap-2 ml-auto">
-            <button type="button" wire:click="exportExcel" wire:loading.attr="disabled" class="inline-flex items-center justify-center p-2 bg-emerald-600 dark:bg-emerald-700 border border-transparent rounded-lg font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors gap-1 shadow-sm h-[38px] min-h-[38px]">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12-3-3m0 0-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            <button type="button" wire:click="exportExcel" wire:loading.attr="disabled"
+                class="inline-flex items-center justify-center p-2 px-3 bg-emerald-600 dark:bg-emerald-700 border border-transparent rounded-lg font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors gap-1 shadow-sm h-[38px] min-h-[38px]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12-3-3m0 0-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                 </svg>
                 EXCEL
             </button>
-            <x-danger-button wire:click="exportPdf" wire:loading.attr="disabled" class="inline-flex items-center justify-center h-[38px] min-h-[38px] gap-1 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            <x-danger-button wire:click="exportPdf" wire:loading.attr="disabled"
+                class="inline-flex items-center justify-center px-3 h-[38px] min-h-[38px] gap-1 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                 </svg>
                 PDF
             </x-danger-button>
@@ -63,9 +67,10 @@
                 <tr>
                     <th>REGISTRADO</th>
                     <th>SERIE</th>
-                    <th>CLIENTE</th>
-                    <th>MES PAGO</th>
-                    <th>SUBTOTAL</th>
+                    <th style="min-width: 230px;">CLIENTE</th>
+                    <th style="min-width: 150px;">SERVICIO</th>
+                    <th style="min-width: 100px;">MES PAGO</th>
+                    <th style="min-width: 120px;">SUBTOTAL</th>
                     <th>DESCUENTO</th>
                     <th>TOTAL</th>
                     <th>ESTADO</th>
@@ -86,11 +91,36 @@
                             <td>
                                 <p>{{ $item->client->name }}</p>
                                 <p>{{ $item->client->document }}</p>
-                                @if ($item->network->location)
-                                    <p class="text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">LUGAR: {{ $item->network->location }}</p>
-                                @endif
-                                <p class="font-semibold">SERVICIO :{{ $item->network->type }}</p>
+
+                                {{-- @if ($item->network && $item->network->networkable)
+                                    @if ($item->network->isSatelital())
+                                        <p class="text-[10px] text-neutral-500">
+                                            {{ $item->network->networkable->name }}
+                                        </p>
+                                    @else
+                                        <p class="text-[10px] text-neutral-500">
+                                            {{ $item->network->networkable->boxnav?->spliter?->olt?->name }} »
+                                            {{ $item->network->networkable->boxnav?->spliter?->name }} »
+                                            {{ $item->network->networkable->boxnav?->name }}
+                                        </p>
+                                        <p class="font-medium text-xs">
+                                            {{ $item->network->networkable->alias ?: $item->network->networkable->code }}
+                                        </p>
+                                    @endif
+                                @endif --}}
+
+                                <p class="text-[10px] text-neutral-600 dark:text-neutral-400">
+                                    @if ($item->network->direccion)
+                                        {{ $item->network->direccion }}
+                                    @endif
+
+                                    @if ($item->network->ubigeo)
+                                        - {{ $item->network->ubigeo->distrito }} -
+                                        {{ $item->network->ubigeo->provincia }}
+                                    @endif
+                                </p>
                             </td>
+                            <td class="text-center uppercase">{{ $item->network->type }}</td>
                             <td class="text-center uppercase">{{ formatDate($item->month, 'MMMM Y') }}</td>
                             <td class="text-center">{{ $item->amount }}</td>
                             <td class="text-center">{{ $item->descuento }}</td>
@@ -155,8 +185,8 @@
                                     </a>
 
                                     <button type="button" wire:key="deleterecibo_{{ $item->id }}"
-                                        onclick="confirmDeleteRecibo({{ $item }})" wire:loading.attr="disabled"
-                                        title="Eliminar Recibo"
+                                        onclick="confirmDeleteRecibo({{ $item }})"
+                                        wire:loading.attr="disabled" title="Eliminar Recibo"
                                         class="inline-flex items-center justify-center p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 transition-colors shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="size-4">
@@ -313,11 +343,14 @@
 
                 Swal.close();
 
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator
+                    .userAgent);
                 let sharedNatively = false;
 
                 // Intentamos compartir usando la Web Share API nativa si es un dispositivo móvil y lo soporta
-                if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+                if (isMobile && navigator.canShare && navigator.canShare({
+                        files: [file]
+                    })) {
                     try {
                         let textMessage = 'Estimado cliente, adjunto su recibo de pago.';
                         if (info) {
@@ -363,7 +396,7 @@
                         if (waPhone.length === 9) {
                             waPhone = '51' + waPhone;
                         }
-                        
+
                         let waMessageText = `¡Hola! Estimado cliente, le adjunto su recibo de pago en formato PDF.`;
                         if (info) {
                             waMessageText = `*📄 RESUMEN DE COMPROBANTE - RED CENTER*\n\n` +
@@ -377,7 +410,7 @@
                         }
 
                         const waMessage = encodeURIComponent(waMessageText);
-                        
+
                         let waUrl = '';
                         if (isMobile) {
                             waUrl = `https://api.whatsapp.com/send?phone=${waPhone}&text=${waMessage}`;
@@ -385,7 +418,7 @@
                             // En escritorio abrimos directamente la sesión de WhatsApp Web
                             waUrl = `https://web.whatsapp.com/send?phone=${waPhone}&text=${waMessage}`;
                         }
-                        
+
                         // Abrir la ventana de WhatsApp
                         window.open(waUrl, '_blank');
 

@@ -53,12 +53,21 @@ class ShowRecibos extends Component
 
     private function getRecibosQueryBuilder()
     {
-        $recibos = Recibo::with(['client', 'payment.formapay', 'network'])->withWhereHas('network', function ($query) {
+        $recibos = Recibo::with([
+            'client',
+            'payment.formapay',
+            'network.ubigeo',
+            'network.networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    \App\Models\Portboxnav::class => ['boxnav.spliter.olt'],
+                ]);
+            }
+        ])->withWhereHas('network', function ($query) {
             if (trim($this->searchtype) !== '') {
                 $query->where('type', $this->searchtype);
             }
             if (trim($this->searchlocation) !== '') {
-                $query->where('location', $this->searchlocation);
+                $query->where('ubigeo_id', $this->searchlocation);
             }
         });
         if (trim($this->search) !== '') {
@@ -81,7 +90,9 @@ class ShowRecibos extends Component
 
     public function render()
     {
-        $locations = Network::activos()->whereNotNull('location')->where('location', '!=', '')->distinct()->orderBy('location', 'asc')->pluck('location')->toArray();
+        $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+        $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
+        $locations = $ubigeos->pluck('distrito', 'id')->toArray();
         $recibos = $this->getRecibosQueryBuilder()->paginate();
         $formapays = Formapay::orderBy('id', 'asc')->get();
         return view('livewire.admin.recibos.show-recibos', compact('recibos', 'formapays', 'locations'));

@@ -169,6 +169,11 @@ return [
         'boxnav_id'             =>  'caja nap',
         'client_id'             =>  'cliente',
         'location'              =>  'lugar',
+        'antena_id'             =>  'antena',
+        'portboxnav_id'         =>  'puerto boxnav',
+        'spliter_port'          =>  'puerto splitter',
+        'portfiber_id'          =>  'puerto fibra',
+        'ubigeo_id'             =>  'ubigeo',
     ],
 
 ];

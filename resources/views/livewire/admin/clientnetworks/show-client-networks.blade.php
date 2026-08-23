@@ -34,23 +34,27 @@
             <x-label value="Seleccionar Lugar" />
             <x-select-input class="w-full" wire:model.lazy="searchlocation">
                 <option value="">TODOS LOS LUGARES</option>
-                @if (count($locations) > 0)
-                    @foreach ($locations as $item)
-                        <option value="{{ $item }}">{{ $item }}</option>
-                    @endforeach
-                @endif
+                @foreach ($locations as $id => $district)
+                    <option value="{{ $id }}">{{ $district }}</option>
+                @endforeach
             </x-select-input>
         </div>
         <div class="flex items-end gap-2 ml-auto">
-            <button type="button" wire:click="exportExcel" wire:loading.attr="disabled" class="inline-flex items-center justify-center p-2 bg-emerald-600 dark:bg-emerald-700 border border-transparent rounded-lg font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors gap-1 shadow-sm h-[38px] min-h-[38px]">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12-3-3m0 0-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            <button type="button" wire:click="exportExcel" wire:loading.attr="disabled"
+                class="inline-flex items-center justify-center p-2 bg-emerald-600 dark:bg-emerald-700 border border-transparent rounded-lg font-semibold text-[10px] text-white uppercase tracking-widest hover:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors gap-1 shadow-sm h-[38px] min-h-[38px]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12-3-3m0 0-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                 </svg>
                 EXCEL
             </button>
-            <x-danger-button wire:click="exportPdf" wire:loading.attr="disabled" class="inline-flex items-center justify-center h-[38px] min-h-[38px] gap-1 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            <x-danger-button wire:click="exportPdf" wire:loading.attr="disabled"
+                class="inline-flex items-center justify-center h-[38px] min-h-[38px] gap-1 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                 </svg>
                 PDF
             </x-danger-button>
@@ -114,21 +118,17 @@
                                     </svg>
                                     {{ $item->telefono ? implode(' ', str_split($item->telefono, 3)) : '' }}
                                 </p>
-                                <p class="text-[9px]">
-                                    @if ($item->location)
-                                        <small class="font-bold text-[10px] text-neutral-600 dark:text-neutral-300">
-                                            {{ $item->location }}
-                                            - 
-                                        </small>
+
+                                <p class="text-[10px] text-neutral-600 dark:text-neutral-400">
+                                    @if ($item->direccion)
+                                        {{ $item->direccion }}
                                     @endif
 
                                     @if ($item->ubigeo)
-                                        {{ $item->ubigeo->departamento }}
-                                        -
+                                        - {{ $item->ubigeo->distrito }} -
+                                        {{ $item->ubigeo->provincia }}
                                     @endif
-                                    {{ $item->direccion }}
-                                </p>
-                                {{-- <p>LOCAL: {{ $item->typelocal }}</p> --}}
+                                </p>                                
                             </td>
                             {{-- <td class="text-center">{{ $item->portnumber }}</td> --}}
                             {{-- <td class="text-center uppercase">{{ formatDate($item->datepayment) }}</td> --}}
@@ -144,12 +144,12 @@
                                         <p>{{ $item->networkable->direccion }}</p>
                                     @else
                                         <p class="text-[10px] text-neutral-500">
-                                            {{ $item->networkable->code }}
+                                            {{ $item->networkable->boxnav?->spliter?->olt?->name }} »
+                                            {{ $item->networkable->boxnav?->spliter?->name }} »
+                                            {{ $item->networkable->boxnav?->name }}
                                         </p>
-                                        <p class="">
-                                            {{ $item->networkable->boxnav->name }},
-                                            {{ $item->networkable->boxnav->spliter->name }},
-                                            {{ $item->networkable->boxnav->spliter->olt->name }}
+                                        <p class="font-medium text-xs">
+                                            {{ $item->networkable->alias ?: $item->networkable->code }}
                                         </p>
                                     @endif
                                 @endif
@@ -299,194 +299,102 @@
                 </div>
 
                 @if ($network->type && !validarFibra($network->type))
+                    @php
+                        $editAntenas = collect($antenas)->map(function ($item) use ($actual_antena_id) {
+                            return [
+                                'id' => $item->id,
+                                'label' => $item->name . ($actual_antena_id == $item->id ? ' (ACTUAL)' : ''),
+                            ];
+                        });
+                    @endphp
                     <div wire:key="edit-antena-loading-container"
                         wire:loading.class="opacity-60 pointer-events-none filter blur-[1.5px]"
-                        wire:target="network.type, antena_id"
-                        class="w-full bg-gray-50 dark:bg-neutral-900/60 p-3 rounded-xl border border-gray-200 dark:border-neutral-700/60 space-y-2 transition-all duration-200">
-                        <x-label value="Seleccionar Antena (Inalámbrico / Radio)"
-                            class="text-xs font-semibold text-gray-700 dark:text-gray-300" />
-                        <x-select-input class="w-full block" wire:model.defer="antena_id">
-                            <option value="">SELECCIONAR ANTENA...</option>
-                            @if (count($antenas) > 0)
-                                @foreach ($antenas as $item)
-                                    <option value="{{ $item->id }}">{{ $item->name }}
-                                        {{ $actual_antena_id == $item->id ? '(ACTUAL)' : '' }}</option>
-                                @endforeach
-                            @endif
-                        </x-select-input>
+                        wire:target="network.type, antena_id" class="w-full transition-all duration-200">
+                        <x-label value="Seleccionar Antena (Inalámbrico / Radio)" />
+                        <x-ubigeo-select wire:model.defer="antena_id" wire:key="edit-select-antena" :options="$editAntenas"
+                            :searchable="false" placeholder="SELECCIONAR ANTENA..." class="w-full block mt-1.5" />
                         <x-input-error for="antena_id" />
                     </div>
                 @elseif ($network->type && validarFibra($network->type))
+                    @php
+                        $editOlts = collect($olts)->map(function ($item) use ($actual_olt_id) {
+                            return [
+                                'id' => $item->id,
+                                'label' => $item->name . ($actual_olt_id == $item->id ? ' (Actual)' : ''),
+                            ];
+                        });
+                        $editSpliters = collect($spliters)->map(function ($item) use ($actual_spliter_id) {
+                            return [
+                                'id' => $item->id,
+                                'label' => $item->name . ($actual_spliter_id == $item->id ? ' (Actual)' : ''),
+                            ];
+                        });
+                        $editBoxnavs = collect($boxnavs)->map(function ($item) use ($actual_boxnav_id) {
+                            return [
+                                'id' => $item->id,
+                                'label' => $item->name . ($actual_boxnav_id == $item->id ? ' (Actual)' : ''),
+                            ];
+                        });
+                        $editPortboxnavs = collect($portboxnavs)->map(function ($item) use ($actual_port_id) {
+                            $label = $item->code;
+                            if ($item->alias) {
+                                $label .= ' - ' . $item->alias;
+                            }
+                            if ($actual_port_id == $item->id) {
+                                $label .= ' (Actual)';
+                            } elseif ($item->network) {
+                                $label .= ' (Ocupado)';
+                            }
+                            return [
+                                'id' => $item->id,
+                                'label' => $label,
+                            ];
+                        });
+                    @endphp
                     <div wire:key="edit-fiber-loading-container"
                         wire:loading.class="opacity-60 pointer-events-none filter blur-[1.5px]"
-                        wire:target="network.type, selectOlt, selectSpliter, selectBoxnav, selectPort"
-                        class="w-full bg-gray-50 dark:bg-neutral-900/60 p-3 rounded-xl border border-gray-200 dark:border-neutral-700/60 space-y-4 transition-all duration-200">
+                        wire:target="network.type, olt_id, spliter_id, boxnav_id, portboxnav_id"
+                        class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-200">
                         {{-- PASO 1: OLT --}}
                         <div>
                             <x-label value="1. Seleccionar OLT"
                                 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5" />
                             @if (count($olts) > 0)
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach ($olts as $item)
-                                        <button type="button" wire:key="olt-{{ $item->id }}"
-                                            wire:click="selectOlt({{ $item->id }})"
-                                            class="px-3 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-all shadow-sm {{ $olt_id == $item->id ? 'bg-neutral-600 dark:bg-neutral-700 border-neutral-600 dark:border-neutral-700 text-white shadow-neutral-500/20 shadow-md ring-2 ring-neutral-400 dark:ring-neutral-500' : 'bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700/80' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="1.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                                            </svg>
-                                            <span>{{ $item->name }}</span>
-                                            @if ($actual_olt_id == $item->id)
-                                                <span
-                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $olt_id == $item->id ? 'bg-green-500/70 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
-                                            @endif
-                                        </button>
-                                    @endforeach
-                                </div>
+                                <x-ubigeo-select wire:model="olt_id" wire:key="edit-select-olt" :options="$editOlts"
+                                    :searchable="false" placeholder="SELECCIONAR OLT..." class="w-full" />
                             @else
                                 <p class="text-xs text-gray-400">No hay OLTs registradas.</p>
                             @endif
                             <x-input-error for="olt_id" />
                         </div>
 
-                        {{-- PASO 2: SPLITTER (Solo visible si hay OLT seleccionada) --}}
-                        @if ($olt_id && count($spliters) > 0)
-                            <div class="border-t border-gray-200 dark:border-neutral-700/60 pt-3">
-                                <x-label value="2. Seleccionar Splitter"
-                                    class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5" />
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach ($spliters as $item)
-                                        <button type="button" wire:key="spliter-{{ $item->id }}"
-                                            wire:click="selectSpliter({{ $item->id }})"
-                                            class="px-3 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-all shadow-sm {{ $spliter_id == $item->id ? 'bg-neutral-600 dark:bg-neutral-700 border-neutral-600 dark:border-neutral-700 text-white shadow-neutral-500/20 shadow-md ring-2 ring-neutral-400 dark:ring-neutral-500' : 'bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700/80' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="1.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                            </svg>
-                                            <span>{{ $item->name }}</span>
-                                            @if ($actual_spliter_id == $item->id)
-                                                <span
-                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $spliter_id == $item->id ? 'bg-green-500/70 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
-                                            @endif
-                                        </button>
-                                    @endforeach
-                                </div>
-                                <x-input-error for="spliter_id" />
-                            </div>
-                        @elseif ($olt_id)
-                            <div
-                                class="border-t border-gray-200 dark:border-neutral-700/60 pt-3 text-xs text-amber-600 dark:text-amber-400">
-                                Esta OLT no tiene Splitters disponibles.
-                            </div>
-                        @endif
+                        {{-- PASO 2: SPLITTER --}}
+                        <div>
+                            <x-label value="2. Seleccionar Splitter"
+                                class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5" />
+                            <x-ubigeo-select wire:model="spliter_id" wire:key="edit-select-splitter" :options="$editSpliters"
+                                :searchable="true" placeholder="SELECCIONAR SPLITTER..." class="w-full" />
+                            <x-input-error for="spliter_id" />
+                        </div>
 
-                        {{-- PASO 3: CAJA NAP (Solo visible si hay Splitter seleccionado) --}}
-                        @if ($spliter_id && count($boxnavs) > 0)
-                            <div class="border-t border-gray-200 dark:border-neutral-700/60 pt-3">
-                                <x-label value="3. Seleccionar Caja NAP"
-                                    class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5" />
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach ($boxnavs as $item)
-                                        <button type="button" wire:key="boxnav-{{ $item->id }}"
-                                            wire:click="selectBoxnav({{ $item->id }})"
-                                            class="px-3 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition-all shadow-sm {{ $boxnav_id == $item->id ? 'bg-neutral-600 dark:bg-neutral-700 border-neutral-600 dark:border-neutral-700 text-white shadow-neutral-500/20 shadow-md ring-2 ring-neutral-400 dark:ring-neutral-500' : 'bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700/80' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="1.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                            </svg>
-                                            <span>{{ $item->name }}</span>
-                                            @if ($actual_boxnav_id == $item->id)
-                                                <span
-                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider {{ $boxnav_id == $item->id ? 'bg-green-500/70 text-white' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700' }}">Actual</span>
-                                            @endif
-                                        </button>
-                                    @endforeach
-                                </div>
-                                <x-input-error for="boxnav_id" />
-                            </div>
-                        @elseif ($spliter_id)
-                            <div
-                                class="border-t border-gray-200 dark:border-neutral-700/60 pt-3 text-xs text-amber-600 dark:text-amber-400">
-                                Este Splitter no tiene Cajas NAP disponibles.
-                            </div>
-                        @endif
+                        {{-- PASO 3: CAJA NAP --}}
+                        <div>
+                            <x-label value="3. Seleccionar Caja NAP"
+                                class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5" />
+                            <x-ubigeo-select wire:model="boxnav_id" wire:key="edit-select-boxnav" :options="$editBoxnavs"
+                                :searchable="false" placeholder="SELECCIONAR CAJA NAP..." class="w-full" />
+                            <x-input-error for="boxnav_id" />
+                        </div>
 
-                        {{-- PASO 4: PUERTOS (Grid Visual de Hardware) --}}
-                        @if ($boxnav_id && count($portboxnavs) > 0)
-                            <div class="border-t border-gray-200 dark:border-neutral-700/60 pt-3">
-                                <div class="flex flex-col sm:flex-row items-center justify-between mb-2">
-                                    <x-label value="4. Seleccionar Puerto"
-                                        class="block w-full flex-1 text-xs font-semibold text-gray-700 dark:text-gray-300 text-left" />
-                                    <div class="flex items-center gap-3 text-[10px]">
-                                        <span class="flex items-center gap-1"><span
-                                                class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-                                            Disponible</span>
-                                        <span class="flex items-center gap-1"><span
-                                                class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
-                                            Ocupado</span>
-                                        <span class="flex items-center gap-1"><span
-                                                class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
-                                            Actual</span>
-                                        <span class="flex items-center gap-1"><span
-                                                class="w-2.5 h-2.5 rounded-full bg-neutral-600 dark:bg-neutral-500 inline-block"></span>
-                                            Seleccionado</span>
-                                    </div>
-                                </div>
-                                <div
-                                    class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-3 bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-700/80 shadow-inner">
-                                    @foreach ($portboxnavs as $item)
-                                        @php
-                                            $es_actual = $actual_port_id == $item->id;
-                                            $ocupado = $item->network && !$es_actual ? true : false;
-                                        @endphp
-                                        <button type="button" wire:key="port-{{ $item->id }}"
-                                            wire:click="selectPort({{ $item->id }})"
-                                            title="{{ $item->alias ? $item->code . ' - ' . $item->alias : ($es_actual ? 'Puerto Actual del Cliente: ' . $item->code : ($ocupado ? 'Puerto Ocupado' : 'Puerto Disponible: ' . $item->code)) }}"
-                                            class="relative py-2 px-1 rounded-lg text-xs font-bold border flex flex-col items-center justify-center gap-0.5 transition-all {{ $portboxnav_id == $item->id ? 'bg-neutral-600 dark:bg-neutral-700 border-neutral-600 dark:border-neutral-700 text-white shadow-md ring-2 ring-neutral-400 dark:ring-neutral-500 scale-105 z-10' : ($es_actual ? 'bg-amber-100 dark:bg-amber-900/40 border-amber-400 dark:border-amber-600 text-amber-800 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-900/60 hover:scale-105 cursor-pointer shadow-sm' : ($ocupado ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60 text-rose-500 dark:text-rose-400 opacity-60 cursor-not-allowed' : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/80 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:scale-105 cursor-pointer shadow-sm')) }}">
-                                            <span
-                                                class="text-[10px] uppercase font-semibold leading-none">{{ $item->code }}</span>
-                                            @if ($item->alias)
-                                                <span class="text-[8px] text-gray-500 dark:text-neutral-400 truncate max-w-full block font-normal leading-none mt-0.5" title="{{ $item->alias }}">{{ $item->alias }}</span>
-                                            @endif
-                                            @if ($es_actual)
-                                                <span
-                                                    class="text-[8px] px-1 py-0.2 rounded font-extrabold uppercase tracking-tight {{ $portboxnav_id == $item->id ? 'bg-white/20 text-white' : 'bg-amber-500 text-white' }}">Actual</span>
-                                            @elseif ($ocupado)
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 mt-0.5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                                </svg>
-                                            @elseif ($portboxnav_id == $item->id)
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="w-3.5 h-3.5 text-white mt-0.5" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            @else
-                                                <span
-                                                    class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1 inline-block"></span>
-                                            @endif
-                                        </button>
-                                    @endforeach
-                                </div>
-                                <x-input-error for="portboxnav_id" />
-                            </div>
-                        @elseif ($boxnav_id)
-                            <div
-                                class="border-t border-gray-200 dark:border-neutral-700/60 pt-3 text-xs text-amber-600 dark:text-amber-400">
-                                Esta Caja NAP no tiene puertos registrados.
-                            </div>
-                        @endif
+                        {{-- PASO 4: PUERTOS --}}
+                        <div>
+                            <x-label value="4. Seleccionar Puerto"
+                                class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5" />
+                            <x-ubigeo-select wire:model="portboxnav_id" wire:key="edit-select-portboxnav"
+                                :options="$editPortboxnavs" :searchable="false" placeholder="SELECCIONAR PUERTO..."
+                                class="w-full" />
+                            <x-input-error for="portboxnav_id" />
+                        </div>
                     </div>
                 @endif
 
@@ -518,9 +426,9 @@
 
                 <div class="w-full grid grid-cols-1 gap-2 md:grid-cols-2">
                     <div class="w-full">
-                        <x-label value="Lugar" />
-                        <x-input class="w-full block" wire:model.defer="network.location" />
-                        <x-input-error for="network.location" />
+                        <x-label value="Lugar / Ubigeo" />
+                        <x-ubigeo-select wire:model.defer="network.ubigeo_id" :options="$ubigeos" />
+                        <x-input-error for="network.ubigeo_id" />
                     </div>
                     <div class="w-full">
                         <x-label value="Dirección de instalación" />

@@ -42,9 +42,10 @@
         .filter-badge {
             display: inline-block;
             background-color: #f3f4f6;
-            padding: 2px 5px;
+            padding: 2px 3px;
             border-radius: 3px;
             font-weight: bold;
+            font-size: 8px;
             color: #374151;
         }
         .data-table {
@@ -84,10 +85,11 @@
         }
         .badge {
             display: inline-block;
-            padding: 2px 6px;
+            padding: 2px 3px;
             border-radius: 4px;
             font-weight: bold;
             text-align: center;
+            font-size: 8px;
             color: #ffffff;
         }
         .badge-pagado {
@@ -141,16 +143,16 @@
         <thead>
             <tr>
                 <th style="width: 3%;">N°</th>
-                <th style="width: 8%;">Registrado</th>
+                <th style="width: 10%;">Teléfono</th>
                 <th style="width: 8%;">Vence</th>
                 <th style="width: 8%;">Serie</th>
                 <th style="width: 21%;">Cliente</th>
                 <th style="width: 10%;">Lugar</th>
-                <th style="width: 7%;">Tipo</th>
-                <th style="width: 9%;">Mes de Pago</th>
+                <th style="width: 12%;">Tipo Servicio</th>
+                <th style="width: 9%;">Mes</th>
                 <th style="width: 6%;">Subtotal</th>
-                <th style="width: 6%;">Descuento</th>
-                <th style="width: 7%;">Total</th>
+                <th style="width: 6%;">Dscto</th>
+                <th style="width: 10%;">Total</th>
                 <th style="width: 7%;">Estado</th>
             </tr>
         </thead>
@@ -168,27 +170,30 @@
                 @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="text-center">{{ formatDate($item->date, 'DD/MM/YYYY') }}</td>
+                    <td class="text-center">{{ $item->network->telefono ?? '-' }}</td>
                     <td class="text-center">{{ formatDate($item->vencimiento, 'DD/MM/YYYY') }}</td>
                     <td class="text-center font-bold">{{ $item->seriecompleta }}</td>
                     <td>
                         <span class="font-bold">{{ $item->client->name }}</span>
                         <br/>
                         <span style="color: #666;">Doc: {{ $item->client->document }}</span>
-                        @if ($item->network->telefono)
-                            <br/>
-                            <span style="color: #16a34a; font-weight: bold;">Tel: {{ implode(' ', str_split($item->network->telefono, 3)) }}</span>
-                        @endif
                         @if ($item->network->codigo_slp)
                             <br/>
                             <span style="color: #1d4ed8; font-weight: bold;">SLP: {{ $item->network->codigo_slp }}</span>
                         @endif
                     </td>
                     <td>
-                        {{ $item->network->location ?? '-' }}
+                        @if ($item->network->direccion)
+                            {{ $item->network->direccion }}
+                        @endif
+
+                        @if ($item->network->ubigeo)
+                            - {{ $item->network->ubigeo->distrito }} -
+                            {{ $item->network->ubigeo->provincia }}
+                        @endif
                     </td>
                     <td class="text-center">
-                        {{ $item->network->type }}
+                        {{ $item->network->type ?? '-' }}
                     </td>
                     <td class="text-center" style="text-transform: uppercase;">
                         {{ formatDate($item->month, 'MMMM Y') }}

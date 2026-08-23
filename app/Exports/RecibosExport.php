@@ -35,7 +35,9 @@ class RecibosExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
     public function headings(): array
     {
         return [
-            'FECHA REGISTRO',
+            'TELÉFONO',
+            // 'FECHA REGISTRO',
+            'MES PAGO',
             'FECHA VENCIMIENTO',
             'SERIE COMPLETA',
             'CLIENTE DOCUMENTO',
@@ -43,7 +45,6 @@ class RecibosExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
             'CÓDIGO SLP',
             'LUGAR',
             'TIPO SERVICIO',
-            'MES PAGO',
             'SUBTOTAL',
             'DESCUENTO',
             'TOTAL',
@@ -60,7 +61,9 @@ class RecibosExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
     public function map($recibo): array
     {
         return [
-            formatDate($recibo->date, 'DD/MM/YYYY'),
+            $recibo->network->telefono ?? '',
+            // formatDate($recibo->date, 'DD/MM/YYYY'),
+            formatDate($recibo->month, 'MMMM Y'),
             formatDate($recibo->vencimiento, 'DD/MM/YYYY'),
             $recibo->seriecompleta,
             $recibo->client->document ?? '',
@@ -68,7 +71,6 @@ class RecibosExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
             $recibo->network->codigo_slp ?? '',
             $recibo->network->location ?? '',
             $recibo->network->type ?? '',
-            formatDate($recibo->month, 'MMMM Y'),
             number_format($recibo->amount, 2, '.', ''),
             number_format($recibo->descuento, 2, '.', ''),
             number_format($recibo->total, 2, '.', ''),
