@@ -14,11 +14,20 @@ class Network extends Model
 
     protected $fillable = [
         'date', 'code', 'portnumber', 'descripcion', 'type', 'telefono',
-        'price', 'direccion', 'typelocal', 'status', 'client_id',
+        'price', 'direccion', 'typelocal', 'status', 'client_id', 'user_id',
         'ubigeo_id', 'networkable_id', 'networkable_type',
         'latitude', 'longitude', 'zoom', 'codigo_slp', 'location',
     ];
     public $timestamps = false;
+
+    protected static function booted(): void
+    {
+        static::creating(function ($network) {
+            if (auth()->check() && empty($network->user_id)) {
+                $network->user_id = auth()->id();
+            }
+        });
+    }
 
     const ALQUILADO = 'ALQUILADO';
     const PROPIO = 'PROPIO';
@@ -63,6 +72,11 @@ class Network extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function ubigeo(): BelongsTo

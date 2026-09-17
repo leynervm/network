@@ -39,7 +39,7 @@ class CreateRecibo extends Component
             $this->reset();
             $this->resetValidation();
             $this->month = now('America/Lima')->format('Y-m');
-            $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+            $ubigeoIds = \App\Models\Network::where('user_id', auth()->id())->whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
             $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
             $this->locations = $ubigeos->pluck('distrito', 'id')->toArray();
         }
@@ -64,6 +64,7 @@ class CreateRecibo extends Component
         DB::beginTransaction();
         try {
             $query = Network::activos()
+                ->where('user_id', auth()->id())
                 ->whereDoesntHave('recibos', function ($q) {
                     $q->where('month', $this->month);
                 })

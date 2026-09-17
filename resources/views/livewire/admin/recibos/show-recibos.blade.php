@@ -74,6 +74,7 @@
                     <th>DESCUENTO</th>
                     <th>TOTAL</th>
                     <th>ESTADO</th>
+                    <th>PROVEEDOR</th>
                     <th>ACCIONES</th>
                 </tr>
             </x-slot>
@@ -135,6 +136,11 @@
                                             PENDIENTE</span>
                                     @endif
                                 </div>
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                                    {{ $item->network->user->name ?? '-' }}
+                                </span>
                             </td>
                             <td class="text-center align-middle">
                                 <div class="flex items-center justify-center gap-2">

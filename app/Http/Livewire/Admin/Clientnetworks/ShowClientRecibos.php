@@ -54,6 +54,9 @@ class ShowClientRecibos extends Component
 
     public function mount(Network $network)
     {
+        if ($network->user_id && $network->user_id != auth()->id()) {
+            abort(403, 'No autorizado para ver los recibos de este servicio.');
+        }
         $this->network = $network;
         $this->recibo = new Recibo();
     }
@@ -62,7 +65,11 @@ class ShowClientRecibos extends Component
     {
         $formapays = Formapay::orderBy('id', 'asc')->get();
         $seriepagos = Seriepago::orderBy('id', 'asc')->get();
-        $recibos = Recibo::with('payment')->where('network_id', $this->network->id);
+        $recibos = Recibo::with('payment')
+            ->where('network_id', $this->network->id)
+            ->whereHas('network', function ($query) {
+                $query->where('user_id', auth()->id());
+            });
         if (trim($this->searchmonth) != '') {
             $recibos->where('month', $this->searchmonth);
         }
@@ -118,6 +125,9 @@ class ShowClientRecibos extends Component
 
     public function save()
     {
+        if ($this->network->user_id && $this->network->user_id != auth()->id()) {
+            abort(403, 'No autorizado para operar en este servicio.');
+        }
 
         $this->client_id = $this->network->client_id;
         $validateData = $this->validate();
@@ -159,6 +169,9 @@ class ShowClientRecibos extends Component
 
     public function pay(Recibo $recibo)
     {
+        if ($this->network->user_id && $this->network->user_id != auth()->id()) {
+            abort(403, 'No autorizado para operar en este servicio.');
+        }
         $this->resetValidation();
         $this->reset(['detalle', 'codetransferencia', 'formapay_id', 'recibo']);
         $this->recibo = $recibo;
@@ -167,6 +180,9 @@ class ShowClientRecibos extends Component
 
     public function savepayment()
     {
+        if ($this->network->user_id && $this->network->user_id != auth()->id()) {
+            abort(403, 'No autorizado para operar en este servicio.');
+        }
 
         $this->codetransferencia = trim(mb_strtoupper($this->codetransferencia, "UTF-8"));
         $this->validate([
@@ -206,6 +222,9 @@ class ShowClientRecibos extends Component
 
     public function deletepayment(Recibo $recibo)
     {
+        if ($this->network->user_id && $this->network->user_id != auth()->id()) {
+            abort(403, 'No autorizado para operar en este servicio.');
+        }
         DB::beginTransaction();
         try {
             if ($recibo->payment) {
@@ -232,6 +251,9 @@ class ShowClientRecibos extends Component
 
     public function deleterecibo(Recibo $recibo)
     {
+        if ($this->network->user_id && $this->network->user_id != auth()->id()) {
+            abort(403, 'No autorizado para operar en este servicio.');
+        }
         DB::beginTransaction();
         try {
             if ($recibo->payment) {

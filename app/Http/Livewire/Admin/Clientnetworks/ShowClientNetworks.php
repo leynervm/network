@@ -115,8 +115,11 @@ class ShowClientNetworks extends Component
                 ]);
             },
             'client',
-            'ubigeo'
-        ])->withWhereHas('client', function ($query) {
+            'ubigeo',
+            'user'
+        ])
+        ->where('user_id', auth()->id())
+        ->withWhereHas('client', function ($query) {
             if (trim($this->search) !== '') {
                 $query->where('document', 'like', '%' . $this->search . '%')->orWhere('name', 'like', '%' . $this->search . '%');
             }
@@ -133,7 +136,7 @@ class ShowClientNetworks extends Component
 
     public function render()
     {
-        $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+        $ubigeoIds = \App\Models\Network::where('user_id', auth()->id())->whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
         $filteredUbigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
         $locations = $filteredUbigeos->pluck('distrito', 'id')->toArray();
         $ubigeos = \App\Models\Ubigeo::orderBy('ubigeo_reniec', 'asc')->get();
@@ -197,6 +200,9 @@ class ShowClientNetworks extends Component
 
     public function edit(Network $network)
     {
+        if ($network->user_id && $network->user_id != auth()->id()) {
+            abort(403, 'No autorizado para acceder a este cliente de red.');
+        }
         $this->resetExcept(['network']);
         $this->resetValidation();
         $this->network = $network;
@@ -412,6 +418,9 @@ class ShowClientNetworks extends Component
 
     public function suspender(Network $network)
     {
+        if ($network->user_id && $network->user_id != auth()->id()) {
+            abort(403);
+        }
         $network->status = Network::SUSPENDIDO;
         $network->save();
         $this->dispatchBrowserEvent('toast', toastJson('Servicio internet suspendido correctamente'));
@@ -419,6 +428,9 @@ class ShowClientNetworks extends Component
 
     public function reconectar(Network $network)
     {
+        if ($network->user_id && $network->user_id != auth()->id()) {
+            abort(403);
+        }
         $network->status = Network::ACTIVO;
         $network->save();
         $this->dispatchBrowserEvent('toast', toastJson('Servicio internet reconectado correctamente'));
@@ -426,6 +438,9 @@ class ShowClientNetworks extends Component
 
     public function delete(Network $network)
     {
+        if ($network->user_id && $network->user_id != auth()->id()) {
+            abort(403);
+        }
         if (get_class($network->networkable) == Portboxnav::class) {
             // dd($network->networkable->status);
         }

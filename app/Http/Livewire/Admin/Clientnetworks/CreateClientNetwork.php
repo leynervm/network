@@ -270,7 +270,7 @@ class CreateClientNetwork extends Component
     public function save()
     {
 
-        $this->document = trim($this->document);
+        $this->document = preg_replace('/\D/', '', trim($this->document));
         $this->name = trim($this->name);
         $this->telefono = trim($this->telefono);
         $this->codigo_slp = trim($this->codigo_slp) === '' ? null : trim($this->codigo_slp);
@@ -307,6 +307,9 @@ class CreateClientNetwork extends Component
         }
 
         $validateData = $this->validate();
+        if (auth()->check()) {
+            $validateData['user_id'] = auth()->id();
+        }
         DB::beginTransaction();
         try {
 
@@ -382,8 +385,14 @@ class CreateClientNetwork extends Component
         });
     }
 
+    public function updatedDocument($value)
+    {
+        $this->document = preg_replace('/\D/', '', $value);
+    }
+
     public function buscar()
     {
+        $this->document = preg_replace('/\D/', '', trim($this->document));
         $this->validate([
             'document' => ['required', 'numeric']
         ]);

@@ -73,6 +73,7 @@
                     {{-- <th>DESCRIPCIÓN</th> --}}
                     <th style="min-width: 100px;">PRECIO</th>
                     <th>ESTADO</th>
+                    <th>PROVEEDOR</th>
                     <th>OPCIONES</th>
                 </tr>
             </x-slot>
@@ -170,6 +171,11 @@
                                         class="bg-emerald-500 dark:bg-emerald-600 inline-block mb-1 text-white text-[9px] font-bold p-1 px-1.5 rounded tracking-wider">
                                         ACTIVO</span>
                                 @endif
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                                    {{ $item->user->name ?? '-' }}
+                                </span>
                             </td>
                             <td class="text-center">
                                 <div class="flex items-center justify-center gap-1">

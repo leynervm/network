@@ -45,6 +45,10 @@ class AdminController extends Controller
 
     public function shownetwork(Network $network)
     {
+        if ($network->user_id && $network->user_id != auth()->id()) {
+            abort(403, 'No tienes permiso para ver este cliente de red.');
+        }
+
         $network->load([
             'networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
                 $morphTo->morphWith([

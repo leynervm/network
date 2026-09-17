@@ -26,7 +26,9 @@
                         <x-label value="Documento cliente" />
                         <div class="w-full flex gap-1">
                             <x-input class="w-full flex-1 block" wire:model.defer="document" maxlength="11"
-                                wire:keydown.enter="buscar" />
+                                wire:keydown.enter="buscar" inputmode="numeric" pattern="[0-9]*"
+                                oninput="this.value = this.value.replace(/\D/g, '')"
+                                onkeydown="return (event.key >= '0' && event.key <= '9') || ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Home', 'End'].includes(event.key) || event.ctrlKey || event.metaKey" />
                             <x-button class="text-white !px-2 flex-shrink-0 !p-1.5" wire:click="buscar"
                                 wire:loading.attr="disabled" type="button">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

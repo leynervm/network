@@ -57,12 +57,14 @@ class ShowRecibos extends Component
             'client',
             'payment.formapay',
             'network.ubigeo',
+            'network.user',
             'network.networkable' => function (\Illuminate\Database\Eloquent\Relations\MorphTo $morphTo) {
                 $morphTo->morphWith([
                     \App\Models\Portboxnav::class => ['boxnav.spliter.olt'],
                 ]);
             }
         ])->withWhereHas('network', function ($query) {
+            $query->where('user_id', auth()->id());
             if (trim($this->searchtype) !== '') {
                 $query->where('type', $this->searchtype);
             }
@@ -90,7 +92,7 @@ class ShowRecibos extends Component
 
     public function render()
     {
-        $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+        $ubigeoIds = \App\Models\Network::where('user_id', auth()->id())->whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
         $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
         $locations = $ubigeos->pluck('distrito', 'id')->toArray();
         $recibos = $this->getRecibosQueryBuilder()->paginate();
