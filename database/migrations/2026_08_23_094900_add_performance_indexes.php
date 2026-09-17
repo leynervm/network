@@ -11,50 +11,39 @@ return new class extends Migration {
     public function up(): void
     {
         // Networks indexes
-        Schema::table('networks', function (Blueprint $table) {
-            $table->index('type');
-            $table->index('ubigeo_id');
-            $table->index('status');
-            $table->index('client_id');
-            $table->index('date');
-        });
+        $this->addIndexSafely('networks', 'type');
+        $this->addIndexSafely('networks', 'ubigeo_id');
+        $this->addIndexSafely('networks', 'status');
+        $this->addIndexSafely('networks', 'client_id');
+        $this->addIndexSafely('networks', 'date');
 
         // Recibos indexes
-        Schema::table('recibos', function (Blueprint $table) {
-            $table->index('date');
-            $table->index('month');
-            $table->index('network_id');
-            $table->index('client_id');
-            $table->index('seriepago_id');
-        });
+        $this->addIndexSafely('recibos', 'date');
+        $this->addIndexSafely('recibos', 'month');
+        $this->addIndexSafely('recibos', 'network_id');
+        $this->addIndexSafely('recibos', 'client_id');
+        $this->addIndexSafely('recibos', 'seriepago_id');
 
-        // Clients indexes (optional but helpful)
-        Schema::table('clients', function (Blueprint $table) {
-            $table->index('name');
-            $table->index('document');
-        });
+        // Clients indexes
+        $this->addIndexSafely('clients', 'name');
+        $this->addIndexSafely('clients', 'document');
 
         // Payments indexes
-        Schema::table('payments', function (Blueprint $table) {
-            $table->index('recibo_id');
-            $table->index('created_at');
-        });
+        // 'payments' usa relación polimórfica (paymentable_type, paymentable_id)
+        // y no cuenta con recibo_id ni created_at ($timestamps = false).
+        $this->addIndexSafely('payments', ['paymentable_type', 'paymentable_id']);
+        $this->addIndexSafely('payments', 'date');
+        $this->addIndexSafely('payments', 'month');
 
         // OLT ports single‑column index
-        Schema::table('olt_ports', function (Blueprint $table) {
-            $table->index('olt_id');
-        });
+        $this->addIndexSafely('olt_ports', 'olt_id');
 
         // Spliter ports single‑column index
-        Schema::table('spliter_ports', function (Blueprint $table) {
-            $table->index('spliter_id');
-        });
+        $this->addIndexSafely('spliter_ports', 'spliter_id');
 
-        // Portboxnavs optional searchable columns
-        Schema::table('portboxnavs', function (Blueprint $table) {
-            $table->index('alias');
-            $table->index('direccion');
-        });
+        // Portboxnavs: indexar solo 'alias' (varchar).
+        // 'direccion' es TEXT y en MySQL genera error 1170 si no tiene longitud fija.
+        $this->addIndexSafely('portboxnavs', 'alias');
     }
 
     /**
@@ -62,43 +51,75 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('networks', function (Blueprint $table) {
-            $table->dropIndex(['type']);
-            $table->dropIndex(['ubigeo_id']);
-            $table->dropIndex(['status']);
-            $table->dropIndex(['client_id']);
-            $table->dropIndex(['date']);
-        });
+        $this->dropIndexSafely('networks', 'type');
+        $this->dropIndexSafely('networks', 'ubigeo_id');
+        $this->dropIndexSafely('networks', 'status');
+        $this->dropIndexSafely('networks', 'client_id');
+        $this->dropIndexSafely('networks', 'date');
 
-        Schema::table('recibos', function (Blueprint $table) {
-            $table->dropIndex(['date']);
-            $table->dropIndex(['month']);
-            $table->dropIndex(['network_id']);
-            $table->dropIndex(['client_id']);
-            $table->dropIndex(['seriepago_id']);
-        });
+        $this->dropIndexSafely('recibos', 'date');
+        $this->dropIndexSafely('recibos', 'month');
+        $this->dropIndexSafely('recibos', 'network_id');
+        $this->dropIndexSafely('recibos', 'client_id');
+        $this->dropIndexSafely('recibos', 'seriepago_id');
 
-        Schema::table('clients', function (Blueprint $table) {
-            $table->dropIndex(['name']);
-            $table->dropIndex(['document']);
-        });
+        $this->dropIndexSafely('clients', 'name');
+        $this->dropIndexSafely('clients', 'document');
 
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropIndex(['recibo_id']);
-            $table->dropIndex(['created_at']);
-        });
+        $this->dropIndexSafely('payments', ['paymentable_type', 'paymentable_id']);
+        $this->dropIndexSafely('payments', 'date');
+        $this->dropIndexSafely('payments', 'month');
 
-        Schema::table('olt_ports', function (Blueprint $table) {
-            $table->dropIndex(['olt_id']);
-        });
+        $this->dropIndexSafely('olt_ports', 'olt_id');
 
-        Schema::table('spliter_ports', function (Blueprint $table) {
-            $table->dropIndex(['spliter_id']);
-        });
+        $this->dropIndexSafely('spliter_ports', 'spliter_id');
 
-        Schema::table('portboxnavs', function (Blueprint $table) {
-            $table->dropIndex(['alias']);
-            $table->dropIndex(['direccion']);
-        });
+        $this->dropIndexSafely('portboxnavs', 'alias');
+    }
+
+    /**
+     * Helper para agregar índices de forma segura e idempotente.
+     */
+    protected function addIndexSafely(string $table, string|array $columns, ?string $indexName = null): void
+    {
+        if (!Schema::hasTable($table)) {
+            return;
+        }
+
+        $columnList = (array) $columns;
+        foreach ($columnList as $col) {
+            if (!Schema::hasColumn($table, $col)) {
+                return;
+            }
+        }
+
+        $existingIndexes = array_map('strtolower', Schema::getIndexListing($table));
+        $expectedName = strtolower($indexName ?? ($table . '_' . implode('_', $columnList) . '_index'));
+
+        if (!in_array($expectedName, $existingIndexes, true)) {
+            Schema::table($table, function (Blueprint $tableBlueprint) use ($columns, $expectedName) {
+                $tableBlueprint->index($columns, $expectedName);
+            });
+        }
+    }
+
+    /**
+     * Helper para eliminar índices de forma segura.
+     */
+    protected function dropIndexSafely(string $table, string|array $columns, ?string $indexName = null): void
+    {
+        if (!Schema::hasTable($table)) {
+            return;
+        }
+
+        $columnList = (array) $columns;
+        $existingIndexes = array_map('strtolower', Schema::getIndexListing($table));
+        $expectedName = strtolower($indexName ?? ($table . '_' . implode('_', $columnList) . '_index'));
+
+        if (in_array($expectedName, $existingIndexes, true)) {
+            Schema::table($table, function (Blueprint $tableBlueprint) use ($expectedName) {
+                $tableBlueprint->dropIndex($expectedName);
+            });
+        }
     }
 };
