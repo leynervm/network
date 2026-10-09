@@ -11,6 +11,7 @@ use Livewire\WithPagination;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RecibosExport;
+use App\Models\User;
 
 class ShowRecibos extends Component
 {
@@ -20,19 +21,28 @@ class ShowRecibos extends Component
     protected $listeners = ['render'];
     protected $queryString = [
         'searchmonth' => [
-            'except' => '', 'as' => 'mes'
+            'except' => '',
+            'as' => 'mes'
         ],
         'search' => [
-            'except' => '', 'as' => 'buscar'
+            'except' => '',
+            'as' => 'buscar'
         ],
         'searchtype' => [
-            'except' => '', 'as' => 'tipo-recibo'
+            'except' => '',
+            'as' => 'tipo-recibo'
         ],
         'searchstatus' => [
-            'except' => '', 'as' => 'estado-pago'
+            'except' => '',
+            'as' => 'estado-pago'
         ],
         'searchlocation' => [
-            'except' => '', 'as' => 'lugar'
+            'except' => '',
+            'as' => 'lugar'
+        ],
+        'searchuser' => [
+            'except' => '',
+            'as' => 'usuario'
         ]
     ];
 
@@ -45,6 +55,7 @@ class ShowRecibos extends Component
     public $searchtype = '';
     public $searchstatus = '';
     public $searchlocation = '';
+    public $searchuser = '';
 
     public function mount()
     {
@@ -64,7 +75,9 @@ class ShowRecibos extends Component
                 ]);
             }
         ])->withWhereHas('network', function ($query) {
-            $query->where('user_id', auth()->id());
+            if ($this->searchuser != '') {
+                $query->where('user_id', $this->searchuser);
+            }
             if (trim($this->searchtype) !== '') {
                 $query->where('type', $this->searchtype);
             }
@@ -78,7 +91,7 @@ class ShowRecibos extends Component
         if (trim($this->searchmonth) !== '') {
             $recibos->where('month', $this->searchmonth);
         }
-        
+
         if (trim($this->searchstatus) !== '') {
             if ($this->searchstatus == 'PAGADO') {
                 $recibos->has('payment');
@@ -92,12 +105,13 @@ class ShowRecibos extends Component
 
     public function render()
     {
-        $ubigeoIds = \App\Models\Network::where('user_id', auth()->id())->whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+        $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
         $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
         $locations = $ubigeos->pluck('distrito', 'id')->toArray();
         $recibos = $this->getRecibosQueryBuilder()->paginate();
+        $users = User::whereHas('networks')->select('id', 'name')->orderBy('name', 'asc')->get();
         $formapays = Formapay::orderBy('id', 'asc')->get();
-        return view('livewire.admin.recibos.show-recibos', compact('recibos', 'formapays', 'locations'));
+        return view('livewire.admin.recibos.show-recibos', compact('recibos', 'formapays', 'locations', 'users'));
     }
 
     public function exportExcel()
@@ -116,7 +130,7 @@ class ShowRecibos extends Component
         $recibos = $this->getRecibosQueryBuilder()->get();
 
         $pdf = PDF::setPaper('a4', 'portrait')
-                  ->loadView('admin.recibos.export-pdf', compact('recibos'));
+            ->loadView('admin.recibos.export-pdf', compact('recibos'));
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
@@ -168,7 +182,7 @@ class ShowRecibos extends Component
             'codetransferencia' => ['nullable', 'string', 'min:3', 'unique:payments,codetransferencia'],
             'formapay_id' => ['required', 'integer', 'min:1', 'exists:formapays,id'],
             'descuento' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
-            'recibo.id' =>  ['required', 'integer', 'min:1', 'exists:recibos,id'],
+            'recibo.id' => ['required', 'integer', 'min:1', 'exists:recibos,id'],
         ]);
 
         DB::beginTransaction();

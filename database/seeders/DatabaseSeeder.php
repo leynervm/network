@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call(UserSeeder::class);
+        $this->call(PermissionSeeder::class);
         $this->call(OltSeeder::class);
         $this->call(SeriepagoSeeder::class);
         $this->call(FormarpaySeeder::class);

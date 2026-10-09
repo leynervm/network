@@ -19,8 +19,8 @@
                     <x-label value="Tipo servicio" />
                     <div class="w-full flex flex-wrap gap-2">
                         <div>
-                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type"
-                                id="todos" value="TODOS" />
+                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type" id="todos"
+                                value="TODOS" />
                             <label for="todos"
                                 class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 dark:peer-hover:bg-neutral-600 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150 text-gray-700 dark:text-gray-300">
                                 TODOS
@@ -28,32 +28,32 @@
                         </div>
 
                         <div>
-                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type"
-                                id="tv" value="{{ \App\Models\Network::TV }}" />
+                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type" id="tv"
+                                value="{{ \App\Models\Network::TV }}" />
                             <label for="tv"
                                 class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 dark:peer-hover:bg-neutral-600 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150 text-gray-700 dark:text-gray-300">
                                 {{ \App\Models\Network::TV }}
                             </label>
                         </div>
                         <div>
-                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type"
-                                id="fibra" value="{{ \App\Models\Network::FIBRA }}" />
+                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type" id="fibra"
+                                value="{{ \App\Models\Network::FIBRA }}" />
                             <label for="fibra"
                                 class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 dark:peer-hover:bg-neutral-600 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150 text-gray-700 dark:text-gray-300">
                                 {{ \App\Models\Network::FIBRA }}
                             </label>
                         </div>
                         <div>
-                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type"
-                                id="fibra_tv" value="{{ \App\Models\Network::FIBRA_TV }}" />
+                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type" id="fibra_tv"
+                                value="{{ \App\Models\Network::FIBRA_TV }}" />
                             <label for="fibra_tv"
                                 class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 dark:peer-hover:bg-neutral-600 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150 text-gray-700 dark:text-gray-300">
                                 {{ \App\Models\Network::FIBRA_TV }}
                             </label>
                         </div>
                         <div>
-                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type"
-                                id="satelital" value="{{ \App\Models\Network::SATELITAL }}" />
+                            <x-input class="hidden peer" type="radio" name="type" wire:model.defer="type" id="satelital"
+                                value="{{ \App\Models\Network::SATELITAL }}" />
                             <label for="satelital"
                                 class="inline-flex items-center cursor-pointer px-2.5 py-2 peer-checked:bg-neutral-600 dark:peer-checked:bg-neutral-700 border border-gray-300 dark:border-neutral-700 rounded-lg font-semibold text-[10px] peer-checked:text-white uppercase tracking-widest peer-hover:bg-neutral-500 dark:peer-hover:bg-neutral-600 peer-hover:text-white peer-focus:bg-neutral-600 peer-active:bg-neutral-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-500 peer-focus:ring-offset-2 transition ease-in-out duration-150 text-gray-700 dark:text-gray-300">
                                 {{ \App\Models\Network::SATELITAL }}
@@ -61,6 +61,17 @@
                         </div>
                     </div>
                     <x-input-error for="type" />
+                </div>
+
+                <div class="w-full">
+                    <x-label value="Usuario" />
+                    <x-select-input class="w-full" wire:model.lazy="searchuser">
+                        <option value="">TODOS</option>
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                        @endforeach
+                    </x-select-input>
+                    <x-input-error for="searchuser" />
                 </div>
 
                 <div class="w-full">

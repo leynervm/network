@@ -35,4 +35,8 @@ return [
         'urlruc' => env('API_SUNAT_URL_RUC'),
         'urldni' => env('API_SUNAT_URL_DNI'),
     ],
+    'yape' => [
+        'base_qr' => env('YAPE_BASE_QR'),
+        'phone'   => env('YAPE_PHONE'),
+    ],
 ];

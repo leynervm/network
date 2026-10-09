@@ -7,6 +7,15 @@
         <div class="w-full max-w-36">
             <x-input class="w-full block !py-1 !text-[10px]" type="month" wire:model.lazy="searchmonth" />
         </div>
+        {{-- <div class="w-full max-w-48">
+            <x-label value="Usuario" />
+            <x-select-input class="w-full" wire:model.lazy="searchuser">
+                <option value="">TODOS</option>
+                @foreach ($users as $user)
+                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                @endforeach
+            </x-select-input>
+        </div> --}}
     </div>
 
     <div class="overflow-x-auto w-full  pt-3">
@@ -62,16 +71,14 @@
                                             $item->seriecompleta .
                                             '.pdf';
                                     @endphp
-                                    <button type="button"
-                                        onclick="sharePdf('{{ route('admin.recibo.print', $item->id) }}', '{{ $pdfFileName }}', '{{ $item->network->telefono ?? '' }}', {
-                                            client: '{{ addslashes($item->client->name) }}',
-                                            serie: '{{ $item->seriecompleta }}',
-                                            month: '{{ formatDate($item->month, 'MMMM Y') }}',
-                                            service: '{{ $item->network->type }}',
-                                            total: '{{ number_format($item->total, 2) }}',
-                                            due_date: '{{ formatDate($item->vencimiento) }}'
-                                        })"
-                                        title="Compartir por WhatsApp"
+                                    <button type="button" onclick="sharePdf('{{ route('admin.recibo.print', $item->id) }}', '{{ $pdfFileName }}', '{{ $item->network->telefono ?? '' }}', {
+                                                                    client: '{{ addslashes($item->client->name) }}',
+                                                                    serie: '{{ $item->seriecompleta }}',
+                                                                    month: '{{ formatDate($item->month, 'MMMM Y') }}',
+                                                                    service: '{{ $item->network->type }}',
+                                                                    total: '{{ number_format($item->total, 2) }}',
+                                                                    due_date: '{{ formatDate($item->vencimiento) }}'
+                                                                })" title="Compartir por WhatsApp"
                                         class="inline-flex items-center justify-center p-1.5 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-500/10 dark:hover:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/30 transition-colors shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="size-4"
                                             viewBox="0 0 16 16">
@@ -194,8 +201,7 @@
 
                     <div class="w-full">
                         <x-label value="Descuento" />
-                        <x-input wire:model.lazy="descuento" class="w-full" type="number" min="0"
-                            step="0.01" />
+                        <x-input wire:model.lazy="descuento" class="w-full" type="number" min="0" step="0.01" />
                     </div>
 
                     <div class="w-full">
@@ -296,11 +302,14 @@
 
                 Swal.close();
 
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator
+                    .userAgent);
                 let sharedNatively = false;
 
                 // Intentamos compartir usando la Web Share API nativa si es un dispositivo móvil y lo soporta
-                if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+                if (isMobile && navigator.canShare && navigator.canShare({
+                    files: [file]
+                })) {
                     try {
                         let textMessage = 'Estimado cliente, adjunto su recibo de pago.';
                         if (info) {
@@ -346,7 +355,7 @@
                         if (waPhone.length === 9) {
                             waPhone = '51' + waPhone;
                         }
-                        
+
                         let waMessageText = `¡Hola! Estimado cliente, le adjunto su recibo de pago en formato PDF.`;
                         if (info) {
                             waMessageText = `*📄 RESUMEN DE COMPROBANTE - RED CENTER*\n\n` +
@@ -360,7 +369,7 @@
                         }
 
                         const waMessage = encodeURIComponent(waMessageText);
-                        
+
                         let waUrl = '';
                         if (isMobile) {
                             waUrl = `https://api.whatsapp.com/send?phone=${waPhone}&text=${waMessage}`;
@@ -368,7 +377,7 @@
                             // En escritorio abrimos directamente la sesión de WhatsApp Web
                             waUrl = `https://web.whatsapp.com/send?phone=${waPhone}&text=${waMessage}`;
                         }
-                        
+
                         // Abrir la ventana de WhatsApp
                         window.open(waUrl, '_blank');
 

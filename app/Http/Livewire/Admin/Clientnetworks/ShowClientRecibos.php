@@ -6,6 +6,7 @@ use App\Models\Formapay;
 use App\Models\Network;
 use App\Models\Recibo;
 use App\Models\Seriepago;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -26,12 +27,18 @@ class ShowClientRecibos extends Component
     public $formapay_id, $codetransferencia, $detalle;
 
     public $searchmonth = '';
+    public $searchuser = '';
 
     protected $queryString = [
         'searchmonth' => [
             'except' => '',
             'as' => 'mes'
-        ]
+        ],
+
+        'searchuser' => [
+            'except' => '',
+            'as' => 'usuario'
+        ],
     ];
 
     protected function rules()
@@ -39,7 +46,8 @@ class ShowClientRecibos extends Component
         return [
             // 'date' => ['required', 'date'],
             'month' => [
-                'required', 'date',
+                'required',
+                'date',
                 Rule::unique('recibos', 'month')->where('network_id', $this->network->id)
             ],
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'gt:0'],
@@ -63,18 +71,20 @@ class ShowClientRecibos extends Component
 
     public function render()
     {
+        $users = User::whereHas('networks')->select('id', 'name')->orderBy('name', 'asc')->get();
         $formapays = Formapay::orderBy('id', 'asc')->get();
         $seriepagos = Seriepago::orderBy('id', 'asc')->get();
-        $recibos = Recibo::with('payment')
-            ->where('network_id', $this->network->id)
-            ->whereHas('network', function ($query) {
-                $query->where('user_id', auth()->id());
-            });
+        $recibos = Recibo::with('payment')->where('network_id', $this->network->id);
+
+        if (trim($this->searchuser) != '') {
+            $recibos->whereHas('network', fn($q) => $q->where('user_id', $this->searchuser));
+        }
+
         if (trim($this->searchmonth) != '') {
             $recibos->where('month', $this->searchmonth);
         }
         $recibos = $recibos->orderBy('month', 'desc')->paginate();
-        return view('livewire.admin.clientnetworks.show-client-recibos', compact('recibos', 'seriepagos', 'formapays'));
+        return view('livewire.admin.clientnetworks.show-client-recibos', compact('recibos', 'seriepagos', 'formapays', 'users'));
     }
 
     public function updatingSearchmonth()
@@ -92,7 +102,7 @@ class ShowClientRecibos extends Component
 
             if (Carbon::parse($this->network->date)->format('Y-m') == Carbon::parse($this->month)->format('Y-m')) {
                 if (!Carbon::parse($this->network->date)->isSameDay(Carbon::parse($this->network->date)->copy()->firstOfMonth())) {
-                    $amount =  amountDays($this->network->date, now('America/Lima'), $amount);
+                    $amount = amountDays($this->network->date, now('America/Lima'), $amount);
                 }
             }
             $this->amount = number_format($amount, 2, '.', '');
@@ -116,7 +126,7 @@ class ShowClientRecibos extends Component
             $amount = $this->network->price;
             if (Carbon::parse($this->network->date)->format('Y-m') == Carbon::parse($value)->format('Y-m')) {
                 if (!Carbon::parse($this->network->date)->isSameDay(Carbon::parse($this->network->date)->copy()->firstOfMonth())) {
-                    $amount =  amountDays($this->network->date, now('America/Lima'), $amount);
+                    $amount = amountDays($this->network->date, now('America/Lima'), $amount);
                 }
             }
             $this->amount = number_format($amount, 2, '.', '');
@@ -189,7 +199,7 @@ class ShowClientRecibos extends Component
             'codetransferencia' => ['nullable', 'string', 'min:3', 'unique:payments,codetransferencia'],
             'formapay_id' => ['required', 'integer', 'min:1', 'exists:formapays,id'],
             'descuento' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
-            'recibo.id' =>  ['required', 'integer', 'min:1', 'exists:recibos,id'],
+            'recibo.id' => ['required', 'integer', 'min:1', 'exists:recibos,id'],
         ]);
 
         DB::beginTransaction();

@@ -12,9 +12,11 @@
             </div>
         </div>
     </div> --}}
-    <div class="w-full">
-        <livewire:admin.clientnetworks.create-client-network wire:key="create-client-network" />
-    </div>
+    @can('admin.clientnetworks.create')
+        <div class="w-full">
+            <livewire:admin.clientnetworks.create-client-network wire:key="create-client-network" />
+        </div>
+    @endcan
 
     <div class="w-full mt-5">
         <livewire:admin.clientnetworks.show-client-networks wire:key="show-client-networks" />

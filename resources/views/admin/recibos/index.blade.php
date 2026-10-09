@@ -2,11 +2,15 @@
 
     <x-slot name="header">{{ __('Gestionar Recibos de Pago') }}</x-slot>
 
-    <div>
-        <livewire:admin.recibos.create-recibo />
-    </div>
+    @can('admin.recibos.create')
+        <div>
+            <livewire:admin.recibos.create-recibo />
+        </div>
+    @endcan
 
-    <div class="mt-3">
-        <livewire:admin.recibos.show-recibos />
-    </div>
+    @can('admin.recibos.index')
+        <div class="mt-3">
+            <livewire:admin.recibos.show-recibos />
+        </div>
+    @endcan
 </x-app-layout>

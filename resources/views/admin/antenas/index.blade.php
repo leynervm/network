@@ -2,11 +2,15 @@
 
     <x-slot name="header">{{ __('Gestionar Antenas') }}</x-slot>
 
-    <div>
-        <livewire:admin.antenas.create-antena />
-    </div>
+    @can('admin.antenas.create')
+        <div>
+            <livewire:admin.antenas.create-antena />
+        </div>
+    @endcan
 
-    <div>
-        <livewire:admin.antenas.show-antenas />
-    </div>
+    @can('admin.antenas.index')
+        <div>
+            <livewire:admin.antenas.show-antenas />
+        </div>
+    @endcan
 </x-app-layout>

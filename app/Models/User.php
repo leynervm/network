@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
@@ -17,6 +18,69 @@ class User extends Authenticatable
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use HasRoles {
+        assignRole as traitAssignRole;
+        syncRoles as traitSyncRoles;
+        removeRole as traitRemoveRole;
+    }
+
+    protected $guard_name = 'web';
+
+    public function guardName(): string
+    {
+        return 'web';
+    }
+
+    /**
+     * Override assignRole so only admin@gmail.com can receive the 'admin' role.
+     */
+    public function assignRole(...$roles)
+    {
+        if ($this->email !== 'admin@gmail.com') {
+            $roles = collect($roles)->flatten()->filter(function ($role) {
+                $name = is_string($role) ? $role : ($role->name ?? '');
+                return $name !== 'admin';
+            })->all();
+        }
+
+        return $this->traitAssignRole(...$roles);
+    }
+
+    /**
+     * Override syncRoles so only admin@gmail.com can have 'admin', and admin@gmail.com never loses it.
+     */
+    public function syncRoles(...$roles)
+    {
+        if ($this->email !== 'admin@gmail.com') {
+            $roles = collect($roles)->flatten()->filter(function ($role) {
+                $name = is_string($role) ? $role : ($role->name ?? '');
+                return $name !== 'admin';
+            })->all();
+        } else {
+            $roleNames = collect($roles)->flatten()->map(function ($r) {
+                return is_string($r) ? $r : ($r->name ?? '');
+            })->all();
+
+            if (!in_array('admin', $roleNames)) {
+                $roles[] = 'admin';
+            }
+        }
+
+        return $this->traitSyncRoles(...$roles);
+    }
+
+    /**
+     * Override removeRole so admin@gmail.com can never have 'admin' removed.
+     */
+    public function removeRole($role)
+    {
+        $name = is_string($role) ? $role : ($role->name ?? '');
+        if ($this->email === 'admin@gmail.com' && $name === 'admin') {
+            return $this;
+        }
+
+        return $this->traitRemoveRole($role);
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -62,5 +126,19 @@ class User extends Authenticatable
     public function accesos()
     {
         return $this->hasMany(Acceso::class);
+    }
+
+    public function networks()
+    {
+        return $this->hasMany(Network::class);
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            if ($user->email === 'admin@gmail.com' || $user->hasRole('admin')) {
+                throw new \Exception('El usuario administrador principal (admin@gmail.com) está protegido por el sistema y no puede ser eliminado.');
+            }
+        });
     }
 }

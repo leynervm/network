@@ -31,79 +31,91 @@
 
             @php
                 $links = [
-                    ['route' => 'dashboard', 'label' => __('Inicio'), 'icon' => 'home'],
-                    ['route' => 'admin.olts', 'label' => __('OLT Networks'), 'icon' => 'server'],
-                    ['route' => 'admin.antenas', 'label' => __('Antenas'), 'icon' => 'signal'],
-                    ['route' => 'admin.recibos', 'label' => __('Recibos'), 'icon' => 'document'],
-                    ['route' => 'admin.payments', 'label' => __('Pagos'), 'icon' => 'creditcard'],
-                    ['route' => 'admin.products', 'label' => __('Productos'), 'icon' => 'cube'],
-                    ['route' => 'admin.yape.notifications', 'label' => __('Yape Webhook'), 'icon' => 'bell'],
+                    ['route' => 'dashboard', 'label' => __('Inicio'), 'icon' => 'home', 'can' => null],
+                    ['route' => 'admin.olts', 'label' => __('OLT Networks'), 'icon' => 'server', 'can' => 'admin.olts.index'],
+                    ['route' => 'admin.antenas', 'label' => __('Antenas'), 'icon' => 'signal', 'can' => 'admin.antenas.index'],
+                    ['route' => 'admin.recibos', 'label' => __('Recibos'), 'icon' => 'document', 'can' => 'admin.recibos.index'],
+                    ['route' => 'admin.payments', 'label' => __('Pagos'), 'icon' => 'creditcard', 'can' => 'admin.payments.index'],
+                    ['route' => 'admin.products', 'label' => __('Productos'), 'icon' => 'cube', 'can' => 'admin.products.index'],
+                    ['route' => 'admin.yape.notifications', 'label' => __('Yape Webhook'), 'icon' => 'bell', 'can' => 'admin.yape.notifications'],
+                    ['route' => 'admin.users', 'label' => __('Usuarios'), 'icon' => 'users', 'can' => 'admin.users.index'],
+                    ['route' => 'admin.roles', 'label' => __('Roles y Permisos'), 'icon' => 'shield', 'can' => 'admin.roles.index'],
                 ];
             @endphp
 
             @foreach ($links as $link)
-                @php $active = request()->routeIs($link['route']); @endphp
-                <a href="{{ route($link['route']) }}" x-data="{ tooltip: false }"
-                    @mouseenter="if(!$store.nav.open) tooltip = true" @mouseleave="tooltip = false"
-                    :class="$store.nav.open ? 'gap-3' : 'justify-center'"
-                    class="group relative flex items-center px-2 py-2 rounded-lg text-sm transition-all duration-150 {{ $active ? 'bg-neutral-600 dark:bg-neutral-700 text-white shadow-md' : 'text-gray-600 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700/60 hover:text-gray-900 dark:hover:text-white' }}">
+                @if (!$link['can'] || auth()->user()->can($link['can']))
+                    @php $active = request()->routeIs($link['route'] . '*'); @endphp
+                    <a href="{{ route($link['route']) }}" x-data="{ tooltip: false }"
+                        @mouseenter="if(!$store.nav.open) tooltip = true" @mouseleave="tooltip = false"
+                        :class="$store.nav.open ? 'gap-3' : 'justify-center'"
+                        class="group relative flex items-center px-2 py-2 rounded-lg text-sm transition-all duration-150 {{ $active ? 'bg-neutral-600 dark:bg-neutral-700 text-white shadow-md' : 'text-gray-600 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700/60 hover:text-gray-900 dark:hover:text-white' }}">
 
-                    {{-- Icon --}}
-                    @if ($link['icon'] === 'home')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
-                        </svg>
-                    @elseif($link['icon'] === 'server')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                        </svg>
-                    @elseif($link['icon'] === 'signal')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                        </svg>
-                    @elseif($link['icon'] === 'document')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    @elseif($link['icon'] === 'creditcard')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                    @elseif($link['icon'] === 'cube')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                    @elseif($link['icon'] === 'bell')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        </svg>
-                    @endif
+                        {{-- Icon --}}
+                        @if ($link['icon'] === 'home')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
+                            </svg>
+                        @elseif($link['icon'] === 'server')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                            </svg>
+                        @elseif($link['icon'] === 'signal')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                            </svg>
+                        @elseif($link['icon'] === 'document')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        @elseif($link['icon'] === 'creditcard')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        @elseif($link['icon'] === 'cube')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                        @elseif($link['icon'] === 'bell')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                        @elseif($link['icon'] === 'users')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                            </svg>
+                        @elseif($link['icon'] === 'shield')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                            </svg>
+                        @endif
 
-                    {{-- Label --}}
-                    <span x-show="$store.nav.open" x-transition:enter="transition-opacity duration-150"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                        class="truncate text-xs font-medium leading-none whitespace-nowrap">
-                        {{ $link['label'] }}
-                    </span>
+                        {{-- Label --}}
+                        <span x-show="$store.nav.open" x-transition:enter="transition-opacity duration-150"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            class="truncate text-xs font-medium leading-none whitespace-nowrap">
+                            {{ $link['label'] }}
+                        </span>
 
-                    {{-- Tooltip when collapsed --}}
-                    <span x-show="tooltip && !$store.nav.open" x-cloak
-                        class="absolute left-full ml-2 px-2 py-1 bg-gray-800 dark:bg-neutral-800 text-white text-xs rounded-md shadow-lg whitespace-nowrap pointer-events-none z-50">
-                        {{ $link['label'] }}
-                    </span>
-                </a>
+                        {{-- Tooltip when collapsed --}}
+                        <span x-show="tooltip && !$store.nav.open" x-cloak
+                            class="absolute left-full ml-2 px-2 py-1 bg-gray-800 dark:bg-neutral-800 text-white text-xs rounded-md shadow-lg whitespace-nowrap pointer-events-none z-50">
+                            {{ $link['label'] }}
+                        </span>
+                    </a>
+                @endif
             @endforeach
         </nav>
 
@@ -209,52 +221,62 @@
         {{-- Mobile Nav Links --}}
         <nav class="flex-1 overflow-y-auto py-2 space-y-0.5 px-1.5">
             @foreach ($links as $link)
-                @php $active = request()->routeIs($link['route']); @endphp
-                <a href="{{ route($link['route']) }}" @click="$store.nav.mobileOpen = false"
-                    class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm transition-colors {{ $active ? 'bg-neutral-600 dark:bg-neutral-700 text-white shadow-md' : 'text-gray-600 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700/60 hover:text-gray-900 dark:hover:text-white' }}">
-                    @if ($link['icon'] === 'home')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
-                        </svg>
-                    @elseif($link['icon'] === 'server')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                        </svg>
-                    @elseif($link['icon'] === 'signal')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                        </svg>
-                    @elseif($link['icon'] === 'document')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    @elseif($link['icon'] === 'creditcard')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                    @elseif($link['icon'] === 'cube')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                    @elseif($link['icon'] === 'bell')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        </svg>
-                    @endif
-                    <span class="text-xs font-medium truncate">{{ $link['label'] }}</span>
-                </a>
+                @if (!$link['can'] || auth()->user()->can($link['can']))
+                    @php $active = request()->routeIs($link['route'] . '*'); @endphp
+                    <a href="{{ route($link['route']) }}" @click="$store.nav.mobileOpen = false"
+                        class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm transition-colors {{ $active ? 'bg-neutral-600 dark:bg-neutral-700 text-white shadow-md' : 'text-gray-600 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700/60 hover:text-gray-900 dark:hover:text-white' }}">
+                        @if ($link['icon'] === 'home')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
+                            </svg>
+                        @elseif($link['icon'] === 'server')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                            </svg>
+                        @elseif($link['icon'] === 'signal')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                            </svg>
+                        @elseif($link['icon'] === 'document')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        @elseif($link['icon'] === 'creditcard')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        @elseif($link['icon'] === 'cube')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                        @elseif($link['icon'] === 'bell')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                        @elseif($link['icon'] === 'users')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                            </svg>
+                        @elseif($link['icon'] === 'shield')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                            </svg>
+                        @endif
+                        <span class="text-xs font-medium truncate">{{ $link['label'] }}</span>
+                    </a>
+                @endif
             @endforeach
         </nav>
 

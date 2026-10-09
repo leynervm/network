@@ -114,3 +114,68 @@ function getCliente($document)
 
     return response()->json($json)->getData();
 }
+
+if (!function_exists('generateDynamicEmvcoQr')) {
+    /**
+     * Genera un código QR dinámico EMVCo MPM para pagos (compatible con Yape / Plin / Interoperabilidad Perú).
+     */
+    function generateDynamicEmvcoQr(
+        string $merchantAccountTLV,
+        string $merchantName,
+        string $merchantCity,
+        float|int|string $amount,
+        string $orderReference,
+        int $qrSize = 300
+    ): \App\DTOs\Payment\EmvcoQrResult {
+        return app(\App\Services\Payment\EmvcoQrService::class)->generateDynamicQr(
+            merchantAccountTLV: $merchantAccountTLV,
+            merchantName: $merchantName,
+            merchantCity: $merchantCity,
+            amount: $amount,
+            orderReference: $orderReference,
+            qrSize: $qrSize
+        );
+    }
+}
+
+if (!function_exists('generateYapeQr')) {
+    /**
+     * Genera un código QR dinámico de Yape / Interoperabilidad BCRP para cobro por celular.
+     */
+    function generateYapeQr(
+        float|int|string $amount,
+        string $orderReference,
+        string $phone = '+51928393901',
+        string $merchantName = 'INTERNET SERVICE',
+        string $merchantCity = 'LIMA',
+        int $qrSize = 180
+    ): \App\DTOs\Payment\EmvcoQrResult {
+        return app(\App\Services\Payment\EmvcoQrService::class)->generateForPhone(
+            phone: $phone,
+            merchantName: $merchantName,
+            merchantCity: $merchantCity,
+            amount: $amount,
+            orderReference: $orderReference,
+            qrSize: $qrSize
+        );
+    }
+}
+
+if (!function_exists('generateYapeFromBaseQr')) {
+    /**
+     * Genera un código QR dinámico de Yape inyectando monto y opcionalmente referencia sobre el QR base del titular.
+     */
+    function generateYapeFromBaseQr(
+        string $baseQrString,
+        float|int|string $amount,
+        ?string $orderReference = null,
+        int $qrSize = 130
+    ): \App\DTOs\Payment\EmvcoQrResult {
+        return app(\App\Services\Payment\EmvcoQrService::class)->generateFromBaseQr(
+            baseQrString: $baseQrString,
+            amount: $amount,
+            orderReference: $orderReference,
+            qrSize: $qrSize
+        );
+    }
+}

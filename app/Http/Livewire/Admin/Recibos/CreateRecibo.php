@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Admin\Recibos;
 
 use App\Models\Network;
 use App\Models\Seriepago;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,7 @@ class CreateRecibo extends Component
     public $open = false;
     public $seriepago_id, $month, $type;
     public $ubigeo_id = '';
+    public $searchuser = '';
     public $locations = [];
 
     protected function rules()
@@ -21,16 +23,21 @@ class CreateRecibo extends Component
         return [
             'month' => ['required', 'date'],
             'seriepago_id' => ['required', 'integer', 'min:1'],
+            'searchuser' => ['required', 'integer', 'min:1'],
             'type' => ['required', 'string'],
         ];
     }
 
-    public function mount() {}
+    public function mount()
+    {
+    }
 
     public function render()
     {
         $seriepagos = Seriepago::orderBy('id', 'asc')->get();
-        return view('livewire.admin.recibos.create-recibo', compact('seriepagos'));
+        $users = User::whereHas('networks')->select('id', 'name')->orderBy('name', 'asc')->get();
+
+        return view('livewire.admin.recibos.create-recibo', compact('seriepagos', 'users'));
     }
 
     public function updatingOpen()
@@ -39,7 +46,7 @@ class CreateRecibo extends Component
             $this->reset();
             $this->resetValidation();
             $this->month = now('America/Lima')->format('Y-m');
-            $ubigeoIds = \App\Models\Network::where('user_id', auth()->id())->whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+            $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
             $ubigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
             $this->locations = $ubigeos->pluck('distrito', 'id')->toArray();
         }
@@ -64,7 +71,7 @@ class CreateRecibo extends Component
         DB::beginTransaction();
         try {
             $query = Network::activos()
-                ->where('user_id', auth()->id())
+                ->where('user_id', $this->searchuser)
                 ->whereDoesntHave('recibos', function ($q) {
                     $q->where('month', $this->month);
                 })

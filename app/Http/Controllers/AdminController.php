@@ -46,7 +46,7 @@ class AdminController extends Controller
     public function shownetwork(Network $network)
     {
         if ($network->user_id && $network->user_id != auth()->id()) {
-            abort(403, 'No tienes permiso para ver este cliente de red.');
+            abort(403, 'No eres propietario del registro de cliente de internet.');
         }
 
         $network->load([
@@ -81,7 +81,7 @@ class AdminController extends Controller
 
     public function print(Recibo $recibo)
     {
-        $pdf = PDF::setPaper([0, 0, 226.77, 500])->loadView('admin.print.index', compact('recibo'));
+        $pdf = PDF::setPaper([0, 0, 226.77, 580])->loadView('admin.print.index', compact('recibo'));
         return $pdf->stream();
 
         // return view('admin.print.index', compact('recibo'));
@@ -91,5 +91,20 @@ class AdminController extends Controller
     {
         $spliter->delete();
         return redirect()->back();
+    }
+
+    public function users()
+    {
+        return view('admin.users.index');
+    }
+
+    public function roles()
+    {
+        return view('admin.roles.index');
+    }
+
+    public function permissions()
+    {
+        return view('admin.permissions.index');
     }
 }

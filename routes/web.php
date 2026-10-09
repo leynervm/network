@@ -47,23 +47,27 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
     
-    Route::get('/admin/olts', [AdminController::class, 'olts'])->name('admin.olts');
-    Route::get('/admin/olts/{olt}/show', [AdminController::class, 'show'])->name('admin.olts.show');
-    // Route::get('/admin/olts/{olt}/spliter/{spliter}/boxnavs', [AdminController::class, 'boxnavs'])->name('admin.olts.boxnavs');
+    // Módulos principales protegidos por permisos
+    Route::get('/admin/olts', [AdminController::class, 'olts'])->name('admin.olts')->middleware('can:admin.olts.index');
+    Route::get('/admin/olts/{olt}/show', [AdminController::class, 'show'])->name('admin.olts.show')->middleware('can:admin.olts.show');
 
-    Route::get('/admin/antenas', [AdminController::class, 'antenas'])->name('admin.antenas');
-    Route::get('/admin/recibos', [AdminController::class, 'recibos'])->name('admin.recibos');
-    Route::get('/admin/payments', [AdminController::class, 'payments'])->name('admin.payments');
-    Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
+    Route::get('/admin/antenas', [AdminController::class, 'antenas'])->name('admin.antenas')->middleware('can:admin.antenas.index');
+    Route::get('/admin/recibos', [AdminController::class, 'recibos'])->name('admin.recibos')->middleware('can:admin.recibos.index');
+    Route::get('/admin/payments', [AdminController::class, 'payments'])->name('admin.payments')->middleware('can:admin.payments.index');
+    Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports')->middleware('can:admin.reports.index');
     
-    Route::get('/admin/yape-notifications', \App\Http\Livewire\Admin\Yape\ShowNotifications::class)->name('admin.yape.notifications');
+    Route::get('/admin/yape-notifications', \App\Http\Livewire\Admin\Yape\ShowNotifications::class)->name('admin.yape.notifications')->middleware('can:admin.yape.notifications');
 
+    Route::get('/admin/client-network/{network}/show', [AdminController::class, 'shownetwork'])->name('admin.network.show')->middleware('can:admin.networks.show');
+    Route::get('/admin/recibo/{recibo}/print', [AdminController::class, 'print'])->name('admin.recibo.print')->middleware('can:admin.recibos.print');
 
-    Route::get('/admin/client-network/{network}/show', [AdminController::class, 'shownetwork'])->name('admin.network.show');
-    Route::get('/admin/recibo/{recibo}/print', [AdminController::class, 'print'])->name('admin.recibo.print');
+    Route::put('/admin/spliters/{spliter}/delete', [AdminController::class, 'deletespliter'])->name('admin.spliters.delete')->middleware('can:admin.spliters.delete');
 
-    Route::put('/admin/spliters/{spliter}/delete', [AdminController::class, 'deletespliter'])->name('admin.spliters.delete');
+    Route::get('/admin/marcas', [AdminController::class, 'marcas'])->name('admin.marcas')->middleware('can:admin.marcas.index');
+    Route::get('/admin/products', [AdminController::class, 'products'])->name('admin.products')->middleware('can:admin.products.index');
 
-    Route::get('/admin/marcas', [AdminController::class, 'marcas'])->name('admin.marcas');
-    Route::get('/admin/products', [AdminController::class, 'products'])->name('admin.products');
+    // Módulo de Usuarios, Roles y Permisos
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users')->middleware('can:admin.users.index');
+    Route::get('/admin/roles', [AdminController::class, 'roles'])->name('admin.roles')->middleware('can:admin.roles.index');
+    Route::get('/admin/permissions', [AdminController::class, 'permissions'])->name('admin.permissions')->middleware('can:admin.roles.index');
 });

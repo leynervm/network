@@ -2,8 +2,9 @@
 
     <x-slot name="header">{{ __('Historial de Pagos') }}</x-slot>
 
-    <div>
-        <livewire:admin.payments.show-payments />
-    </div>
-
+    @can('admin.payments.index')
+        <div>
+            <livewire:admin.payments.show-payments />
+        </div>
+    @endcan
 </x-app-layout>

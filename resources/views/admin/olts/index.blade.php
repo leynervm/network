@@ -2,12 +2,15 @@
 
     <x-slot name="header">{{ __('Gestionar OLTs') }}</x-slot>
 
-    <div>
-        <livewire:admin.olts.create-olt />
-    </div>
+    @can('admin.olts.create')
+        <div>
+            <livewire:admin.olts.create-olt />
+        </div>
+    @endcan
 
-    <div>
-        <livewire:admin.olts.show-olts />
-    </div>
-
+    @can('admin.olts.index')
+        <div>
+            <livewire:admin.olts.show-olts />
+        </div>
+    @endcan
 </x-app-layout>

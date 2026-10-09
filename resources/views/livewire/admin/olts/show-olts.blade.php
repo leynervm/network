@@ -18,27 +18,31 @@
                         </div>
                     </div>
                     <div class="flex gap-1 items-center">
-                        <button type="button" wire:click.stop="edit({{ $item->id }})" wire:loading.attr="disabled"
-                            onclick="event.preventDefault(); event.stopPropagation();" title="Editar OLT"
-                            class="p-1.5 rounded-lg text-orange-500 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-600 duration-150 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="size-4 block mx-auto">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); confirmDeleteOLT({{ $item }});"
-                            wire:loading.attr="disabled" title="Eliminar OLT"
-                            class="p-1.5 rounded-lg text-red-500 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 duration-150 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="size-4 block mx-auto">
-                                <path d="M10 12V17" />
-                                <path d="M14 12V17" />
-                                <path d="M4 7H20" />
-                                <path d="M6 10V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V10" />
-                                <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" />
-                            </svg>
-                        </button>
+                        @can('admin.olts.edit')
+                            <button type="button" wire:click.stop="edit({{ $item->id }})" wire:loading.attr="disabled"
+                                onclick="event.preventDefault(); event.stopPropagation();" title="Editar OLT"
+                                class="p-1.5 rounded-lg text-orange-500 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-600 duration-150 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="size-4 block mx-auto">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                </svg>
+                            </button>
+                        @endcan
+                        @can('admin.olts.delete')
+                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); confirmDeleteOLT({{ $item }});"
+                                wire:loading.attr="disabled" title="Eliminar OLT"
+                                class="p-1.5 rounded-lg text-red-500 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 duration-150 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="size-4 block mx-auto">
+                                    <path d="M10 12V17" />
+                                    <path d="M14 12V17" />
+                                    <path d="M4 7H20" />
+                                    <path d="M6 10V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V10" />
+                                    <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" />
+                                </svg>
+                            </button>
+                        @endcan
                     </div>
                 </a>
             @endforeach

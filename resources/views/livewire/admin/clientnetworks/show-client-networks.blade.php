@@ -31,6 +31,15 @@
             </x-select-input>
         </div>
         <div class="w-full max-w-48">
+            <x-label value="Usuario" />
+            <x-select-input class="w-full" wire:model.lazy="searchuser">
+                <option value="">TODOS</option>
+                @foreach ($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                @endforeach
+            </x-select-input>
+        </div>
+        <div class="w-full max-w-48">
             <x-label value="Seleccionar Lugar" />
             <x-select-input class="w-full" wire:model.lazy="searchlocation">
                 <option value="">TODOS LOS LUGARES</option>
@@ -74,7 +83,9 @@
                     <th style="min-width: 100px;">PRECIO</th>
                     <th>ESTADO</th>
                     <th>PROVEEDOR</th>
-                    <th>OPCIONES</th>
+                    @canany(['admin.clientnetworks.edit', 'admin.clientnetworks.delete'])
+                        <th>OPCIONES</th>
+                    @endcan
                 </tr>
             </x-slot>
             <x-slot name="tbody">
@@ -129,7 +140,7 @@
                                         - {{ $item->ubigeo->distrito }} -
                                         {{ $item->ubigeo->provincia }}
                                     @endif
-                                </p>                                
+                                </p>
                             </td>
                             {{-- <td class="text-center">{{ $item->portnumber }}</td> --}}
                             {{-- <td class="text-center uppercase">{{ formatDate($item->datepayment) }}</td> --}}
@@ -179,44 +190,50 @@
                             </td>
                             <td class="text-center">
                                 <div class="flex items-center justify-center gap-1">
-                                    @if ($item->isSuspendido())
-                                        <x-button wire:click="reconectar({{ $item->id }})"
-                                            wire:loading.attr="disabled"
-                                            class="!bg-emerald-600 hover:!bg-emerald-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 !text-white !py-1.5 !text-[10px] shadow-sm transition-all">
-                                            RECONECTAR
-                                        </x-button>
-                                    @else
-                                        <x-button wire:click="suspender({{ $item->id }})"
-                                            wire:loading.attr="disabled"
-                                            class="!bg-orange-500 hover:!bg-orange-600 dark:!bg-orange-600 dark:hover:!bg-orange-500 !text-white !py-1.5 !text-[10px] shadow-sm transition-all">
-                                            SUSPENDER
-                                        </x-button>
-                                    @endif
+                                    @can('admin.clientnetworks.edit')
+                                        @if ($item->isSuspendido())
+                                            <x-button wire:click="reconectar({{ $item->id }})"
+                                                wire:loading.attr="disabled"
+                                                class="!bg-emerald-600 hover:!bg-emerald-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 !text-white !py-1.5 !text-[10px] shadow-sm transition-all">
+                                                RECONECTAR
+                                            </x-button>
+                                        @else
+                                            <x-button wire:click="suspender({{ $item->id }})"
+                                                wire:loading.attr="disabled"
+                                                class="!bg-orange-500 hover:!bg-orange-600 dark:!bg-orange-600 dark:hover:!bg-orange-500 !text-white !py-1.5 !text-[10px] shadow-sm transition-all">
+                                                SUSPENDER
+                                            </x-button>
+                                        @endif
+                                    @endcan
 
-                                    <button wire:click="edit({{ $item->id }})" wire:loading.attr="disabled"
-                                        wire:key="edit_{{ $item->id }}" title="Editar"
-                                        class="inline-block p-1 rounded-md text-orange-500 hover:bg-orange-500 hover:text-white duration-150 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="2" stroke="currentColor" class="size-4 block mx-auto">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                        </svg>
-                                    </button>
+                                    @can('admin.clientnetworks.edit')
+                                        <button wire:click="edit({{ $item->id }})" wire:loading.attr="disabled"
+                                            wire:key="edit_{{ $item->id }}" title="Editar"
+                                            class="inline-block p-1 rounded-md text-orange-500 hover:bg-orange-500 hover:text-white duration-150 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2" stroke="currentColor" class="size-4 block mx-auto">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                            </svg>
+                                        </button>
+                                    @endcan
 
-                                    <button type="button" onclick="confirmDeleteNetwork({{ $item }})"
-                                        wire:loading.attr="disabled" wire:key="delete_{{ $item->id }}"
-                                        title="Eliminar"
-                                        class="inline-block p-1 rounded-md text-red-600 hover:bg-red-600 hover:text-white duration-150 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" class="size-4 block mx-auto">
-                                            <path d="M3 6h18" />
-                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                            <line x1="10" x2="10" y1="11" y2="17" />
-                                            <line x1="14" x2="14" y1="11" y2="17" />
-                                        </svg>
-                                    </button>
+                                    @can('admin.clientnetworks.delete')
+                                        <button type="button" onclick="confirmDeleteNetwork({{ $item }})"
+                                            wire:loading.attr="disabled" wire:key="delete_{{ $item->id }}"
+                                            title="Eliminar"
+                                            class="inline-block p-1 rounded-md text-red-600 hover:bg-red-600 hover:text-white duration-150 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" class="size-4 block mx-auto">
+                                                <path d="M3 6h18" />
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                <line x1="14" x2="14" y1="11" y2="17" />
+                                            </svg>
+                                        </button>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

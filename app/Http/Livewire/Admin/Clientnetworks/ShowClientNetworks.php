@@ -9,6 +9,7 @@ use App\Models\Olt;
 use App\Models\Portboxnav;
 use App\Models\Spliter;
 use App\Models\Ubigeo;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -30,10 +31,10 @@ class ShowClientNetworks extends Component
 
     public $antena_id;
     public $olt_id = '',
-        $spliter_id = '',
-        $boxnav_id = '',
-        $portboxnav_id,
-        $portnumber;
+    $spliter_id = '',
+    $boxnav_id = '',
+    $portboxnav_id,
+    $portnumber;
 
     public $actual_olt_id = null;
     public $actual_spliter_id = null;
@@ -50,6 +51,7 @@ class ShowClientNetworks extends Component
     public $searchtype = '';
     public $searchstatus = '';
     public $searchlocation = '';
+    public $searchuser = '';
 
     protected $listeners = ['render'];
     protected $queryString = [
@@ -71,6 +73,10 @@ class ShowClientNetworks extends Component
         'searchlocation' => [
             'except' => '',
             'as' => 'lugar',
+        ],
+        'searchuser' => [
+            'except' => '',
+            'as' => 'usuario',
         ],
     ];
 
@@ -117,9 +123,13 @@ class ShowClientNetworks extends Component
             'client',
             'ubigeo',
             'user'
-        ])
-        ->where('user_id', auth()->id())
-        ->withWhereHas('client', function ($query) {
+        ]);
+
+        if (trim($this->searchuser) !== '') {
+            $clientnetworks->where('user_id', $this->searchuser);
+        }
+
+        $clientnetworks->withWhereHas('client', function ($query) {
             if (trim($this->search) !== '') {
                 $query->where('document', 'like', '%' . $this->search . '%')->orWhere('name', 'like', '%' . $this->search . '%');
             }
@@ -136,7 +146,7 @@ class ShowClientNetworks extends Component
 
     public function render()
     {
-        $ubigeoIds = \App\Models\Network::where('user_id', auth()->id())->whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
+        $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
         $filteredUbigeos = \App\Models\Ubigeo::whereIn('id', $ubigeoIds)->orderBy('distrito', 'asc')->get();
         $locations = $filteredUbigeos->pluck('distrito', 'id')->toArray();
         $ubigeos = \App\Models\Ubigeo::orderBy('ubigeo_reniec', 'asc')->get();
@@ -150,9 +160,10 @@ class ShowClientNetworks extends Component
             $clientnetworks->where('codigo_slp', 'like', '%' . $this->searchcode . '%');
         }
         $clientnetworks = $clientnetworks->paginate();
+        $users = User::whereHas('networks')->select('id', 'name')->orderBy('name', 'asc')->get();
         $olts = Olt::with(['spliters.boxnavs.portboxnavs.network'])->get();
         $antenas = Antena::orderBy('id', 'asc')->get();
-        return view('livewire.admin.clientnetworks.show-client-networks', compact('clientnetworks', 'ubigeos', 'olts', 'antenas', 'locations'));
+        return view('livewire.admin.clientnetworks.show-client-networks', compact('clientnetworks', 'ubigeos', 'olts', 'antenas', 'locations', 'users'));
     }
 
     public function exportExcel()
@@ -171,7 +182,7 @@ class ShowClientNetworks extends Component
         $clientnetworks = $this->getClientNetworksQueryBuilder()->get();
 
         $pdf = PDF::setPaper('a4', 'portrait')
-                  ->loadView('admin.clientnetworks.export-pdf', compact('clientnetworks'));
+            ->loadView('admin.clientnetworks.export-pdf', compact('clientnetworks'));
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
@@ -309,14 +320,23 @@ class ShowClientNetworks extends Component
     {
         if (!$id) {
             $this->reset([
-                'spliter_id', 'boxnav_id', 'portboxnav_id',
-                'spliters', 'boxnavs', 'portboxnavs', 'portnumber'
+                'spliter_id',
+                'boxnav_id',
+                'portboxnav_id',
+                'spliters',
+                'boxnavs',
+                'portboxnavs',
+                'portnumber'
             ]);
             return;
         }
         $this->reset([
-            'spliter_id', 'boxnav_id', 'portboxnav_id',
-            'boxnavs', 'portboxnavs', 'portnumber'
+            'spliter_id',
+            'boxnav_id',
+            'portboxnav_id',
+            'boxnavs',
+            'portboxnavs',
+            'portnumber'
         ]);
         $olt = Olt::find($id);
         $this->spliters = $olt ? $olt->spliters : [];
@@ -326,14 +346,20 @@ class ShowClientNetworks extends Component
     {
         if (!$id) {
             $this->reset([
-                'spliter_id', 'boxnav_id', 'portboxnav_id',
-                'boxnavs', 'portboxnavs', 'portnumber'
+                'spliter_id',
+                'boxnav_id',
+                'portboxnav_id',
+                'boxnavs',
+                'portboxnavs',
+                'portnumber'
             ]);
             return;
         }
         $this->reset([
-            'boxnav_id', 'portboxnav_id',
-            'portboxnavs', 'portnumber'
+            'boxnav_id',
+            'portboxnav_id',
+            'portboxnavs',
+            'portnumber'
         ]);
         $spliter = Spliter::find($id);
         $this->boxnavs = $spliter ? $spliter->boxnavs : [];
@@ -343,8 +369,10 @@ class ShowClientNetworks extends Component
     {
         if (!$id) {
             $this->reset([
-                'boxnav_id', 'portboxnav_id',
-                'portboxnavs', 'portnumber'
+                'boxnav_id',
+                'portboxnav_id',
+                'portboxnavs',
+                'portnumber'
             ]);
             return;
         }
