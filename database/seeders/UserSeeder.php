@@ -18,8 +18,9 @@ class UserSeeder extends Seeder
                 'email' => 'admin@gmail.com',
             ],
             [
-                'name' => 'Red Center',
+                'name' => 'Administrador',
                 'password' => bcrypt('12345678'),
+                'is_admin' => User::IS_ADMIN,
             ],
         );
 
@@ -30,6 +31,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Eliceo',
                 'password' => bcrypt('12345678'),
+                'is_admin' => User::NOT_ADMIN,
             ],
         );
     }

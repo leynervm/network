@@ -24,6 +24,9 @@ class User extends Authenticatable
         removeRole as traitRemoveRole;
     }
 
+    const IS_ADMIN = '1';
+    const NOT_ADMIN = '0';
+
     protected $guard_name = 'web';
 
     public function guardName(): string
@@ -91,6 +94,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin',
     ];
 
     /**
@@ -133,6 +137,11 @@ class User extends Authenticatable
         return $this->hasMany(Network::class);
     }
 
+    public function IsAdmin(): bool
+    {
+        return (string) $this->is_admin === self::IS_ADMIN;
+    }
+
     protected static function booted()
     {
         static::deleting(function ($user) {
@@ -142,3 +151,7 @@ class User extends Authenticatable
         });
     }
 }
+
+
+
+

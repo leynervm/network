@@ -1,0 +1,53 @@
+{
+  "name": "network-backend",
+  "version": "1.0.0",
+  "description": "Backend API Node.js/TypeScript con Express, TypeORM y PostgreSQL para Sistema de Gestión de Redes",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "typeorm": "tsx ./node_modules/typeorm/cli.js -d src/config/dataSource.ts",
+    "migration:run": "tsx src/database/migrate.ts run",
+    "migration:revert": "tsx src/database/migrate.ts revert",
+    "migration:show": "tsx src/database/migrate.ts show",
+    "migration:status": "tsx src/database/migrate.ts status",
+    "migration:generate": "tsx ./node_modules/typeorm/cli.js migration:generate -d src/config/dataSource.ts",
+    "migration:create": "tsx ./node_modules/typeorm/cli.js migration:create",
+    "db:verify": "tsx src/database/verify.ts",
+    "schema:sync": "tsx ./node_modules/typeorm/cli.js schema:sync -d src/config/dataSource.ts",
+    "schema:drop": "tsx ./node_modules/typeorm/cli.js schema:drop -d src/config/dataSource.ts",
+    "seed:run": "tsx src/database/seed.ts",
+    "seed": "tsx src/database/seed.ts"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.24.6",
+    "pdfkit": "^0.15.0",
+    "pg": "^8.13.0",
+    "qrcode": "^1.5.4",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.7.5",
+    "@types/pdfkit": "^0.13.5",
+    "@types/pg": "^8.11.10",
+    "@types/qrcode": "^1.5.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

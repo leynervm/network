@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Clientes Internet</title>
+
+    <!-- Google Fonts idénticas al proyecto Laravel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Kdam+Thmor+Pro&family=Tilt+Neon&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+      * {
+        font-family: "Kdam Thmor Pro", sans-serif;
+        font-weight: 300;
+        font-style: normal;
+      }
+      .sidebar-transition {
+        transition: width 0.3s ease, transform 0.3s ease;
+      }
+      .content-transition {
+        transition: padding-left 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="font-sans antialiased bg-gray-50 dark:bg-neutral-800 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

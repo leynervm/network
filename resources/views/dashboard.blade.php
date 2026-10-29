@@ -12,7 +12,7 @@
             </div>
         </div>
     </div> --}}
-    @can('admin.clientnetworks.create')
+    @can('admin.networks.create')
         <div class="w-full">
             <livewire:admin.clientnetworks.create-client-network wire:key="create-client-network" />
         </div>

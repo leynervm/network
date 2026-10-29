@@ -30,7 +30,7 @@
                 <option value="{{ \App\Models\Network::SUSPENDIDO }}">SUSPENDIDO</option>
             </x-select-input>
         </div>
-        <div class="w-full max-w-48">
+        {{-- <div class="w-full max-w-48">
             <x-label value="Usuario" />
             <x-select-input class="w-full" wire:model.lazy="searchuser">
                 <option value="">TODOS</option>
@@ -38,7 +38,7 @@
                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                 @endforeach
             </x-select-input>
-        </div>
+        </div> --}}
         <div class="w-full max-w-48">
             <x-label value="Seleccionar Lugar" />
             <x-select-input class="w-full" wire:model.lazy="searchlocation">
@@ -83,7 +83,7 @@
                     <th style="min-width: 100px;">PRECIO</th>
                     <th>ESTADO</th>
                     <th>PROVEEDOR</th>
-                    @canany(['admin.clientnetworks.edit', 'admin.clientnetworks.delete'])
+                    @canany(['admin.networks.edit', 'admin.networks.delete'])
                         <th>OPCIONES</th>
                     @endcan
                 </tr>
@@ -190,7 +190,7 @@
                             </td>
                             <td class="text-center">
                                 <div class="flex items-center justify-center gap-1">
-                                    @can('admin.clientnetworks.edit')
+                                    @can('admin.networks.edit')
                                         @if ($item->isSuspendido())
                                             <x-button wire:click="reconectar({{ $item->id }})"
                                                 wire:loading.attr="disabled"
@@ -206,7 +206,7 @@
                                         @endif
                                     @endcan
 
-                                    @can('admin.clientnetworks.edit')
+                                    @can('admin.networks.edit')
                                         <button wire:click="edit({{ $item->id }})" wire:loading.attr="disabled"
                                             wire:key="edit_{{ $item->id }}" title="Editar"
                                             class="inline-block p-1 rounded-md text-orange-500 hover:bg-orange-500 hover:text-white duration-150 transition-colors">
@@ -218,7 +218,7 @@
                                         </button>
                                     @endcan
 
-                                    @can('admin.clientnetworks.delete')
+                                    @can('admin.networks.delete')
                                         <button type="button" onclick="confirmDeleteNetwork({{ $item }})"
                                             wire:loading.attr="disabled" wire:key="delete_{{ $item->id }}"
                                             title="Eliminar"

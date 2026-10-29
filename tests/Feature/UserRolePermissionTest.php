@@ -159,6 +159,15 @@ class UserRolePermissionTest extends TestCase
             ->call('update')
             ->assertHasNoErrors();
 
-        $this->assertTrue($eliceo->fresh()->hasRole('asistente'));
+                $this->assertTrue($eliceo->fresh()->hasRole('asistente'));
+    }
+
+    public function test_is_admin_column_and_is_admin_method()
+    {
+        $admin = new User(['email' => 'admin@gmail.com', 'is_admin' => '1']);
+        $regularUser = new User(['email' => 'user@gmail.com', 'is_admin' => '0']);
+
+        $this->assertTrue($admin->IsAdmin());
+        $this->assertFalse($regularUser->IsAdmin());
     }
 }

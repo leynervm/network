@@ -17,7 +17,7 @@
     <!-- Theme Initialization Script (prevents FOUC) -->
     <script>
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia(
-                '(prefers-color-scheme: dark)').matches)) {
+            '(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -107,8 +107,6 @@
                     <span
                         class="font-bold text-sm sm:text-base tracking-tight text-neutral-900 dark:text-white flex items-center gap-1.5 truncate transition-colors duration-300">
                         <span class="truncate">{{ config('app.name', 'ISP NETWORK') }}</span>
-                        <span
-                            class="shrink-0 text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-neutral-200/80 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold">Pro</span>
                     </span>
                     <span
                         class="text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 truncate transition-colors duration-300">Gestión
@@ -129,8 +127,8 @@
                             d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     <!-- Moon Icon (Active in Light Mode) -->
-                    <svg x-show="!darkMode" x-cloak class="w-4 h-4 text-neutral-700" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
+                    <svg x-show="!darkMode" x-cloak class="w-4 h-4 text-neutral-700" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
@@ -143,9 +141,12 @@
             class="flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 text-center w-full">
 
             <!-- Animated Badge -->
-            {{-- <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 dark:bg-neutral-900/90 border border-neutral-300 dark:border-neutral-800 backdrop-blur-md mb-5 sm:mb-6 shadow-2xs transition-colors duration-300">
+            {{-- <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 dark:bg-neutral-900/90 border border-neutral-300 dark:border-neutral-800 backdrop-blur-md mb-5 sm:mb-6 shadow-2xs transition-colors duration-300">
                 <span class="flex h-1.5 w-1.5 rounded-full bg-neutral-700 dark:bg-neutral-300 animate-ping"></span>
-                <span class="text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 tracking-wide">Plataforma FTTH & WISP de Alta Precisión</span>
+                <span
+                    class="text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 tracking-wide">Plataforma
+                    FTTH & WISP de Alta Precisión</span>
             </div> --}}
 
             <!-- Main Heading (Moderate Size) -->
@@ -264,10 +265,11 @@
                 <div class="flex flex-wrap justify-center sm:justify-end items-center gap-3 sm:gap-5">
                     <span class="inline-flex items-center gap-1 text-neutral-600 dark:text-neutral-400 font-medium">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        Sistema Operativo
+                        Desarrollado por Leiner VM
                     </span>
-                    <span>Laravel v{{ Illuminate\Foundation\Application::VERSION }}</span>
-                    <span>PHP v{{ PHP_VERSION }}</span>
+                    {{-- <span>Leiner VM</span> --}}
+                    {{-- <span>Laravel v{{ Illuminate\Foundation\Application::VERSION }}</span> --}}
+                    <span>v1.0</span>
                 </div>
             </div>
         </footer>

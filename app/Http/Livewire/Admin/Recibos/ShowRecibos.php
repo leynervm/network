@@ -60,6 +60,7 @@ class ShowRecibos extends Component
     public function mount()
     {
         $this->recibo = new Recibo();
+        $this->searchuser = auth()->user()->id;
     }
 
     private function getRecibosQueryBuilder()
@@ -169,7 +170,7 @@ class ShowRecibos extends Component
     public function updatingOpen()
     {
         if ($this->open == false) {
-            $this->resetExcept(['recibo']);
+            $this->resetExcept(['recibo', 'searchuser']);
             $this->resetValidation();
         }
     }

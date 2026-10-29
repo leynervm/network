@@ -110,6 +110,7 @@ class ShowClientNetworks extends Component
     public function mount()
     {
         $this->network = new Network();
+        $this->searchuser = auth()->user()->id;
     }
 
     private function getClientNetworksQueryBuilder()
@@ -124,6 +125,7 @@ class ShowClientNetworks extends Component
             'ubigeo',
             'user'
         ]);
+
 
         if (trim($this->searchuser) !== '') {
             $clientnetworks->where('user_id', $this->searchuser);
@@ -214,7 +216,7 @@ class ShowClientNetworks extends Component
         if ($network->user_id && $network->user_id != auth()->id()) {
             abort(403, 'No autorizado para acceder a este cliente de red.');
         }
-        $this->resetExcept(['network']);
+        $this->resetExcept(['network', 'searchuser']);
         $this->resetValidation();
         $this->network = $network;
         $this->client_id = $network->client_id;
@@ -286,7 +288,7 @@ class ShowClientNetworks extends Component
             $this->network->save();
             DB::commit();
             $this->resetValidation();
-            $this->resetExcept(['network']);
+            $this->resetExcept(['network', 'searchuser']);
             $this->dispatchBrowserEvent('toast', toastJson('Servicio internet actualizado correctamente'));
         } catch (\Exception $e) {
             $this->dispatchBrowserEvent('alert', alertJson('Error al actualizar cliente de internet', $e->getMessage(), 'error'));

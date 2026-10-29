@@ -30,6 +30,7 @@ class CreateRecibo extends Component
 
     public function mount()
     {
+        $this->searchuser = auth()->user()->id;
     }
 
     public function render()
@@ -43,7 +44,7 @@ class CreateRecibo extends Component
     public function updatingOpen()
     {
         if ($this->open == false) {
-            $this->reset();
+            $this->resetExcept(['searchuser']);
             $this->resetValidation();
             $this->month = now('America/Lima')->format('Y-m');
             $ubigeoIds = \App\Models\Network::whereNotNull('ubigeo_id')->distinct()->pluck('ubigeo_id')->toArray();
@@ -119,7 +120,7 @@ class CreateRecibo extends Component
                 }
 
                 DB::commit();
-                $this->reset();
+                $this->resetExcept(['searchuser']);
                 $this->resetValidation();
                 $this->emitTo('admin.recibos.show-recibos', 'render');
                 $this->dispatchBrowserEvent('toast', toastJson('Recibos generado correctamente'));

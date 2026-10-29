@@ -67,6 +67,7 @@ class ShowClientRecibos extends Component
         }
         $this->network = $network;
         $this->recibo = new Recibo();
+        $this->searchuser = auth()->user()->id;
     }
 
     public function render()
@@ -95,7 +96,7 @@ class ShowClientRecibos extends Component
     public function updatingOpen()
     {
         if ($this->open == false) {
-            $this->resetExcept(['network', 'recibo']);
+            $this->resetExcept(['network', 'recibo', 'searchuser']);
             $this->resetValidation();
             $this->month = now('America/Lima')->format('Y-m');
             $amount = $this->network->price;
@@ -168,7 +169,7 @@ class ShowClientRecibos extends Component
 
             DB::commit();
             $this->network->refresh();
-            $this->resetExcept(['network', 'recibo']);
+            $this->resetExcept(['network', 'recibo', 'searchuser']);
             $this->resetValidation();
             $this->dispatchBrowserEvent('toast', toastJson('Recibo generado correctamente'));
         } catch (\Exception $e) {
